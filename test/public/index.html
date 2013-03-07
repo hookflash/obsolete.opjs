@@ -10,9 +10,7 @@
     <script src="/vendor/chai.js"></script>
     <script src="/vendor/mocha.js"></script>
     <script>mocha.setup('tdd')</script>
-    <script>
-    </script>
-    <script src="/vendor/require.js" data-main="/requirejs-config"></script>
+    <script src="/vendor/require.js"></script>
     <script>
       require.config({
         paths: {
@@ -20,6 +18,7 @@
         }
       });
       require([
+        'tests/util',
         'tests/MessageRequest'
       ], function() {
         window.assert = chai.assert;

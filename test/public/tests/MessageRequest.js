@@ -1,4 +1,4 @@
-define(['stack/message/MessageRequest'], function(MessageRequest) {
+define(['opjs/stack/message/MessageRequest'], function(MessageRequest) {
   suite('MessageRequest', function() {
 
     // A placeholder just to ensure the Require.js pathing is correct
