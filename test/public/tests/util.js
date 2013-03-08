@@ -1,7 +1,11 @@
-define(['opjs/stack/util'], function(util) {
-  suite('util', function() {
+/* global suite, test, assert */
+define(['opjs/stack/util'], function (util) {
 
-    test('Is an object', function() {
+  'use strict';
+
+  suite('util', function () {
+
+    test('Is an object', function () {
       assert.equal(typeof util, 'object');
     });
 
