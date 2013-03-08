@@ -5,7 +5,7 @@ define(['opjs/stack/util'], function(util) {
       assert.equal(typeof util, 'object');
     });
 
-    test("Generates random hex strings", function () {
+    test('Generates random hex strings', function () {
       var hex = util.randomHex(16);
       assert.equal(hex.length, 32);
       assert(/^[0-9a-f]*$/.test(hex));
