@@ -22,6 +22,18 @@ define(['opjs/stack/peer'], function (Peer) {
       });
       assert.deepEqual(Peer.splitURI('peer://domain.c/om/abc123'), false);
     });
+
+    test('.joinURI', function () {
+      assert.equal(Peer.joinURI(), false);
+      assert.equal(Peer.joinURI({
+        domain: 'domain.com',
+        contactID: 'def456'
+      }), 'peer://domain.com/def456');
+      assert.equal(Peer.joinURI({
+        domain: 'do/main.com',
+        contactID: '34'
+      }), false);
+    });
   });
 
 });
