@@ -1,0 +1,21 @@
+{
+  "name": "op-prototype",
+  "version": "0.0.1",
+  "description": "A prototype of the OpenPeer JS client",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:openpeer/opjs.git"
+  },
+  "author": "OpenPeer",
+  "license": "BSD",
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-jshint": "~0.3.0",
+    "grunt-requirejs": "~0.3.3"
+  }
+}

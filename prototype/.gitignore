@@ -1,0 +1,3 @@
+node_modules/
+# Built JS file goes here
+public/scripts/dist/
