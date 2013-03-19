@@ -30,7 +30,16 @@ wsServer.on('connection', function (socket) {
   socket.send('Hello');
 });
 
-server.listen(8080, function () {
+var PORT = process.env.PORT || process.getuid() ? 8080 : 80; 
+
+server.listen(PORT, function () {
   console.log('Server listening at', server.address());
 });
+
+if (!process.getuid()) {
+  // If we're running as root, drop down to a regular user after binding to 80
+  var stat = require('fs').statSync(__filename);
+  process.setgid(stat.gid);
+  process.setuid(stat.uid);
+}
 
