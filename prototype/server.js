@@ -1,3 +1,5 @@
+/*jshint node: true */
+'use strict';
 
 var http = require('http');
 var urlParse = require('url').parse;
