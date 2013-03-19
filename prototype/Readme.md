@@ -8,5 +8,10 @@
 3. Install local project dependencies
       $ npm install
 
-Run `grunt` to lint the code base and run unit tests (coming soon). Run `grunt
-dist` to build a single JavaScript file suitable for production.
+To lint the code and run the unit tests, run:
+
+    $ grunt
+
+To build a single JavaScript file suitable for production, run:
+
+    $ grunt dist

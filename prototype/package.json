@@ -4,7 +4,7 @@
   "description": "A prototype of the OpenPeer JS client",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "grunt test",
     "start": "node server.js"
   },
   "repository": {
@@ -16,6 +16,7 @@
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-contrib-jshint": "~0.3.0",
-    "grunt-requirejs": "~0.3.3"
+    "grunt-requirejs": "~0.3.3",
+    "grunt-mocha": "~0.3.0"
   }
 }

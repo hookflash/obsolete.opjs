@@ -30,6 +30,19 @@ module.exports = function(grunt) {
         files: {
           src: ['public/scripts/modules/*.js', 'public/scripts/*.js']
         }
+      },
+      clientTests: {
+        options: {
+          globals: {
+            define: true,
+            assert: true,
+            suite: true,
+            test: true
+          }
+        },
+        files: {
+          src: ['test/client/tests/*.js']
+        }
       }
     },
     requirejs: {
@@ -41,12 +54,17 @@ module.exports = function(grunt) {
           name: 'app'
         }
       }
+    },
+    mocha: {
+      index: ['test/client/index.html']
     }
   });
 
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-requirejs');
+  grunt.loadNpmTasks('grunt-mocha');
 
-  grunt.registerTask('default', ['jshint']);
+  grunt.registerTask('test', ['mocha']);
+  grunt.registerTask('default', ['jshint', 'test']);
   grunt.registerTask('dist', ['default', 'requirejs']);
 };
