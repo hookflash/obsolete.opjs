@@ -3,7 +3,9 @@ require.config({
   paths: {
     jquery: 'lib/jquery',
     _: 'lib/lodash',
-    backbone: 'lib/backbone'
+    backbone: 'lib/backbone',
+    text: 'lib/text',
+    templates: '../templates'
   },
   shim: {
     backbone: {
