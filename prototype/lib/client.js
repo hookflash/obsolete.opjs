@@ -84,18 +84,15 @@ Client.prototype.onResult = function (result) {
   if (!deferred) {
     throw new Error('Received result with invalid $id: ' + result.$id);
   }
-  deferred.notify(result);
+  delete this.pending[result.$id];
+  deferred.resolve(result);
 };
 
 Client.prototype.onReply = function (reply) {
-  var deferred = this.pending[reply.$id];
-  if (!deferred) {
-    throw new Error('Received reply with invalid $id: ' + reply.$id);
+  var handler = this.handlers.reply;
+  if (!handler) {
+    throw new Error('Missing reply handler');
   }
-  delete this.pending[reply.$id];
-  deferred.resolve(reply);
+  handler(reply);
 };
 
-Client.prototype.peerLocationFind = function (request) {
-  return this.sendRequest('peer-location-find', request);
-};

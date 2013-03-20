@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+<head><title>Test Finder</title></head>
+<body>
+<script src="scripts/lib/require.js"></script>
+<script>
+require.config({
+  baseUrl: 'scripts',
+  paths: {
+    q: 'lib/q'
+  }
+});
+require(['modules/finder'], function (Finder) {
+  window.Finder = Finder;
+});
+</script>
+</body>
+</html>

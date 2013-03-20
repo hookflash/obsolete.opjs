@@ -6,6 +6,7 @@ var urlParse = require('url').parse;
 var pathJoin = require('path').join;
 var send = require('send');
 var WebSocketServer = require('ws').Server;
+var Client = require('./lib/client');
 
 var server = http.createServer(function (req, res) {
   var pathname = urlParse(req.url).pathname;
@@ -24,13 +25,32 @@ var server = http.createServer(function (req, res) {
 
 var wsServer = new WebSocketServer({server: server});
 wsServer.on('connection', function (socket) {
-  socket.on('message', function (message) {
-    socket.send(message);
+  var client = new Client(socket, {
+    'session-create': function (request) {
+      console.log('request', request);
+      throw new Error('TODO: Implement session-create request handler');
+    },
+    'session-delete': function (request) {
+      console.log('request', request);
+      throw new Error('TODO: Implement session-delete request handler');
+    },
+    'session-keep-alive': function (request) {
+      console.log('request', request);
+      throw new Error('TODO: Implement session-keep-alive request handler');
+    },
+    'peer-location-find': function (request) {
+      console.log('request', request);
+      throw new Error('TODO: Implement peer-location-find request handler');
+    },
+    reply: function (reply) {
+      console.log('reply', reply);
+      throw new Error('TODO: Implement peer-location-find response handler');
+    }
   });
-  socket.send('Hello');
+  console.log('client', client);
 });
 
-var PORT = process.env.PORT || process.getuid() ? 8080 : 80; 
+var PORT = process.env.PORT || process.getuid() ? 8080 : 80;
 
 server.listen(PORT, function () {
   console.log('Server listening at', server.address());
