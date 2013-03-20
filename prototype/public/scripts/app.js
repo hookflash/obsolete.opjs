@@ -12,7 +12,6 @@ require(['modules/gum-compat', 'modules/peerconn-compat', 'jquery'], function(gu
   };
   var localStream = null;
   var peerConn = null;
-  var started = false;
   var channelReady = false;
   var mediaConstraints = {
     mandatory: {
@@ -50,10 +49,9 @@ require(['modules/gum-compat', 'modules/peerconn-compat', 'jquery'], function(gu
         gum.stopStream(sourceVid);
       },
       connect: function() {
-        if (!started && localStream && channelReady) {
-          createPeerConnection();
-          started = true;
-          peerConn.createOffer(setLocalAndSendMessage, createOfferFailed, mediaConstraints);
+        if (!peerConn && localStream && channelReady) {
+          peerConn = createPeerConnection(socket);
+          peerConn.createOffer(setLocalAndSendMessage.bind(null, peerConn), createOfferFailed, mediaConstraints);
         } else {
           alert('Local stream not running yet - try again.');
         }
@@ -65,21 +63,14 @@ require(['modules/gum-compat', 'modules/peerconn-compat', 'jquery'], function(gu
       }
     }
   };
-  function setLocalAndSendMessage(sessionDescription) {
+  function setLocalAndSendMessage(peerConn, sessionDescription) {
     peerConn.setLocalDescription(sessionDescription);
-    console.log('Sending: SDP');
-    console.log(sessionDescription);
+    console.log('Sending SDP:', sessionDescription);
     socket.send(JSON.stringify(sessionDescription));
   }
 
   function createOfferFailed() {
     console.log('Create Answer failed');
-  }
-
-  function stop() {
-    peerConn.close();
-    peerConn = null;
-    started = false;
   }
 
   // socket: channel connected
@@ -96,51 +87,66 @@ require(['modules/gum-compat', 'modules/peerconn-compat', 'jquery'], function(gu
     console.log('Create Answer failed');
   }
   // socket: accept connection request
-  function onMessage(evt) {
-    evt = JSON.parse(evt.data);
-    if (evt.type === 'offer') {
+  var socketEvents = {
+    offer: function(msg) {
       console.log('Received offer...');
-      if (!started) {
-        createPeerConnection();
-        started = true;
+      if (!peerConn) {
+        peerConn = createPeerConnection(socket);
       }
       console.log('Creating remote session description...' );
-      peerConn.setRemoteDescription(new rtc.RTCSessionDescription(evt));
+      peerConn.setRemoteDescription(new rtc.RTCSessionDescription(msg));
       console.log('Sending answer...');
-      peerConn.createAnswer(setLocalAndSendMessage, createAnswerFailed, mediaConstraints);
-
-    } else if (evt.type === 'answer' && started) {
-      console.log('Received answer...');
-      console.log('Setting remote session description...' );
-      peerConn.setRemoteDescription(new rtc.RTCSessionDescription(evt));
-
-    } else if (evt.type === 'candidate' && started) {
-      console.log('Received ICE candidate...');
+      peerConn.createAnswer(setLocalAndSendMessage.bind(null, peerConn), createAnswerFailed, mediaConstraints);
+    },
+    answer: function(msg) {
+      var description = new rtc.RTCSessionDescription(msg);
+      console.log('Received answer. Setting remote session description:',
+        description);
+      peerConn.setRemoteDescription(description);
+    },
+    candidate: function(msg) {
       var candidate = new rtc.RTCIceCandidate({
-        sdpMLineIndex: evt.sdpMLineIndex,
-        sdpMid: evt.sdpMid,
-        candidate: evt.candidate
+        sdpMLineIndex: msg.sdpMLineIndex,
+        sdpMid: msg.sdpMid,
+        candidate: msg.candidate
       });
-      console.log(candidate);
+      console.log('Received ICE candidate:', candidate);
       peerConn.addIceCandidate(candidate);
-
-    } else if (evt.type === 'bye' && started) {
+    },
+    bye: function() {
       console.log('Received bye');
       stop();
     }
+  };
+  function stop() {
+    peerConn.close();
+    peerConn = null;
+  }
+  function onMessage(evt) {
+    var msg = JSON.parse(evt.data);
+    if (msg.type === 'offer') {
+      socketEvents.offer(msg);
+    } else if (msg.type === 'answer' && peerConn) {
+      socketEvents.answer(msg);
+    } else if (msg.type === 'candidate' && peerConn) {
+      socketEvents.candidate(msg);
+    } else if (msg.type === 'bye' && peerConn) {
+      socketEvents.bye(msg);
+    }
   }
 
-  function createPeerConnection() {
+  function createPeerConnection(socket) {
+    var peerConn;
     try {
       peerConn = new rtc.RTCPeerConnection(config.pcConfig);
     } catch (e) {
       console.log('Failed to create PeerConnection, exception: ' + e.message);
+      return null;
     }
     // send any ice candidates to the other peer
     peerConn.onicecandidate = function (evt) {
-      if (event.candidate) {
-        console.log('Sending ICE candidate...');
-        console.log(evt.candidate);
+      if (evt.candidate) {
+        console.log('Sending ICE candidate:', evt.candidate);
         socket.send(JSON.stringify({type: 'candidate',
                           sdpMLineIndex: evt.candidate.sdpMLineIndex,
                           sdpMid: evt.candidate.sdpMid,
@@ -149,23 +155,23 @@ require(['modules/gum-compat', 'modules/peerconn-compat', 'jquery'], function(gu
         console.log('End of candidates.');
       }
     };
+
+    attachStream(peerConn, remoteVid);
+    return peerConn;
+  }
+
+  function attachStream(peerConn, video) {
+    // when remote adds a stream, hand it on to the local video element
+    rtc.on(peerConn, 'addstream', function (event) {
+      gum.playStream(video, event.stream);
+    });
+    // when remote removes a stream, remove it from the local video element
+    rtc.on(peerConn, 'removestream', function() {
+      console.log('Remove remote stream');
+      gum.stopStream(video);
+    });
     console.log('Adding local stream...');
     peerConn.addStream(localStream);
-
-    rtc.on(peerConn, 'addstream', onRemoteStreamAdded);
-    rtc.on(peerConn, 'removestream', onRemoteStreamRemoved);
-
-    // when remote adds a stream, hand it on to the local video element
-    function onRemoteStreamAdded(event) {
-      console.log('Added remote stream');
-      gum.playStream(remoteVid, event.stream);
-    }
-
-    // when remote removes a stream, remove it from the local video element
-    function onRemoteStreamRemoved() {
-      console.log('Remove remote stream');
-      gum.stopStream(remoteVid);
-    }
   }
 
   $cache.startVideo.on('click', handlers.user.startVideo);
