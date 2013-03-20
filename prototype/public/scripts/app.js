@@ -14,7 +14,10 @@ require([
   };
   var localStream = null;
   var peerConn = null;
-  var channelReady = false;
+  var socketIs = function(socket, stateName) {
+    stateName = stateName.toUpperCase();
+    return socket.readyState === WebSocket[stateName];
+  };
   var mediaConstraints = {
     mandatory: {
       OfferToReceiveAudio: true,
@@ -51,7 +54,7 @@ require([
         gum.stopStream(sourceVid);
       },
       connect: function() {
-        if (!peerConn && localStream && channelReady) {
+        if (!peerConn && localStream && socketIs(socket, 'open')) {
           peerConn = createPeerConnection(socket);
           peerConn.createOffer(setLocalAndSendMessage.bind(null, peerConn),
             createOfferFailed, mediaConstraints);
@@ -83,7 +86,6 @@ require([
 
   function onChannelOpened() {
     console.log('Channel opened.');
-    channelReady = true;
   }
 
   function createAnswerFailed() {
