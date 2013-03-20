@@ -7,11 +7,17 @@
 require.config({
   baseUrl: 'scripts',
   paths: {
-    q: 'lib/q'
+    q: 'lib/q',
+    transport: 'modules/transport'
+  },
+  shim: {
+    transport: {
+      deps: ['q'],
+    }
   }
 });
-require(['modules/finder'], function (Finder) {
-  window.Finder = Finder;
+require(['transport'], function (Transport) {
+  window.Transport = Transport;
 });
 </script>
 </body>

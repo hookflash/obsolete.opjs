@@ -6,7 +6,7 @@ var urlParse = require('url').parse;
 var pathJoin = require('path').join;
 var send = require('send');
 var WebSocketServer = require('ws').Server;
-var Client = require('./lib/client');
+var Transport = require('./lib/transport');
 
 var server = http.createServer(function (req, res) {
   var pathname = urlParse(req.url).pathname;
@@ -25,7 +25,7 @@ var server = http.createServer(function (req, res) {
 
 var wsServer = new WebSocketServer({server: server});
 wsServer.on('connection', function (socket) {
-  var client = new Client(socket, {
+  var api = {
     'session-create': function (request) {
       console.log('request', request);
       throw new Error('TODO: Implement session-create request handler');
@@ -46,8 +46,9 @@ wsServer.on('connection', function (socket) {
       console.log('reply', reply);
       throw new Error('TODO: Implement peer-location-find response handler');
     }
-  });
-  console.log('client', client);
+  };
+  var transport = new Transport(api).open(socket);
+  console.log('transport', transport);
 });
 
 var PORT = process.env.PORT || process.getuid() ? 8080 : 80;
