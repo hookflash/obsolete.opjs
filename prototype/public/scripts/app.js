@@ -1,4 +1,6 @@
-require(['modules/gum-compat', 'modules/peerconn-compat', 'jquery'], function(gum, rtc, $) {
+require([
+  'modules/gum-compat', 'modules/peerconn-compat', 'jquery'
+  ], function(gum, rtc, $) {
   'use strict';
 
   var config = {
@@ -15,8 +17,8 @@ require(['modules/gum-compat', 'modules/peerconn-compat', 'jquery'], function(gu
   var channelReady = false;
   var mediaConstraints = {
     mandatory: {
-      OfferToReceiveAudio:true,
-      OfferToReceiveVideo:true
+      OfferToReceiveAudio: true,
+      OfferToReceiveVideo: true
     }
   };
   var socket = new WebSocket('ws://' + config.socketServer);
@@ -51,14 +53,15 @@ require(['modules/gum-compat', 'modules/peerconn-compat', 'jquery'], function(gu
       connect: function() {
         if (!peerConn && localStream && channelReady) {
           peerConn = createPeerConnection(socket);
-          peerConn.createOffer(setLocalAndSendMessage.bind(null, peerConn), createOfferFailed, mediaConstraints);
+          peerConn.createOffer(setLocalAndSendMessage.bind(null, peerConn),
+            createOfferFailed, mediaConstraints);
         } else {
           alert('Local stream not running yet - try again.');
         }
       },
       hangUp: function() {
         console.log('Hang up.');
-        socket.send(JSON.stringify({type: 'bye'}));
+        socket.send(JSON.stringify({ type: 'bye' }));
         stop();
       }
     }
@@ -89,14 +92,17 @@ require(['modules/gum-compat', 'modules/peerconn-compat', 'jquery'], function(gu
   // socket: accept connection request
   var socketEvents = {
     offer: function(msg) {
+      var sessionDesc;
       console.log('Received offer...');
       if (!peerConn) {
         peerConn = createPeerConnection(socket);
       }
-      console.log('Creating remote session description...' );
-      peerConn.setRemoteDescription(new rtc.RTCSessionDescription(msg));
+      sessionDesc = new rtc.RTCSessionDescription(msg);
+      console.log('Creating remote session description:', sessionDesc);
+      peerConn.setRemoteDescription(sessionDesc);
       console.log('Sending answer...');
-      peerConn.createAnswer(setLocalAndSendMessage.bind(null, peerConn), createAnswerFailed, mediaConstraints);
+      peerConn.createAnswer(setLocalAndSendMessage.bind(null, peerConn),
+        createAnswerFailed, mediaConstraints);
     },
     answer: function(msg) {
       var description = new rtc.RTCSessionDescription(msg);
@@ -145,12 +151,17 @@ require(['modules/gum-compat', 'modules/peerconn-compat', 'jquery'], function(gu
     }
     // send any ice candidates to the other peer
     peerConn.onicecandidate = function (evt) {
-      if (evt.candidate) {
-        console.log('Sending ICE candidate:', evt.candidate);
-        socket.send(JSON.stringify({type: 'candidate',
-                          sdpMLineIndex: evt.candidate.sdpMLineIndex,
-                          sdpMid: evt.candidate.sdpMid,
-                          candidate: evt.candidate.candidate}));
+      var candidate = evt && evt.candidate;
+      var msg;
+      if (candidate) {
+        msg = {
+          type: 'candidate',
+          sdpMLineIndex: evt.candidate.sdpMLineIndex,
+          sdpMid: evt.candidate.sdpMid,
+          candidate: evt.candidate.candidate
+        };
+        console.log('Sending ICE candidate:', msg);
+        socket.send(JSON.stringify(msg));
       } else {
         console.log('End of candidates.');
       }
