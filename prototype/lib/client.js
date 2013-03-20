@@ -40,8 +40,6 @@ function Client(socket, handlers) {
       id = (Math.random() * 0x10000000).toString(36);
     } while (id in this.pending);
 
-    var deferred = Q.defer();
-
     // Generate the metadata for the request
     var message = {
       $domain: 'hookflash.com',
@@ -52,17 +50,23 @@ function Client(socket, handlers) {
     for (var key in request) {
       message[key] = request[key];
     }
+    message = {request: message};
 
+    var deferred = Q.defer();
+
+    // Serialize the message and send it across the wire.
     var json;
     try {
-      json = JSON.stringify({request: message});
+      json = JSON.stringify(message);
       socket.send(json);
     }
     catch (err) {
       deferred.reject(err);
     }
 
+    // It was send, store the pending deferred for later access
     this.pending[id] = deferred;
+    // And return the promise.
     return deferred.promise;
   };
 }
