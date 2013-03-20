@@ -1,10 +1,13 @@
 define(function() {
   'use strict';
-  var rtcPeerConn = {};
-  var RTCPeerConnection = window.webkitRTCPeerConnection ||
-    window.mozRTCPeerConnection;
+  var rtc = {};
+  var RTCPeerConnection = rtc.RTCPeerConnection =
+    window.webkitRTCPeerConnection || window.mozRTCPeerConnection;
+  rtc.RTCSessionDescription =
+    window.mozRTCSessionDescription || window.RTCSessionDescription;
+  rtc.RTCIceCandidate = window.RTCIceCandidate;
 
-  var strats = rtcPeerConn.strategies = {
+  var strats = rtc.strategies = {
     on: {
       moz: function(connection, eventName, handler) {
         connection['on' + eventName] = handler;
@@ -16,10 +19,10 @@ define(function() {
   };
 
   if (RTCPeerConnection.prototype && 'addEventListener' in RTCPeerConnection.prototype) {
-    rtcPeerConn.on = strats.on.webkit;
+    rtc.on = strats.on.webkit;
   } else {
-    rtcPeerConn.on = strats.on.moz;
+    rtc.on = strats.on.moz;
   }
 
-  return rtcPeerConn;
+  return rtc;
 });

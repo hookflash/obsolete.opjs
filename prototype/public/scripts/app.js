@@ -1,4 +1,4 @@
-require(['modules/finder', 'modules/gum-compat', 'modules/peerconn-compat', 'jquery'], function(Finder, gum, rtcPeerConn, $) {
+require(['modules/finder', 'modules/gum-compat', 'modules/peerconn-compat', 'jquery'], function(Finder, gum, rtc, $) {
   'use strict';
 
   var config = {
@@ -10,11 +10,6 @@ require(['modules/finder', 'modules/gum-compat', 'modules/peerconn-compat', 'jqu
       ]
     }
   };
-  var RTCPeerConnection = window.webkitRTCPeerConnection ||
-    window.mozRTCPeerConnection;
-  var RTCSessionDescription = window.mozRTCSessionDescription ||
-    window.RTCSessionDescription;
-  var RTCIceCandidate = window.RTCIceCandidate;
   var localStream = null;
   var peerConn = null;
   var started = false;
@@ -110,18 +105,22 @@ require(['modules/finder', 'modules/gum-compat', 'modules/peerconn-compat', 'jqu
         started = true;
       }
       console.log('Creating remote session description...' );
-      peerConn.setRemoteDescription(new RTCSessionDescription(evt));
+      peerConn.setRemoteDescription(new rtc.RTCSessionDescription(evt));
       console.log('Sending answer...');
       peerConn.createAnswer(setLocalAndSendMessage, createAnswerFailed, mediaConstraints);
 
     } else if (evt.type === 'answer' && started) {
       console.log('Received answer...');
       console.log('Setting remote session description...' );
-      peerConn.setRemoteDescription(new RTCSessionDescription(evt));
+      peerConn.setRemoteDescription(new rtc.RTCSessionDescription(evt));
 
     } else if (evt.type === 'candidate' && started) {
       console.log('Received ICE candidate...');
-      var candidate = new RTCIceCandidate({sdpMLineIndex:evt.sdpMLineIndex, sdpMid:evt.sdpMid, candidate:evt.candidate});
+      var candidate = new rtc.RTCIceCandidate({
+        sdpMLineIndex: evt.sdpMLineIndex,
+        sdpMid: evt.sdpMid,
+        candidate: evt.candidate
+      });
       console.log(candidate);
       peerConn.addIceCandidate(candidate);
 
@@ -133,7 +132,7 @@ require(['modules/finder', 'modules/gum-compat', 'modules/peerconn-compat', 'jqu
 
   function createPeerConnection() {
     try {
-      peerConn = new RTCPeerConnection(config.pcConfig);
+      peerConn = new rtc.RTCPeerConnection(config.pcConfig);
     } catch (e) {
       console.log('Failed to create PeerConnection, exception: ' + e.message);
     }
@@ -153,8 +152,8 @@ require(['modules/finder', 'modules/gum-compat', 'modules/peerconn-compat', 'jqu
     console.log('Adding local stream...');
     peerConn.addStream(localStream);
 
-    rtcPeerConn.on(peerConn, 'addstream', onRemoteStreamAdded);
-    rtcPeerConn.on(peerConn, 'removestream', onRemoteStreamRemoved);
+    rtc.on(peerConn, 'addstream', onRemoteStreamAdded);
+    rtc.on(peerConn, 'removestream', onRemoteStreamRemoved);
 
     // when remote adds a stream, hand it on to the local video element
     function onRemoteStreamAdded(event) {
