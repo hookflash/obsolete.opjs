@@ -1,4 +1,4 @@
-require(['modules/finder', 'modules/gum-compat', 'modules/peerconn-compat', 'jquery'], function(Finder, gum, rtc, $) {
+require(['modules/gum-compat', 'modules/peerconn-compat', 'jquery'], function(gum, rtc, $) {
   'use strict';
 
   var config = {
