@@ -13,18 +13,12 @@ require([
     }
   };
   var localStream = null;
-  var peerConn = null;
-  var socketIs = function(socket, stateName) {
-    stateName = stateName.toUpperCase();
-    return socket.readyState === WebSocket[stateName];
-  };
   var mediaConstraints = {
     mandatory: {
       OfferToReceiveAudio: true,
       OfferToReceiveVideo: true
     }
   };
-  var socket = new WebSocket('ws://' + config.socketServer);
   var sourceVid = document.getElementById('webrtc-source-vid');
   var remoteVid = document.getElementById('webrtc-remote-vid');
   var $cache = {
@@ -54,99 +48,79 @@ require([
         gum.stopStream(sourceVid);
       },
       connect: function() {
-        if (!peerConn && localStream && socketIs(socket, 'open')) {
-          peerConn = createPeerConnection(socket);
-          peerConn.createOffer(setLocalAndSendMessage.bind(null, peerConn),
-            createOfferFailed, mediaConstraints);
+        if (!nder.peerConn && localStream && nder.is('open')) {
+          nder.createPeerConnection();
+          nder.peerConn.createOffer(
+            setLocalAndSendMessage.bind(null, nder.peerConn),
+            createOfferFailed,
+            mediaConstraints);
         } else {
           alert('Local stream not running yet - try again.');
         }
       },
       hangUp: function() {
         console.log('Hang up.');
-        socket.send(JSON.stringify({ type: 'bye' }));
-        stop();
+        nder.send({ type: 'bye' });
+        nder.stop();
       }
     }
   };
   function setLocalAndSendMessage(peerConn, sessionDescription) {
     peerConn.setLocalDescription(sessionDescription);
     console.log('Sending SDP:', sessionDescription);
-    socket.send(JSON.stringify(sessionDescription));
+    nder.send(sessionDescription);
   }
 
   function createOfferFailed() {
     console.log('Create Answer failed');
   }
 
-  // socket: channel connected
-  socket.addEventListener('message', onMessage, false);
-  socket.onmessage = onMessage;
-  socket.addEventListener('open', onChannelOpened, false);
-
-  function onChannelOpened() {
-    console.log('Channel opened.');
-  }
-
   function createAnswerFailed() {
     console.log('Create Answer failed');
   }
-  // socket: accept connection request
-  var socketEvents = {
-    offer: function(msg) {
-      var sessionDesc;
-      console.log('Received offer...');
-      if (!peerConn) {
-        peerConn = createPeerConnection(socket);
-      }
-      sessionDesc = new rtc.RTCSessionDescription(msg);
-      console.log('Creating remote session description:', sessionDesc);
-      peerConn.setRemoteDescription(sessionDesc);
-      console.log('Sending answer...');
-      peerConn.createAnswer(setLocalAndSendMessage.bind(null, peerConn),
-        createAnswerFailed, mediaConstraints);
-    },
-    answer: function(msg) {
-      var description = new rtc.RTCSessionDescription(msg);
-      console.log('Received answer. Setting remote session description:',
-        description);
-      peerConn.setRemoteDescription(description);
-    },
-    candidate: function(msg) {
-      var candidate = new rtc.RTCIceCandidate({
-        sdpMLineIndex: msg.sdpMLineIndex,
-        sdpMid: msg.sdpMid,
-        candidate: msg.candidate
-      });
-      console.log('Received ICE candidate:', candidate);
-      peerConn.addIceCandidate(candidate);
-    },
-    bye: function() {
-      console.log('Received bye');
-      stop();
-    }
-  };
-  function stop() {
-    peerConn.close();
-    peerConn = null;
-  }
-  function onMessage(evt) {
-    var msg = JSON.parse(evt.data);
-    if (msg.type === 'offer') {
-      socketEvents.offer(msg);
-    } else if (msg.type === 'answer' && peerConn) {
-      socketEvents.answer(msg);
-    } else if (msg.type === 'candidate' && peerConn) {
-      socketEvents.candidate(msg);
-    } else if (msg.type === 'bye' && peerConn) {
-      socketEvents.bye(msg);
-    }
-  }
 
-  function createPeerConnection(socket) {
+  // Nder
+  // A temporary abstraction around an RTC messaging service
+  function Nder(options) {
+    var socket = this.socket = options.socket;
+    var onMessage = this._onMessage.bind(this);
+    this.peerConn = options.peerConn;
+    this.handlers = options.handlers;
+    socket.addEventListener('message', onMessage, false);
+    socket.onmessage = onMessage;
+    socket.addEventListener('open', this._onChannelOpened, false);
+  }
+  Nder.prototype.is = function(stateName) {
+    return this.socket && stateName &&
+      this.socket.readyState === WebSocket[stateName.toUpperCase()];
+  };
+  Nder.prototype.send = function(msg) {
+    this.socket.send(JSON.stringify(msg));
+  };
+  Nder.prototype._onMessage = function(event) {
+    var msg = JSON.parse(event.data);
+    this.trigger(msg.type, msg);
+  };
+  Nder.prototype._onChannelOpened = function() {
+    console.log('Channel opened.');
+  };
+  Nder.prototype.trigger = function(eventName) {
+    var handler = this.handlers[eventName];
+
+    if (typeof handler !== 'function') {
+      return;
+    }
+    handler.apply(this, Array.prototype.slice.call(arguments, 1));
+  };
+  Nder.prototype.stop = function() {
+    this.peerConn.close();
+    delete this.peerConn;
+  };
+  Nder.prototype.createPeerConnection = function() {
     var peerConn;
+    var socket = this.socket;
     try {
-      peerConn = new rtc.RTCPeerConnection(config.pcConfig);
+      peerConn = this.peerConn = new rtc.RTCPeerConnection(config.pcConfig);
     } catch (e) {
       console.log('Failed to create PeerConnection, exception: ' + e.message);
       return null;
@@ -171,7 +145,7 @@ require([
 
     attachStream(peerConn, remoteVid);
     return peerConn;
-  }
+  };
 
   function attachStream(peerConn, video) {
     // when remote adds a stream, hand it on to the local video element
@@ -186,6 +160,55 @@ require([
     console.log('Adding local stream...');
     peerConn.addStream(localStream);
   }
+
+  var nder = new Nder({
+    socket: new WebSocket('ws://' + config.socketServer),
+    handlers: {
+      offer: function(msg) {
+        var sessionDesc;
+        console.log('Received offer...');
+        if (!this.peerConn) {
+          this.createPeerConnection();
+        }
+        sessionDesc = new rtc.RTCSessionDescription(msg);
+        console.log('Creating remote session description:', sessionDesc);
+        this.peerConn.setRemoteDescription(sessionDesc);
+        console.log('Sending answer...');
+        this.peerConn.createAnswer(setLocalAndSendMessage.bind(null, this.peerConn),
+          createAnswerFailed, mediaConstraints);
+      },
+      answer: function(msg) {
+        var description;
+        if (!this.peerConn) {
+          return;
+        }
+        description = new rtc.RTCSessionDescription(msg);
+        console.log('Received answer. Setting remote session description:',
+          description);
+        this.peerConn.setRemoteDescription(description);
+      },
+      candidate: function(msg) {
+        var candidate;
+        if (!this.peerConn) {
+          return;
+        }
+        candidate = new rtc.RTCIceCandidate({
+          sdpMLineIndex: msg.sdpMLineIndex,
+          sdpMid: msg.sdpMid,
+          candidate: msg.candidate
+        });
+        console.log('Received ICE candidate:', candidate);
+        this.peerConn.addIceCandidate(candidate);
+      },
+      bye: function() {
+        if (!this.peerConn) {
+          return;
+        }
+        console.log('Received bye');
+        this.stop();
+      }
+    }
+  });
 
   $cache.startVideo.on('click', handlers.user.startVideo);
   $cache.stopVideo.on('click', handlers.user.stopVideo);
