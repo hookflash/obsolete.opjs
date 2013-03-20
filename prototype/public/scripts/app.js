@@ -1,6 +1,6 @@
 require([
-  'modules/gum-compat', 'modules/peerconn-compat', 'jquery'
-  ], function(gum, rtc, $) {
+  'modules/nder', 'modules/gum-compat', 'modules/peerconn-compat', 'jquery'
+  ], function(Nder, gum, rtc, $) {
   'use strict';
 
   var config = {
@@ -49,7 +49,8 @@ require([
       },
       connect: function() {
         if (!nder.peerConn && localStream && nder.is('open')) {
-          nder.createPeerConnection();
+          nder.createPeerConnection(config.pcConfig);
+          nder.attachStream(remoteVid, localStream);
           nder.peerConn.createOffer(
             setLocalAndSendMessage.bind(null, nder.peerConn),
             createOfferFailed,
@@ -79,88 +80,6 @@ require([
     console.log('Create Answer failed');
   }
 
-  // Nder
-  // A temporary abstraction around an RTC messaging service
-  function Nder(options) {
-    var socket = this.socket = options.socket;
-    var onMessage = this._onMessage.bind(this);
-    this.peerConn = options.peerConn;
-    this.handlers = options.handlers;
-    socket.addEventListener('message', onMessage, false);
-    socket.onmessage = onMessage;
-    socket.addEventListener('open', this._onChannelOpened, false);
-  }
-  Nder.prototype.is = function(stateName) {
-    return this.socket && stateName &&
-      this.socket.readyState === WebSocket[stateName.toUpperCase()];
-  };
-  Nder.prototype.send = function(msg) {
-    this.socket.send(JSON.stringify(msg));
-  };
-  Nder.prototype._onMessage = function(event) {
-    var msg = JSON.parse(event.data);
-    this.trigger(msg.type, msg);
-  };
-  Nder.prototype._onChannelOpened = function() {
-    console.log('Channel opened.');
-  };
-  Nder.prototype.trigger = function(eventName) {
-    var handler = this.handlers[eventName];
-
-    if (typeof handler !== 'function') {
-      return;
-    }
-    handler.apply(this, Array.prototype.slice.call(arguments, 1));
-  };
-  Nder.prototype.stop = function() {
-    this.peerConn.close();
-    delete this.peerConn;
-  };
-  Nder.prototype.createPeerConnection = function() {
-    var peerConn;
-    var socket = this.socket;
-    try {
-      peerConn = this.peerConn = new rtc.RTCPeerConnection(config.pcConfig);
-    } catch (e) {
-      console.log('Failed to create PeerConnection, exception: ' + e.message);
-      return null;
-    }
-    // send any ice candidates to the other peer
-    peerConn.onicecandidate = function (evt) {
-      var candidate = evt && evt.candidate;
-      var msg;
-      if (candidate) {
-        msg = {
-          type: 'candidate',
-          sdpMLineIndex: evt.candidate.sdpMLineIndex,
-          sdpMid: evt.candidate.sdpMid,
-          candidate: evt.candidate.candidate
-        };
-        console.log('Sending ICE candidate:', msg);
-        socket.send(JSON.stringify(msg));
-      } else {
-        console.log('End of candidates.');
-      }
-    };
-
-    attachStream(peerConn, remoteVid);
-    return peerConn;
-  };
-
-  function attachStream(peerConn, video) {
-    // when remote adds a stream, hand it on to the local video element
-    rtc.on(peerConn, 'addstream', function (event) {
-      gum.playStream(video, event.stream);
-    });
-    // when remote removes a stream, remove it from the local video element
-    rtc.on(peerConn, 'removestream', function() {
-      console.log('Remove remote stream');
-      gum.stopStream(video);
-    });
-    console.log('Adding local stream...');
-    peerConn.addStream(localStream);
-  }
-
   var nder = new Nder({
     socket: new WebSocket('ws://' + config.socketServer),
     handlers: {
@@ -168,7 +87,8 @@ require([
         var sessionDesc;
         console.log('Received offer...');
         if (!this.peerConn) {
-          this.createPeerConnection();
+          this.createPeerConnection(config.pcConfig);
+          this.attachStream(remoteVid, localStream);
         }
         sessionDesc = new rtc.RTCSessionDescription(msg);
         console.log('Creating remote session description:', sessionDesc);
