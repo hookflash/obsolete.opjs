@@ -4,7 +4,7 @@ define(function() {
   // Nder
   // A temporary abstraction around an RTC messaging service
   function Nder(options) {
-    var socket = this.socket = options.socket;
+    var socket = this.socket = new WebSocket('ws://' + options.socketAddr);
     var onMessage = this._onMessage.bind(this);
     this.peerConn = options.peerConn;
     this.handlers = options.handlers;

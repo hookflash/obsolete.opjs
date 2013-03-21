@@ -96,8 +96,7 @@ require([
     nder.send(msg);
   });
   var nder = new Nder({
-    // TODO: Initialize this in the constructor
-    socket: new WebSocket('ws://' + config.socketServer),
+    socketAddr: config.socketServer,
     handlers: {
       offer: function(msg) {
         var sessionDesc;
