@@ -5,7 +5,7 @@ require([
   'use strict';
 
   var config = {
-    socketServer: '10.0.0.202:1337',
+    socketServer: window.location.hostname + ':1337',
     pcConfig: {
       iceServers: [
         { url: 'stun:stun.l.google.com:19302' },
