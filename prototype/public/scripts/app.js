@@ -1,7 +1,6 @@
 require([
-  'modules/nder', 'modules/pc', 'modules/gum-compat',
-  'modules/rtc-compat', 'jquery'
-  ], function(Nder, PC, gum, rtc, $) {
+  'modules/nder', 'modules/pc', 'modules/gum-compat', 'jquery'
+  ], function(Nder, PC, gum, $) {
   'use strict';
 
   var config = {
@@ -51,7 +50,7 @@ require([
       connect: function() {
         if (!pc.isActive() && localStream && nder.is('open')) {
           pc.init(config.pcConfig);
-          pc.peerConn.addStream(localStream);
+          pc.addStream(localStream);
           pc.createOffer(
             setLocalAndSendMessage,
             createOfferFailed,
@@ -68,7 +67,7 @@ require([
     }
   };
   var setLocalAndSendMessage = function(sessionDescription) {
-    this.peerConn.setLocalDescription(sessionDescription);
+    this.setLocalDescription(sessionDescription);
     console.log('Sending SDP:', sessionDescription);
     nder.send(sessionDescription);
   };
@@ -99,41 +98,31 @@ require([
     socketAddr: config.socketServer,
     handlers: {
       offer: function(msg) {
-        var sessionDesc;
         console.log('Received offer...');
         if (!pc.isActive()) {
           pc.init(config.pcConfig);
-          pc.peerConn.addStream(localStream);
+          pc.addStream(localStream);
         }
-        sessionDesc = new rtc.RTCSessionDescription(msg);
-        console.log('Creating remote session description:', sessionDesc);
-        pc.peerConn.setRemoteDescription(sessionDesc);
+        console.log('Creating remote session description:', msg);
+        pc.setRemoteDescription(msg);
         console.log('Sending answer...');
         pc.createAnswer(setLocalAndSendMessage,
           createAnswerFailed, mediaConstraints);
       },
       answer: function(msg) {
-        var description;
         if (!pc.isActive()) {
           return;
         }
-        description = new rtc.RTCSessionDescription(msg);
         console.log('Received answer. Setting remote session description:',
-          description);
-        pc.peerConn.setRemoteDescription(description);
+          msg);
+        pc.setRemoteDescription(msg);
       },
       candidate: function(msg) {
-        var candidate;
         if (!pc.isActive()) {
           return;
         }
-        candidate = new rtc.RTCIceCandidate({
-          sdpMLineIndex: msg.sdpMLineIndex,
-          sdpMid: msg.sdpMid,
-          candidate: msg.candidate
-        });
-        console.log('Received ICE candidate:', candidate);
-        pc.peerConn.addIceCandidate(candidate);
+        console.log('Received ICE candidate:', msg);
+        pc.addIceCandidate(msg);
       },
       bye: function() {
         if (!pc.isActive()) {

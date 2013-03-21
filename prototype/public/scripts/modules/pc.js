@@ -25,6 +25,41 @@ define([
     rtc.on(peerConn, 'removestream', this._handleRemoveStream.bind(this));
   };
 
+  // addStream
+  // Add a stream object to the local stream set of the Peer Connection
+  // instance
+  PC.prototype.addStream = function(stream) {
+    this.peerConn.addStream(stream);
+  };
+
+  // setLocalDescription
+  // Create a valid WebRTC Session Description object from the provided data
+  // and set it as the local description of the Peer Connection instance
+  PC.prototype.setLocalDescription = function(desc) {
+    desc = new rtc.RTCSessionDescription(desc);
+    this.peerConn.setLocalDescription(desc);
+  };
+
+  // setRemoteDescription
+  // Create a valid WebRTC Session Description object from the provided data
+  // and set it as the remote description of the Peer Connection instance
+  PC.prototype.setRemoteDescription = function(desc) {
+    desc = new rtc.RTCSessionDescription(desc);
+    this.peerConn.setRemoteDescription(desc);
+  };
+
+  // addIceCandidate
+  // Create a valid WebRTC Ice Candidate object from the provided data and add
+  // it to the Peer Connection instance
+  PC.prototype.addIceCandidate = function(candidateData) {
+    var candidate = new rtc.RTCIceCandidate({
+      sdpMLineIndex: candidateData.sdpMLineIndex,
+      sdpMid: candidateData.sdpMid,
+      candidate: candidateData.candidate
+    });
+    this.peerConn.addIceCandidate(candidate);
+  };
+
   PC.prototype._handleIceCandidate = function(evt) {
     var candidate = evt && evt.candidate;
     var msg;
