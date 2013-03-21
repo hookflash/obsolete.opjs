@@ -1,5 +1,5 @@
 define([
-    'modules/peerconn-compat', '_', 'backbone'
+    'modules/rtc-compat', '_', 'backbone'
   ], function(rtc, _, Backbone) {
   'use strict';
 

@@ -1,6 +1,6 @@
 require([
   'modules/nder', 'modules/pc', 'modules/gum-compat',
-  'modules/peerconn-compat', 'jquery'
+  'modules/rtc-compat', 'jquery'
   ], function(Nder, PC, gum, rtc, $) {
   'use strict';
 
