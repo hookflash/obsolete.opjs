@@ -53,26 +53,41 @@ define([
     return !!this.peerConn;
   };
 
-  // TODO: Avoid binding
   PC.prototype.createOffer = function(success, failure, mediaConstraints) {
-    if (typeof success === 'function') {
-      success = success.bind(this);
-    }
-    if (typeof failure === 'function') {
-      failure = failure.bind(this);
-    }
-    this.peerConn.createOffer(success, failure, mediaConstraints);
+    var cbs = this._wrapCallbacks({
+      success: success,
+      failure: failure
+    });
+    this.peerConn.createOffer(cbs.success, cbs.failure, mediaConstraints);
   };
 
-  // TODO: Avoid binding
   PC.prototype.createAnswer = function(success, failure, mediaConstraints) {
+    var cbs = this._wrapCallbacks({
+      success: success,
+      failure: failure
+    });
+    this.peerConn.createAnswer(cbs.success, cbs.failure, mediaConstraints);
+  };
+
+  // _wrapCallbacks
+  // Private method to create callbacks that will be invoked in the context of
+  // the PC object. Avoiding `Function.prototype.bind` allows users to
+  // optionally override the context of their callback functions.
+  PC.prototype._wrapCallbacks = function(callbacks) {
+    var self = this;
+    var success = callbacks.success;
+    var failure = callbacks.failure;
     if (typeof success === 'function') {
-      success = success.bind(this);
+      callbacks.success = function() {
+        success.apply(self, arguments);
+      };
     }
     if (typeof failure === 'function') {
-      failure = failure.bind(this);
+      callbacks.failure = function() {
+        failure.apply(self, arguments);
+      };
     }
-    this.peerConn.createAnswer(success, failure, mediaConstraints);
+    return callbacks;
   };
 
   PC.prototype.destroy = function() {
