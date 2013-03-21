@@ -8,6 +8,9 @@ require.config({
     templates: '../templates'
   },
   shim: {
+    _: {
+      exports: '_'
+    },
     backbone: {
       exports: 'Backbone',
       deps: ['jquery', '_']
