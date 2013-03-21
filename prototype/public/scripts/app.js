@@ -1,6 +1,6 @@
 require([
-  'modules/nder', 'modules/pc', 'modules/gum-compat', 'jquery'
-  ], function(Nder, PC, gum, $) {
+  'modules/nder', 'modules/pc', 'modules/layout'
+  ], function(Nder, PC, Layout) {
   'use strict';
 
   var config = {
@@ -12,58 +12,10 @@ require([
       ]
     }
   };
-  var localStream = null;
   var mediaConstraints = {
     mandatory: {
       OfferToReceiveAudio: true,
       OfferToReceiveVideo: true
-    }
-  };
-  var sourceVid = document.getElementById('webrtc-source-vid');
-  var remoteVid = document.getElementById('webrtc-remote-vid');
-  var $cache = {
-    startVideo: $('#start-video'),
-    stopVideo: $('#stop-video'),
-    connect: $('#connect'),
-    hangUp: $('#hang-up')
-  };
-  var handlers = {
-    gum: {
-      success: function(stream) {
-        localStream = stream;
-        gum.playStream(sourceVid, stream);
-      },
-      failure: function(error) {
-        console.error('An error occurred: [CODE ' + error.code + ']');
-      }
-    },
-    user: {
-      startVideo: function() {
-        gum.getUserMedia({
-          video: true,
-          audio: true
-        }, handlers.gum.success, handlers.gum.failure);
-      },
-      stopVideo: function() {
-        gum.stopStream(sourceVid);
-      },
-      connect: function() {
-        if (!pc.isActive() && localStream && nder.is('open')) {
-          pc.init(config.pcConfig);
-          pc.addStream(localStream);
-          pc.createOffer(
-            setLocalAndSendMessage,
-            createOfferFailed,
-            mediaConstraints);
-        } else {
-          alert('Local stream not running yet - try again.');
-        }
-      },
-      hangUp: function() {
-        console.log('Hang up.');
-        nder.send({ type: 'bye' });
-        pc.destroy();
-      }
     }
   };
   var setLocalAndSendMessage = function(sessionDescription) {
@@ -81,14 +33,29 @@ require([
   }
 
   var pc = new PC();
+  var layout = new Layout();
+  layout.render().$el.appendTo('body');
+  layout.on('connectRequest', function(stream) {
+    if (!pc.isActive() && nder.is('open')) {
+      pc.init(config.pcConfig);
+      pc.addStream(stream);
+      pc.createOffer(
+        setLocalAndSendMessage,
+        createOfferFailed,
+        mediaConstraints);
+    }
+  });
+  layout.on('hangup', function() {
+    nder.send({ type: 'bye' });
+    pc.destroy();
+  });
   pc.on('addstream', function(stream) {
     console.log('Remote stream added');
-    console.log(arguments);
-    gum.playStream(remoteVid, stream);
+    layout.playRemoteStream(stream);
   });
   pc.on('removestream', function() {
     console.log('Remove remote stream');
-    gum.stopStream(remoteVid);
+    layout.stopRemoteStream();
   });
   pc.on('ice', function(msg) {
     console.log('Sending ICE candidate:', msg);
@@ -101,7 +68,9 @@ require([
         console.log('Received offer...');
         if (!pc.isActive()) {
           pc.init(config.pcConfig);
-          pc.addStream(localStream);
+          // TODO: Refactor so signalling service is not so tightly-coupled to
+          // the layout.
+          pc.addStream(layout.localStreamView.getStream());
         }
         console.log('Creating remote session description:', msg);
         pc.setRemoteDescription(msg);
@@ -134,8 +103,4 @@ require([
     }
   });
 
-  $cache.startVideo.on('click', handlers.user.startVideo);
-  $cache.stopVideo.on('click', handlers.user.stopVideo);
-  $cache.connect.on('click', handlers.user.connect);
-  $cache.hangUp.on('click', handlers.user.hangUp);
 });
