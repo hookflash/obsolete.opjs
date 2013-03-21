@@ -24,7 +24,7 @@ define(function() {
         videoElem.src = null;
       },
       webkit: function(videoElem) {
-        videoElem.stop();
+        videoElem.pause();
         videoElem.src = '';
       }
     }
