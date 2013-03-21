@@ -1,6 +1,7 @@
 require([
-  'modules/nder', 'modules/gum-compat', 'modules/peerconn-compat', 'jquery'
-  ], function(Nder, gum, rtc, $) {
+  'modules/nder', 'modules/pc', 'modules/gum-compat',
+  'modules/peerconn-compat', 'jquery'
+  ], function(Nder, PC, gum, rtc, $) {
   'use strict';
 
   var config = {
@@ -48,11 +49,11 @@ require([
         gum.stopStream(sourceVid);
       },
       connect: function() {
-        if (!nder.peerConn && localStream && nder.is('open')) {
-          nder.createPeerConnection(config.pcConfig);
-          nder.attachStream(remoteVid, localStream);
-          nder.peerConn.createOffer(
-            setLocalAndSendMessage.bind(null, nder.peerConn),
+        if (!pc.isActive() && localStream && nder.is('open')) {
+          pc.init(config.pcConfig);
+          pc.peerConn.addStream(localStream);
+          pc.createOffer(
+            setLocalAndSendMessage,
             createOfferFailed,
             mediaConstraints);
         } else {
@@ -62,54 +63,69 @@ require([
       hangUp: function() {
         console.log('Hang up.');
         nder.send({ type: 'bye' });
-        nder.stop();
+        pc.destroy();
       }
     }
   };
-  function setLocalAndSendMessage(peerConn, sessionDescription) {
-    peerConn.setLocalDescription(sessionDescription);
+  var setLocalAndSendMessage = function(sessionDescription) {
+    this.peerConn.setLocalDescription(sessionDescription);
     console.log('Sending SDP:', sessionDescription);
     nder.send(sessionDescription);
-  }
+  };
 
   function createOfferFailed() {
-    console.log('Create Answer failed');
+    console.error('Create Answer failed');
   }
 
   function createAnswerFailed() {
-    console.log('Create Answer failed');
+    console.error('Create Answer failed');
   }
 
+  var pc = new PC();
+  pc.on('addstream', function(stream) {
+    console.log('Remote stream added');
+    console.log(arguments);
+    gum.playStream(remoteVid, stream);
+  });
+  pc.on('removestream', function() {
+    console.log('Remove remote stream');
+    gum.stopStream(remoteVid);
+  });
+  pc.on('ice', function(msg) {
+    console.log('Sending ICE candidate:', msg);
+    nder.send(msg);
+  });
   var nder = new Nder({
+    // TODO: Initialize this in the constructor
     socket: new WebSocket('ws://' + config.socketServer),
     handlers: {
       offer: function(msg) {
         var sessionDesc;
         console.log('Received offer...');
-        if (!this.peerConn) {
-          this.createPeerConnection(config.pcConfig);
-          this.attachStream(remoteVid, localStream);
+        if (!pc.isActive()) {
+          pc.init(config.pcConfig);
+          pc.peerConn.addStream(localStream);
         }
         sessionDesc = new rtc.RTCSessionDescription(msg);
         console.log('Creating remote session description:', sessionDesc);
-        this.peerConn.setRemoteDescription(sessionDesc);
+        pc.peerConn.setRemoteDescription(sessionDesc);
         console.log('Sending answer...');
-        this.peerConn.createAnswer(setLocalAndSendMessage.bind(null, this.peerConn),
+        pc.createAnswer(setLocalAndSendMessage,
           createAnswerFailed, mediaConstraints);
       },
       answer: function(msg) {
         var description;
-        if (!this.peerConn) {
+        if (!pc.isActive()) {
           return;
         }
         description = new rtc.RTCSessionDescription(msg);
         console.log('Received answer. Setting remote session description:',
           description);
-        this.peerConn.setRemoteDescription(description);
+        pc.peerConn.setRemoteDescription(description);
       },
       candidate: function(msg) {
         var candidate;
-        if (!this.peerConn) {
+        if (!pc.isActive()) {
           return;
         }
         candidate = new rtc.RTCIceCandidate({
@@ -118,14 +134,14 @@ require([
           candidate: msg.candidate
         });
         console.log('Received ICE candidate:', candidate);
-        this.peerConn.addIceCandidate(candidate);
+        pc.peerConn.addIceCandidate(candidate);
       },
       bye: function() {
-        if (!this.peerConn) {
+        if (!pc.isActive()) {
           return;
         }
         console.log('Received bye');
-        this.stop();
+        pc.destroy();
       }
     }
   });
