@@ -1,44 +1,36 @@
 define([
-  'modules/stream-view', 'modules/gum-compat', 'text!templates/layout.html',
-  'backbone', '_'
-  ], function(StreamView, gum, html, Backbone, _) {
+  'modules/stream-views', 'modules/contacts-view',
+  'text!templates/layout.html', 'backbone', '_', 'layoutmanager'
+  ], function(StreamViews, ContactsView, html, Backbone, _) {
   'use strict';
 
-  var Layout = Backbone.View.extend({
+  var Layout = Backbone.Layout.extend({
     template: _.template(html),
     events: {
-      'click .start-video': 'requestMedia',
-      'click .stop-video': 'stopLocalStream',
-      'click .connect': 'connect',
-      'click .hang-up': 'hangUp'
+      'click .btn-connect': 'connect',
+      'click .btn-hang-up': 'hangUp'
     },
-    initialize: function() {
-      this.localStreamView = new StreamView();
-      this.remoteStreamView = new StreamView();
-      // Shadow prototype method with versions bound to this instance
-      this.playLocalStream = _.bind(this.playLocalStream, this);
-      this.mediaRejected = _.bind(this.mediaRejected, this);
-    },
-    requestMedia: function() {
-      gum.getUserMedia({
-        video: true,
-        audio: true
-      }, this.playLocalStream, this.mediaRejected);
+    initialize: function(options) {
+      this.localStreamView = new StreamViews.LocalStreamView();
+      this.remoteStreamView = new StreamViews.StreamView();
+      this.contactsView = new ContactsView({ collection: options.contacts });
+      this.setView('.source', this.localStreamView);
+      this.setView('.remote', this.remoteStreamView);
+      this.setView('.contacts-cont', this.contactsView);
     },
     playLocalStream: function(stream) {
       this.localStreamView.play(stream);
     },
     playRemoteStream: function(stream) {
       this.remoteStreamView.play(stream);
-    },
-    mediaRejected: function(error) {
-      console.error('Unable to set user media.', error);
+      this.render();
     },
     stopLocalStream: function() {
       this.localStreamView.stop();
     },
     stopRemoteStream: function() {
       this.remoteStreamView.stop();
+      this.render();
     },
     connect: function() {
       if (this.localStreamView.isPlaying()) {
@@ -52,11 +44,10 @@ define([
       this.stopRemoteStream();
       this.trigger('hangup');
     },
-    render: function() {
-      this.$el.html(this.template());
-      this.$('.source-stream').append(this.localStreamView.el);
-      this.$('.remote-stream').append(this.remoteStreamView.el);
-      return this;
+    serialize: function() {
+      return {
+        isPlaying: this.remoteStreamView.isPlaying()
+      };
     }
   });
 

@@ -1,6 +1,6 @@
 require([
-  'modules/nder', 'modules/pc', 'modules/layout'
-  ], function(Nder, PC, Layout) {
+  'modules/nder', 'modules/pc', 'modules/layout', 'backbone'
+  ], function(Nder, PC, Layout, Backbone) {
   'use strict';
 
   var config = {
@@ -12,6 +12,15 @@ require([
       ]
     }
   };
+  // TODO: Fetch contacts from remote identitiy provider
+  var contacts = [
+    { name: 'creationix' },
+    { name: 'robin' },
+    { name: 'erik' },
+    { name: 'lawrence' },
+    { name: 'cassie' },
+    { name: 'jugglinmike' }
+  ];
   var mediaConstraints = {
     mandatory: {
       OfferToReceiveAudio: true,
@@ -33,8 +42,11 @@ require([
   }
 
   var pc = new PC();
-  var layout = new Layout();
-  layout.render().$el.appendTo('body');
+  var layout = new Layout({
+    el: '#app',
+    contacts: new Backbone.Collection(contacts)
+  });
+  layout.render();
   layout.on('connectRequest', function(stream) {
     if (!pc.isActive() && nder.is('open')) {
       pc.init(config.pcConfig);

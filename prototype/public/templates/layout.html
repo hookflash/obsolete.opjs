@@ -1,6 +1,8 @@
-<div class="source-stream"></div>
-<button type="button" class="start-video">Start video</button>
-<button type="button" class="stop-video">Stop video</button>
-<div class="remote-stream"></div>
-<button type="button" class="connect">Connect</button>
-<button type="button" class="hang-up">Hang Up</button>
+<div class="contacts-cont"></div>
+<div class="stream-cont">
+  <div class="source"></div>
+  <div class="remote"></div>
+  <button type="button" class="btn <%= isPlaying ? 'btn-hang-up' : 'btn-connect' %>">
+    <%= isPlaying ? 'Hang Up' : 'Connect' %>
+  </button>
+</div>
