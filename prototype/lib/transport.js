@@ -124,9 +124,7 @@
 
   Transport.prototype.result = function (request, result, isReply) {
     var message = {
-      $domain: request.$domain,
       $id: request.$id,
-      $handler: request.$handler,
       $method: request.$method,
       $timestamp: Date.now() / 1000
     };
@@ -158,9 +156,7 @@
 
     // Generate the metadata for the request
     var message = {
-      $domain: 'hookflash.com',
       $id: id,
-      $handler: 'peer-finder',
       $method: method
     };
     for (var key in request) {
