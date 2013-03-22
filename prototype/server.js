@@ -23,32 +23,74 @@ var server = http.createServer(function (req, res) {
     .pipe(res);
 });
 
+var sessions = {};
+var api = {
+  'session-create': function (request, transport) {
+    var username = request.username;
+    if (!username) {
+      throw new Error('Missing username field');
+    }
+
+    var session = transport;
+
+    var list = sessions[username];
+    if (!list) {
+      sessions[username] = [session];
+    }
+    else {
+      list.push(session);
+    }
+
+    return {
+      server: 'node.js ' + process.version
+    };
+  },
+  'session-delete': function (request) {
+    console.error('TODO: Implement session-delete request handler', request);
+  },
+  'session-keep-alive': function (request) {
+    console.error('TODO: Implement session-keep-alive request handler', request);
+  },
+  'peer-location-find': function (request) {
+    var username = request.username;
+    var list = sessions[username] || [];
+    var locations = list.map(function (transport) {
+      var socket = transport.socket._socket;
+      return {
+        localAddress: socket.localAddress,
+        localPort: socket.localPort,
+        remoteAddress: socket.remoteAddress,
+        remotePort: socket.remotePort
+      };
+    });
+
+    process.nextTick(function () {
+      list.forEach(function (transport) {
+        transport.peerLocationFind(request).then(function (reply) {
+          transport.result(request, reply, true);
+        });
+      });
+    });
+    return {
+      locations: locations
+    };
+  }
+};
+
+
 var wsServer = new WebSocketServer({server: server});
 wsServer.on('connection', function (socket) {
-  var api = {
-    'session-create': function (request) {
-      console.log('request', request);
-      throw new Error('TODO: Implement session-create request handler');
-    },
-    'session-delete': function (request) {
-      console.log('request', request);
-      throw new Error('TODO: Implement session-delete request handler');
-    },
-    'session-keep-alive': function (request) {
-      console.log('request', request);
-      throw new Error('TODO: Implement session-keep-alive request handler');
-    },
-    'peer-location-find': function (request) {
-      console.log('request', request);
-      throw new Error('TODO: Implement peer-location-find request handler');
-    },
-    reply: function (reply) {
-      console.log('reply', reply);
-      throw new Error('TODO: Implement peer-location-find response handler');
-    }
-  };
-  var transport = new Transport(api).open(socket);
-  console.log('transport', transport);
+  var transport = new Transport(api);
+  transport.open(socket);
+  transport.on('closed', function (reason) {
+    Object.keys(sessions).forEach(function (username) {
+      var list = sessions[username];
+      var index = list.indexOf(transport);
+      if (index >= 0) {
+        list.splice(index, 1);
+      }
+    });
+  });
 });
 
 var PORT = process.env.PORT || process.getuid() ? 8080 : 80;

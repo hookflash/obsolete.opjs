@@ -17,7 +17,27 @@ require.config({
   }
 });
 require(['transport'], function (Transport) {
-  window.Transport = Transport;
+  var url = window.location.toString().replace(/^http/, 'ws');
+  var transport = new Transport({
+    'invite': function (request, transport) {
+      return {
+        peer: true,
+        blob: (Math.random() * 0x100000000).toString(32)
+      };
+    }
+  });
+
+  transport.open(new WebSocket(url))
+  .then(function () {
+    return transport.sessionCreate('creationix');
+  })
+  .then(function (result) {
+    var blob = (Math.random() * 0x100000000).toString(32);
+    return transport.peerLocationFind('creationix', blob);
+  })
+  .then(function (reply) {
+    console.log("find-reply!", reply);
+  });
 });
 </script>
 </body>

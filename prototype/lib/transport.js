@@ -82,6 +82,7 @@
     }
 
     // Plug-in the new socket.
+    var deferred = Q.defer();
     this.socket = socket;
     var transport = this;
     socket.onmessage = function (evt) {
@@ -98,24 +99,53 @@
         else if (message.reply) {
           transport.onReply(message.reply);
         }
-        throw new Error('Unknown message type');
+        else {
+          throw new Error('Unknown message type: ' + json);
+        }
       }
       catch (err) {
         transport.emit('error', err);
       }
     };
     socket.onclose = function (evt) {
-      if (evt.wasClean) {
-        transport.emit('closed', evt.reason);
-      }
-      else {
+      transport.emit('closed', evt.reason);
+      if (!evt.wasClean) {
         transport.emit('error', new Error(evt.reason));
       }
+      deferred.reject();
     };
     socket.onopen = function () {
       transport.emit('opened');
+      deferred.resolve();
     };
-    return this.emit('open');
+    this.emit('open');
+    return deferred.promise;
+  };
+
+  Transport.prototype.result = function (request, result, isReply) {
+    var message = {
+      $domain: request.$domain,
+      $id: request.$id,
+      $handler: request.$handler,
+      $method: request.$method,
+      $timestamp: Date.now() / 1000
+    };
+    for (var key in result) {
+      if (key[0] !== "$") {
+        message[key] = result[key];
+      }
+    }
+    if (isReply) {
+      console.log("reply", message);
+      message = {reply: message};
+    }
+    else {
+      console.log("result", message);
+      message = {result: message};
+    }
+
+    var json = JSON.stringify(message);
+    this.socket.send(json);
   };
 
   Transport.prototype.request = function (method, request) {
@@ -123,7 +153,7 @@
     // TODO: Use real secure random in real app.
     var id;
     do {
-      id = (Math.random() * 0x10000000).toString(36);
+      id = (Math.random() * 0x100000000).toString(32);
     } while (id in this.pending);
 
     // Generate the metadata for the request
@@ -136,6 +166,7 @@
     for (var key in request) {
       message[key] = request[key];
     }
+    console.log("request", message);
     message = {request: message};
 
     var deferred = Q.defer();
@@ -157,20 +188,34 @@
   };
 
   Transport.prototype.onRequest = function (request) {
+    console.log("onRequest", request);
     var handler = this.api[request.$method];
+    var isReply = false;
+    if (!handler && request.$method === 'peer-location-find') {
+      handler = this.api.invite;
+      isReply = true;
+    }
     if (!handler) {
       throw new Error('Unknown request method: ' + request.$method);
     }
-    handler(request).then(function (result) {
-      console.log(result);
-      throw new Error('TODO: send the result back to the caller');
-    }, function (err) {
+    var transport = this;
+    Q.fcall(handler, request, this).then(function (result) {
+      if (!result) {
+        result = {};
+      }
+      transport.result(request, result, isReply);
+    }).fail(function (err) {
       // TODO: What should I do here?
-      throw err;
+      // What is the proper way to communicate this failure across the wire?
+      console.error(err);
     });
   };
 
   Transport.prototype.onResult = function (result) {
+    console.log("onResult", result);
+    if (result.$method === 'peer-location-find') {
+      return;
+    }
     var deferred = this.pending[result.$id];
     if (!deferred) {
       throw new Error('Received result with invalid $id: ' + result.$id);
@@ -180,11 +225,28 @@
   };
 
   Transport.prototype.onReply = function (reply) {
-    var handler = this.api.reply;
-    if (!handler) {
-      throw new Error('Missing reply api handler');
+    console.log("onReply", reply);
+    var deferred = this.pending[reply.$id];
+    if (!deferred) {
+      return;
+      // We don't care about this reply anymore
     }
-    handler(reply);
+    // TODO: Allow multiple replies somehow
+    delete this.pending[reply.$id];
+    deferred.resolve(reply);
+  };
+
+  Transport.prototype.sessionCreate = function (username) {
+    return this.request('session-create', {
+      username: username
+    });
+  };
+
+  Transport.prototype.peerLocationFind = function (username, blob) {
+    return this.request('peer-location-find', {
+        username: username,
+        blob: blob
+    });
   };
 
   return Transport;
