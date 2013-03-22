@@ -131,16 +131,16 @@
       $timestamp: Date.now() / 1000
     };
     for (var key in result) {
-      if (key[0] !== "$") {
+      if (key[0] !== '$') {
         message[key] = result[key];
       }
     }
     if (isReply) {
-      console.log("reply", message);
+      console.log('reply', message);
       message = {reply: message};
     }
     else {
-      console.log("result", message);
+      console.log('result', message);
       message = {result: message};
     }
 
@@ -166,7 +166,7 @@
     for (var key in request) {
       message[key] = request[key];
     }
-    console.log("request", message);
+    console.log('request', message);
     message = {request: message};
 
     var deferred = Q.defer();
@@ -188,7 +188,7 @@
   };
 
   Transport.prototype.onRequest = function (request) {
-    console.log("onRequest", request);
+    console.log('onRequest', request);
     var handler = this.api[request.$method];
     var isReply = false;
     if (!handler && request.$method === 'peer-location-find') {
@@ -212,7 +212,7 @@
   };
 
   Transport.prototype.onResult = function (result) {
-    console.log("onResult", result);
+    console.log('onResult', result);
     if (result.$method === 'peer-location-find') {
       return;
     }
@@ -225,7 +225,7 @@
   };
 
   Transport.prototype.onReply = function (reply) {
-    console.log("onReply", reply);
+    console.log('onReply', reply);
     var deferred = this.pending[reply.$id];
     if (!deferred) {
       return;
@@ -244,8 +244,8 @@
 
   Transport.prototype.peerLocationFind = function (username, blob) {
     return this.request('peer-location-find', {
-        username: username,
-        blob: blob
+      username: username,
+      blob: blob
     });
   };
 

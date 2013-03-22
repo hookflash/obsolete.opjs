@@ -83,6 +83,7 @@ wsServer.on('connection', function (socket) {
   var transport = new Transport(api);
   transport.open(socket);
   transport.on('closed', function (reason) {
+    console.log('socket closed: ' + reason);
     Object.keys(sessions).forEach(function (username) {
       var list = sessions[username];
       var index = list.indexOf(transport);
