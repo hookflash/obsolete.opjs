@@ -1,14 +1,20 @@
 define([
-    'modules/rtc-compat', '_', 'backbone'
-  ], function(rtc, _, Backbone) {
+  'modules/rtc-compat', 'backbone'
+  ], function(rtc, Backbone) {
   'use strict';
 
-  function PC() {
-  }
+  var Peer = Backbone.Model.extend({
+    nameRegex: /^[0-9a-z\.-]+$/i,
+    validate: function(attrs) {
+      if (!attrs || !attrs.name) {
+        return new Error('No username specified');
+      } else if (!this.nameRegex.test(attrs.name)) {
+        return new Error('Invalid username');
+      }
+    }
+  });
 
-  _.extend(PC.prototype, Backbone.Events);
-
-  PC.prototype.init = function(options) {
+  Peer.prototype.connect = function(options) {
     var peerConn;
     if (this.peerConn) {
       this.destroy();
@@ -28,14 +34,14 @@ define([
   // addStream
   // Add a stream object to the local stream set of the Peer Connection
   // instance
-  PC.prototype.addStream = function(stream) {
+  Peer.prototype.addStream = function(stream) {
     this.peerConn.addStream(stream);
   };
 
   // setLocalDescription
   // Create a valid WebRTC Session Description object from the provided data
   // and set it as the local description of the Peer Connection instance
-  PC.prototype.setLocalDescription = function(desc) {
+  Peer.prototype.setLocalDescription = function(desc) {
     desc = new rtc.RTCSessionDescription(desc);
     this.peerConn.setLocalDescription(desc);
   };
@@ -43,7 +49,7 @@ define([
   // setRemoteDescription
   // Create a valid WebRTC Session Description object from the provided data
   // and set it as the remote description of the Peer Connection instance
-  PC.prototype.setRemoteDescription = function(desc) {
+  Peer.prototype.setRemoteDescription = function(desc) {
     desc = new rtc.RTCSessionDescription(desc);
     this.peerConn.setRemoteDescription(desc);
   };
@@ -51,7 +57,7 @@ define([
   // addIceCandidate
   // Create a valid WebRTC Ice Candidate object from the provided data and add
   // it to the Peer Connection instance
-  PC.prototype.addIceCandidate = function(candidateData) {
+  Peer.prototype.addIceCandidate = function(candidateData) {
     var candidate = new rtc.RTCIceCandidate({
       sdpMLineIndex: candidateData.sdpMLineIndex,
       sdpMid: candidateData.sdpMid,
@@ -60,7 +66,7 @@ define([
     this.peerConn.addIceCandidate(candidate);
   };
 
-  PC.prototype._handleIceCandidate = function(evt) {
+  Peer.prototype._handleIceCandidate = function(evt) {
     var candidate = evt && evt.candidate;
     var msg;
     if (candidate) {
@@ -76,19 +82,19 @@ define([
     }
   };
 
-  PC.prototype._handleAddStream = function(event) {
+  Peer.prototype._handleAddStream = function(event) {
     this.trigger('addstream', event.stream);
   };
 
-  PC.prototype._handleRemoveStream = function() {
+  Peer.prototype._handleRemoveStream = function() {
     this.trigger('removestream');
   };
 
-  PC.prototype.isActive = function() {
+  Peer.prototype.isActive = function() {
     return !!this.peerConn;
   };
 
-  PC.prototype.createOffer = function(success, failure, mediaConstraints) {
+  Peer.prototype.createOffer = function(success, failure, mediaConstraints) {
     var cbs = this._wrapCallbacks({
       success: success,
       failure: failure
@@ -96,7 +102,7 @@ define([
     this.peerConn.createOffer(cbs.success, cbs.failure, mediaConstraints);
   };
 
-  PC.prototype.createAnswer = function(success, failure, mediaConstraints) {
+  Peer.prototype.createAnswer = function(success, failure, mediaConstraints) {
     var cbs = this._wrapCallbacks({
       success: success,
       failure: failure
@@ -106,9 +112,9 @@ define([
 
   // _wrapCallbacks
   // Private method to create callbacks that will be invoked in the context of
-  // the PC object. Avoiding `Function.prototype.bind` allows users to
+  // the Peer object. Avoiding `Function.prototype.bind` allows users to
   // optionally override the context of their callback functions.
-  PC.prototype._wrapCallbacks = function(callbacks) {
+  Peer.prototype._wrapCallbacks = function(callbacks) {
     var self = this;
     var success = callbacks.success;
     var failure = callbacks.failure;
@@ -125,11 +131,11 @@ define([
     return callbacks;
   };
 
-  PC.prototype.destroy = function() {
+  Peer.prototype.destroy = function() {
     this.trigger('destroy');
     this.peerConn.close();
     delete this.peerConn;
   };
 
-  return PC;
+  return Peer;
 });

@@ -18,7 +18,8 @@ define(function() {
     }
   };
 
-  if (RTCPeerConnection.prototype && 'addEventListener' in RTCPeerConnection.prototype) {
+  if (RTCPeerConnection && RTCPeerConnection.prototype &&
+    'addEventListener' in RTCPeerConnection.prototype) {
     rtc.on = strats.on.webkit;
   } else {
     rtc.on = strats.on.moz;

@@ -1,3 +1,3 @@
 define([
-  'tests/user'
+  'tests/peer'
 ]);

@@ -1,7 +1,6 @@
 require([
-  'modules/user', 'modules/transport', 'modules/pc', 'modules/layout',
-  'backbone', 'q'
-  ], function(User, Transport, PC, Layout, Backbone, Q) {
+  'modules/peer', 'modules/transport', 'modules/layout', 'backbone', 'q'
+  ], function(Peer, Transport, Layout, Backbone, Q) {
   'use strict';
 
   var config = {
@@ -37,8 +36,8 @@ require([
     console.error('Create Answer failed');
   }
 
-  var user = new User();
-  var pc = new PC();
+  var user = new Peer();
+  var pc = new Peer();
   var layout = new Layout({
     el: '#app',
     user: user,
@@ -50,7 +49,7 @@ require([
     var remotePeerID = 'creationix';
     if (!pc.isActive() && transport.state === 'OPEN') {
 
-      pc.init(config.pcConfig);
+      pc.connect(config.pcConfig);
       pc.addStream(stream);
       pc.createOffer(
         function(sessionDescription) {
@@ -61,7 +60,7 @@ require([
           }).then(function(findReply) {
             console.log('Promise Resolved', findReply);
             pc.setRemoteDescription(findReply.sessionDescription);
-            window.TO_ID = findReply.from;
+            pc.set('locationID', findReply.from);
           }, function() {
             // TODO: Update the UI to reflect this failure.
             console.error('Find request failed.');
@@ -73,7 +72,7 @@ require([
   });
   layout.on('hangup', function() {
     transport.request('bye', {
-      to: window.TO_ID
+      to: pc.get('locationID')
     });
     pc.destroy();
   });
@@ -89,7 +88,7 @@ require([
     console.log('Sending ICE candidate:', candidate);
     transport.request('update', {
       candidate: candidate,
-      to: window.TO_ID
+      to: pc.get('locationID')
     });
   });
   var transport = new Transport({
@@ -112,13 +111,13 @@ require([
         '. Would you like to answer?');
 
       if (!pc.isActive()) {
-        pc.init(config.pcConfig);
+        pc.connect(config.pcConfig);
         // TODO: Refactor so transport is not so tightly-coupled to the layout.
         // This should also allow recieving calls without sharing the local
         // stream.
         pc.addStream(layout.localStreamView.getStream());
       }
-      window.TO_ID = request.username.from;
+      pc.set('locationID', request.username.from);
       console.log('Creating remote session description:', remoteSession);
       pc.setRemoteDescription(remoteSession);
       console.log('Sending answer...');
