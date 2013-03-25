@@ -1,6 +1,7 @@
 require([
-  'modules/user', 'modules/transport', 'modules/pc', 'modules/layout', 'backbone'
-  ], function(User, Transport, PC, Layout, Backbone) {
+  'modules/user', 'modules/transport', 'modules/pc', 'modules/layout',
+  'backbone', 'q'
+  ], function(User, Transport, PC, Layout, Backbone, Q) {
   'use strict';
 
   var config = {
@@ -45,8 +46,8 @@ require([
   });
   layout.render();
   layout.on('connectRequest', function(stream) {
-    // TODO: Derive target user from application state
-    var targetUser = 'creationix';
+    // TODO: Derive remote peer ID from application state
+    var remotePeerID = 'creationix';
     if (!pc.isActive() && transport.state === 'OPEN') {
 
       pc.init(config.pcConfig);
@@ -54,9 +55,16 @@ require([
       pc.createOffer(
         function(sessionDescription) {
           this.setLocalDescription(sessionDescription);
-          transport.peerLocationFind(targetUser, {
+          transport.peerLocationFind(remotePeerID, {
             session: sessionDescription,
             userName: user.get('name')
+          }).then(function(findReply) {
+            console.log('Promise Resolved', findReply);
+            pc.setRemoteDescription(findReply.sessionDescription);
+            window.TO_ID = findReply.from;
+          }, function() {
+            // TODO: Update the UI to reflect this failure.
+            console.error('Find request failed.');
           });
         },
         createOfferFailed,
@@ -64,8 +72,9 @@ require([
     }
   });
   layout.on('hangup', function() {
-    // TODO: implement `Transport#bye` method (or similar)
-    // transport.bye();
+    transport.request('bye', {
+      to: window.TO_ID
+    });
     pc.destroy();
   });
   pc.on('addstream', function(stream) {
@@ -76,10 +85,12 @@ require([
     console.log('Remove remote stream');
     layout.stopRemoteStream();
   });
-  pc.on('ice', function(msg) {
-    console.log('Sending ICE candidate:', msg);
-    // TODO: implement `Transport#sendIce` method (or similar)
-    // transport.sendIce(msg);
+  pc.on('ice', function(candidate) {
+    console.log('Sending ICE candidate:', candidate);
+    transport.request('update', {
+      candidate: candidate,
+      to: window.TO_ID
+    });
   });
   var transport = new Transport({
     invite: function(request) {
@@ -107,22 +118,31 @@ require([
         // stream.
         pc.addStream(layout.localStreamView.getStream());
       }
+      window.TO_ID = request.username.from;
       console.log('Creating remote session description:', remoteSession);
       pc.setRemoteDescription(remoteSession);
       console.log('Sending answer...');
+      var dfd = Q.defer();
       pc.createAnswer(function(sessionDescription) {
           this.setLocalDescription(sessionDescription);
+          dfd.resolve({
+            peer: true,
+            sessionDescription: sessionDescription
+          });
         },
         createAnswerFailed, mediaConstraints);
-    }
-    // TODO: Implement `ice` message (or similar)
-    /*ice: function(candidate) {
+      return dfd.promise;
+    },
+    bye: function() {
+      pc.destroy();
+    },
+    update: function(msg) {
       if (!pc.isActive()) {
         return;
       }
-      console.log('Received ICE candidate:', candidate);
-      pc.addIceCandidate(candidate);
-    }*/
+      console.log('Received ICE candidate:', msg.candidate);
+      pc.addIceCandidate(msg.candidate);
+    }
   });
 
   user.on('change:name', function() {
