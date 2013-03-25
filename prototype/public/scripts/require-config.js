@@ -6,9 +6,13 @@ require.config({
     backbone: 'lib/backbone',
     layoutmanager: 'lib/backbone.layoutmanager',
     text: 'lib/text',
+    q: 'lib/q',
     templates: '../templates'
   },
   shim: {
+    transport: {
+      deps: ['q']
+    },
     _: {
       exports: '_'
     },
