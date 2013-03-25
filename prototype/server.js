@@ -82,6 +82,7 @@ var api = {
 
     list.forEach(function (targetTransport) {
       targetTransport.peerLocationFind(request).then(function (reply) {
+        reply.from = targetTransport.id;
         transport.result(request, reply, true);
       });
     });
