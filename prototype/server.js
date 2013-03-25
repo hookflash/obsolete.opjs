@@ -24,7 +24,22 @@ var server = http.createServer(function (req, res) {
 });
 
 var sessions = {};
+var transports = {};
 var api = {
+  'update': function (request) {
+    var target = transports[request.to];
+    if (!target) {
+      throw new Error('Invalid transport ID');
+    }
+    return target.request('update', request);
+  },
+  'bye': function (request) {
+    var target = transports[request.to];
+    if (!target) {
+      throw new Error('Invalid transport ID');
+    }
+    return target.request('bye', request);
+  },
   'session-create': function (request, transport) {
     var username = request.username;
     if (!username) {
@@ -51,7 +66,8 @@ var api = {
   'session-keep-alive': function (request) {
     console.error('TODO: Implement session-keep-alive request handler', request);
   },
-  'peer-location-find': function (request) {
+  'peer-location-find': function (request, transport) {
+    request.from = transport.id;
     var username = request.username;
     var list = sessions[username] || [];
     var locations = list.map(function (transport) {
@@ -64,13 +80,12 @@ var api = {
       };
     });
 
-    process.nextTick(function () {
-      list.forEach(function (transport) {
-        transport.peerLocationFind(request).then(function (reply) {
-          transport.result(request, reply, true);
-        });
+    list.forEach(function (transport) {
+      transport.peerLocationFind(request).then(function (reply) {
+        transport.result(request, reply, true);
       });
     });
+
     return {
       locations: locations
     };
@@ -81,6 +96,12 @@ var api = {
 var wsServer = new WebSocketServer({server: server});
 wsServer.on('connection', function (socket) {
   var transport = new Transport(api);
+  var id;
+  do {
+    id = (Math.random() * 0x100000000).toString(32);
+  } while (id in transports);
+  transports[id] = transport;
+  transport.id = id;
   transport.open(socket);
   transport.on('closed', function (reason) {
     console.log('socket closed: ' + reason);
@@ -91,6 +112,7 @@ wsServer.on('connection', function (socket) {
         list.splice(index, 1);
       }
     });
+    delete transports[id];
   });
 });
 
