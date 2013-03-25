@@ -70,8 +70,8 @@ var api = {
     request.from = transport.id;
     var username = request.username;
     var list = sessions[username] || [];
-    var locations = list.map(function (transport) {
-      var socket = transport.socket._socket;
+    var locations = list.map(function (targetTransport) {
+      var socket = targetTransport.socket._socket;
       return {
         localAddress: socket.localAddress,
         localPort: socket.localPort,
@@ -80,8 +80,8 @@ var api = {
       };
     });
 
-    list.forEach(function (transport) {
-      transport.peerLocationFind(request).then(function (reply) {
+    list.forEach(function (targetTransport) {
+      targetTransport.peerLocationFind(request).then(function (reply) {
         transport.result(request, reply, true);
       });
     });
