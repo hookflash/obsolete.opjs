@@ -1,0 +1,11 @@
+<div class="screen"></div>
+<div class="dialog">
+  <h1 class="title">Please Log In</h1>
+  <% if (login.error) { %>
+    <div class="error"><%= login.error %></div>
+  <% } %>
+  <form>
+    <input type="text" class="username"<%= login.isPending ? ' disabled' : '' %>>
+    <input type="submit" class="submit" value="Submit"<%= login.isPending ? ' disabled' : '' %>>
+  </form>
+</div>

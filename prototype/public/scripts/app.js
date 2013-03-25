@@ -1,6 +1,6 @@
 require([
-  'modules/transport', 'modules/pc', 'modules/layout', 'backbone'
-  ], function(Transport, PC, Layout, Backbone) {
+  'modules/user', 'modules/transport', 'modules/pc', 'modules/layout', 'backbone'
+  ], function(User, Transport, PC, Layout, Backbone) {
   'use strict';
 
   var config = {
@@ -36,9 +36,11 @@ require([
     console.error('Create Answer failed');
   }
 
+  var user = new User();
   var pc = new PC();
   var layout = new Layout({
     el: '#app',
+    user: user,
     contacts: new Backbone.Collection(contacts)
   });
   layout.render();
@@ -54,7 +56,7 @@ require([
           this.setLocalDescription(sessionDescription);
           transport.peerLocationFind(targetUser, {
             session: sessionDescription,
-            userName: userName
+            userName: user.get('name')
           });
         },
         createOfferFailed,
@@ -123,27 +125,17 @@ require([
     }*/
   });
 
-  // Infer username from 'username' query string parameter (default to
-  // 'creationx') and immediately initiate a connection.
-  // TODO: First prompt user for name, then initiate a connection.
-  var userName = 'creationix';
-  window.location.search
-    // Remove leading '?'
-    .slice(1)
-    .split('&')
-    .forEach(function(pair) {
-      pair = pair.split('=');
-      if (pair[0] === 'username') {
-        userName = pair[1];
-      }
-    });
-  transport.open(new WebSocket(config.socketServer))
-    .then(function() {
-      return transport.sessionCreate(userName);
-    })
-    .then(function() {
-      console.log('Logged in!');
-      // TODO: Update UI to reflect logged-in state.
-    }, console.error.bind(console));
+  user.on('change:name', function() {
+    transport.open(new WebSocket(config.socketServer))
+      .then(function() {
+        return transport.sessionCreate(user.get('name'));
+      })
+      .then(function() {
+        // Simulate network latency
+        setTimeout(function() {
+          layout.login();
+        }, 800);
+      }, console.error.bind(console));
+  });
 
 });

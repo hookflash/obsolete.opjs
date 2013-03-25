@@ -37,6 +37,7 @@ module.exports = function(grunt) {
             define: true,
             assert: true,
             suite: true,
+            suiteSetup: true,
             test: true
           }
         },
