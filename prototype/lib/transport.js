@@ -160,7 +160,9 @@
       $method: method
     };
     for (var key in request) {
-      message[key] = request[key];
+      if (key[0] !== '$') {
+        message[key] = request[key];
+      }
     }
     console.log('request', message);
     message = {request: message};
