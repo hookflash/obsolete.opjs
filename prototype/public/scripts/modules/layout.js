@@ -7,14 +7,15 @@ define([
   var Layout = Backbone.Layout.extend({
     template: _.template(html),
     events: {
-      'click .btn-connect': 'connect',
       'click .btn-hang-up': 'hangUp'
     },
     initialize: function(options) {
       this.user = options.user;
+      this.contacts = options.contacts;
       this.localStreamView = new StreamViews.LocalStreamView();
       this.remoteStreamView = new StreamViews.StreamView();
-      this.contactsView = new ContactsView({ collection: options.contacts });
+      this.contactsView = new ContactsView({ collection: this.contacts });
+      this.listenTo(this.contacts, 'send-connect-request', this.sendConnectReq);
       this.loginView = new LoginView({ model: this.user });
       this.setView('.source', this.localStreamView);
       this.setView('.remote', this.remoteStreamView);
@@ -38,12 +39,19 @@ define([
       this.remoteStreamView.stop();
       this.render();
     },
-    connect: function() {
-      if (this.localStreamView.isPlaying()) {
-        this.trigger('connectRequest', this.localStreamView.getStream());
-      } else {
-        alert('Local stream not running yet - try again.');
+    sendConnectReq: function(peer) {
+
+      if (peer.isActive()) {
+        // TODO: Update UI accordingly
+        console.error('Already connected to ' + peer.get('name') + '!');
+        return;
       }
+      peer.connect();
+      if (this.localStreamView.isPlaying()) {
+        peer.addStream(this.localStreamView.getStream());
+      }
+
+      this.trigger('send-connect-request', peer);
     },
     hangUp: function() {
       console.log('Hang up.');

@@ -42,10 +42,26 @@ body {
 .contacts .contact {
   display: block;
   border-bottom: solid 1px #888;
-  line-height: 1.9em;
-  cursor: pointer;
-  padding: 0 0.3em;
+  padding: 0.5em 0.3em;
 }
+
+.contact .name {
+  float: left;
+} .contact .options {
+  float: right;
+  visibility: hidden;
+} .contact:hover .options {
+  visibility: visible;
+} .contact .option {
+  cursor: pointer;
+  background-color: transparent;
+  border-width: 0 1px 1px 0;
+  border-color: #555;
+  border-style: solid;
+} .contact .option:active {
+  border-width: 0;
+}
+
 .login {
   color: #eee;
   position: absolute;

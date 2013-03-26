@@ -7,7 +7,11 @@ require([
     socketServer: 'ws://' + window.location.host
   };
   var user = new Peer.Model();
-  var pc = new Peer.Model();
+  // activePeer
+  // A global reference to the current call.
+  // TODO: Re-factor in order to support multiple simultaneous connections (and
+  // remove this variable)
+  var activePeer;
   // TODO: Fetch contacts from remote identitiy provider
   var contacts = new Peer.Collection([
     { name: 'creationix' },
@@ -38,23 +42,33 @@ require([
     contacts: contacts
   });
   layout.render();
-  layout.on('connectRequest', function(stream) {
-    // TODO: Derive remote peer ID from application state
-    var remotePeerID = 'creationix';
-    if (!pc.isActive() && transport.state === 'OPEN') {
+  layout.on('send-connect-request', function(peer) {
+    if (transport.state === 'OPEN') {
 
-      pc.connect(config.pcConfig);
-      pc.addStream(stream);
-      pc.createOffer(
+      // TODO: Remove this line and reduce dependence on global state.
+      activePeer = peer;
+
+      peer.on('ice', function(candidate) {
+        console.log('Sending ICE candidate:', candidate);
+        transport.request('update', {
+          candidate: candidate,
+          to: this.get('locationID')
+        });
+      });
+      peer.on('addstream', function(stream) {
+        console.log('Remote stream added');
+        layout.playRemoteStream(stream);
+      });
+
+      peer.createOffer(
         function(sessionDescription) {
           this.setLocalDescription(sessionDescription);
-          transport.peerLocationFind(remotePeerID, {
+          transport.peerLocationFind(peer.get('name'), {
             session: sessionDescription,
             userName: user.get('name')
           }).then(function(findReply) {
-            console.log('Promise Resolved', findReply);
-            pc.setRemoteDescription(findReply.sessionDescription);
-            pc.set('locationID', findReply.from);
+            peer.setRemoteDescription(findReply.sessionDescription);
+            peer.set('locationID', findReply.from);
           }, function() {
             // TODO: Update the UI to reflect this failure.
             console.error('Find request failed.');
@@ -66,24 +80,9 @@ require([
   });
   layout.on('hangup', function() {
     transport.request('bye', {
-      to: pc.get('locationID')
+      to: activePeer.get('locationID')
     });
-    pc.destroy();
-  });
-  pc.on('addstream', function(stream) {
-    console.log('Remote stream added');
-    layout.playRemoteStream(stream);
-  });
-  pc.on('removestream', function() {
-    console.log('Remove remote stream');
-    layout.stopRemoteStream();
-  });
-  pc.on('ice', function(candidate) {
-    console.log('Sending ICE candidate:', candidate);
-    transport.request('update', {
-      candidate: candidate,
-      to: pc.get('locationID')
-    });
+    activePeer.destroy();
   });
   var transport = new Transport({
     invite: function(request) {
@@ -104,19 +103,38 @@ require([
       console.log('Receiving call from ' + blob.userName +
         '. Would you like to answer?');
 
-      if (!pc.isActive()) {
-        pc.connect(config.pcConfig);
+      if (!activePeer) {
+        activePeer = new Peer.Model();
+        activePeer.on('addstream', function(stream) {
+          console.log('Remote stream added');
+          layout.playRemoteStream(stream);
+        });
+        activePeer.on('removestream', function() {
+          console.log('Remove remote stream');
+          layout.stopRemoteStream();
+        });
+        activePeer.on('ice', function(candidate) {
+          console.log('Sending ICE candidate:', candidate);
+          transport.request('update', {
+            candidate: candidate,
+            to: this.get('locationID')
+          });
+        });
+      }
+      if (!activePeer.isActive()) {
+        activePeer.connect();
         // TODO: Refactor so transport is not so tightly-coupled to the layout.
         // This should also allow recieving calls without sharing the local
         // stream.
-        pc.addStream(layout.localStreamView.getStream());
+        activePeer.addStream(layout.localStreamView.getStream());
       }
-      pc.set('locationID', request.username.from);
+      activePeer.set('locationID', request.username.from);
+      activePeer.set('name', blob.userName);
       console.log('Creating remote session description:', remoteSession);
-      pc.setRemoteDescription(remoteSession);
+      activePeer.setRemoteDescription(remoteSession);
       console.log('Sending answer...');
       var dfd = Q.defer();
-      pc.createAnswer(function(sessionDescription) {
+      activePeer.createAnswer(function(sessionDescription) {
           this.setLocalDescription(sessionDescription);
           dfd.resolve({
             peer: true,
@@ -127,14 +145,14 @@ require([
       return dfd.promise;
     },
     bye: function() {
-      pc.destroy();
+      activePeer.destroy();
     },
     update: function(msg) {
-      if (!pc.isActive()) {
+      if (!activePeer.isActive()) {
         return;
       }
       console.log('Received ICE candidate:', msg.candidate);
-      pc.addIceCandidate(msg.candidate);
+      activePeer.addIceCandidate(msg.candidate);
     }
   });
 
