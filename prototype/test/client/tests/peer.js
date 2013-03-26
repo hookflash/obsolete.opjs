@@ -1,4 +1,4 @@
-define(['modules/peer'], function(Peer) {
+define(['modules/peer', 'backbone'], function(Peer, Backbone) {
   'use strict';
 
   suite('Peer', function() {
@@ -25,6 +25,35 @@ define(['modules/peer'], function(Peer) {
         });
         test('Rejects invalid names', function() {
           assert.instanceOf(peer.validate({ name: '!@#@#$' }), Error);
+        });
+      });
+      suite('#getTransport', function() {
+        test('Returns `undefined` when no transport is found', function() {
+          var peer = new Peer.Model();
+          assert.isUndefined(peer.getTransport());
+        });
+        test('Returns a reference to its transport object when available', function() {
+          var peer = new Peer.Model();
+          var transport = peer.transport = {};
+          assert.equal(peer.getTransport(), transport);
+        });
+        test('Returns a reference to its transport object when ' +
+          'part of a collection that defines a transport', function() {
+          var coll = new Backbone.Collection();
+          var peer = new Peer.Model();
+          var transport = peer.transport = {};
+          coll.transport = {};
+          coll.add(peer);
+          assert.equal(peer.getTransport(), transport);
+        });
+        test('Returns a reference to its collection\'s transport object ' +
+          'when it does not define one, but is a memeber of a collection ' +
+          'that does', function() {
+          var coll = new Backbone.Collection();
+          var peer = new Peer.Model();
+          coll.transport = {};
+          coll.add(peer);
+          assert.equal(peer.getTransport(), coll.transport);
         });
       });
     });

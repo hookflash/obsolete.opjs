@@ -22,6 +22,13 @@ define([
       } else if (!this.nameRegex.test(attrs.name)) {
         return new Error('Invalid username');
       }
+    },
+    // getTransport
+    // Return a reference to the model's transport. If the model does not
+    // define a transport, return a reference to its collection's transport (if
+    // available).
+    getTransport: function() {
+      return this.transport || this.collection && this.collection.transport;
     }
   });
 
