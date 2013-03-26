@@ -8,38 +8,37 @@ body {
   width: 90%;
   margin: 0 auto;
 }
-.contacts-cont, .stream-cont {
+.contacts-cont, .conversation-cont {
   display: block;
   float: left;
 }
 .contacts-cont {
   width: 20%;
 }
-.stream-cont {
+.conversation-cont {
   position: relative;
   border-left: 1px solid #555;
   width: 79%;
 }
-.stream-cont .source {
+
+.conversation .source {
   position: absolute;
   right: 5%;
   bottom: 5%;
   width: 20%;
   text-align: center;
-}
-.stream-cont .source video {
+} .conversation .source video {
   border: 1px solid #333;
   width: 100%;
-}
-.stream-cont .remote video {
+} .conversation .remote video {
   width: 100%;
   height: 100%;
 }
+
 .contacts .title {
   font-size: 1.2em;
   margin-bottom: 0.6em;
-}
-.contacts .contact {
+} .contacts .contact {
   display: block;
   border-bottom: solid 1px #888;
   padding: 0.5em 0.3em;

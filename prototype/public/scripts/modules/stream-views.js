@@ -67,10 +67,6 @@ define([
   var LocalStreamView = StreamView.extend({
     template: _.template(localHtml),
     className: StreamView.prototype.className + ' stream-local',
-    events: {
-      'click .btn-stop': 'stop',
-      'click .btn-start': 'requestMedia'
-    },
     requestMedia: function() {
       var self = this;
       var dfd = Q.defer();
@@ -78,12 +74,12 @@ define([
       gum.getUserMedia({
         video: true,
         audio: true
-      }, function(stream) {
+      }, function() {
         self.play.apply(self, arguments);
-        dfd.resolve(stream);
+        dfd.resolve.apply(dfd, arguments);
       }, function() {
         self.mediaRejected.apply(self, arguments);
-        dfd.reject();
+        dfd.reject.apply(dfd, arguments);
       });
 
       return dfd.promise;

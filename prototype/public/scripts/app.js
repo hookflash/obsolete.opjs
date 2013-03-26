@@ -49,6 +49,7 @@ require([
       if (!activePeer) {
         activePeer = new Peer.Model();
         activePeer.transport = transport;
+        /*
         activePeer.on('addstream', function(stream) {
           console.log('Remote stream added');
           layout.playRemoteStream(stream);
@@ -57,20 +58,24 @@ require([
           console.log('Remove remote stream');
           layout.stopRemoteStream();
         });
+        */
       }
+      /*
       if (!activePeer.isActive()) {
         activePeer.connect();
         // TODO: Refactor so transport is not so tightly-coupled to the layout.
         // This should also allow recieving calls without sharing the local
         // stream.
         activePeer.addStream(layout.localStreamView.getStream());
-      }
+      }*/
+      var dfd = Q.defer();
+      layout.sendCall(activePeer).then(function(stream) {
+      activePeer.addStream(stream);
       activePeer.set('locationID', request.username.from);
       activePeer.set('name', blob.userName);
       console.log('Creating remote session description:', remoteSession);
       activePeer.setRemoteDescription(remoteSession);
       console.log('Sending answer...');
-      var dfd = Q.defer();
       activePeer.createAnswer(function(sessionDescription) {
           this.setLocalDescription(sessionDescription);
           dfd.resolve({
@@ -79,6 +84,7 @@ require([
           });
         },
         createAnswerFailed, mediaConstraints);
+      });
       return dfd.promise;
     },
     bye: function() {
@@ -107,17 +113,20 @@ require([
     contacts: contacts
   });
   layout.render();
-  layout.on('send-connect-request', function(peer) {
+  contacts.on('send-connect-request', function(peer) {
     if (transport.state === 'OPEN') {
 
       // TODO: Remove this line and reduce dependence on global state.
       activePeer = peer;
 
+      /*
       peer.on('addstream', function(stream) {
         console.log('Remote stream added');
         layout.playRemoteStream(stream);
       });
+      */
 
+      layout.sendCall(peer).then(function() {
       peer.createOffer(
         function(sessionDescription) {
           this.setLocalDescription(sessionDescription);
@@ -134,6 +143,7 @@ require([
         },
         createOfferFailed,
         mediaConstraints);
+      });
     }
   });
   layout.on('hangup', function() {
