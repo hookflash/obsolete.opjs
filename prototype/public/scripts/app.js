@@ -30,13 +30,16 @@ require([
   var transport = new Transport({
     invite: function(request) {
       var blob = request && request.username && request.username.blob;
-      var remoteSession;
+      var locationID = request && request.username && request.username.from;
+      var remoteSession = blob && blob.session;
+
       if (!blob) {
         console.error('No blob found. Ignoring invite.');
         return;
-      }
-      remoteSession = blob.session;
-      if (!remoteSession) {
+      } else if (!locationID) {
+        console.error('Location ID not found. Ignoring invite.');
+        return;
+      } else if (!remoteSession) {
         console.error('Remote session not specified. Ignoring invite.');
         return;
       }
@@ -46,46 +49,31 @@ require([
       console.log('Receiving call from ' + blob.userName +
         '. Would you like to answer?');
 
-      if (!activePeer) {
-        activePeer = new Peer.Model();
-        activePeer.transport = transport;
-        /*
-        activePeer.on('addstream', function(stream) {
-          console.log('Remote stream added');
-          layout.playRemoteStream(stream);
-        });
-        activePeer.on('removestream', function() {
-          console.log('Remove remote stream');
-          layout.stopRemoteStream();
-        });
-        */
-      }
-      /*
-      if (!activePeer.isActive()) {
-        activePeer.connect();
-        // TODO: Refactor so transport is not so tightly-coupled to the layout.
-        // This should also allow recieving calls without sharing the local
-        // stream.
-        activePeer.addStream(layout.localStreamView.getStream());
-      }*/
-      var dfd = Q.defer();
-      layout.sendCall(activePeer).then(function(stream) {
-      activePeer.addStream(stream);
-      activePeer.set('locationID', request.username.from);
-      activePeer.set('name', blob.userName);
-      console.log('Creating remote session description:', remoteSession);
-      activePeer.setRemoteDescription(remoteSession);
-      console.log('Sending answer...');
-      activePeer.createAnswer(function(sessionDescription) {
-          this.setLocalDescription(sessionDescription);
-          dfd.resolve({
-            peer: true,
-            sessionDescription: sessionDescription
-          });
-        },
-        createAnswerFailed, mediaConstraints);
+      activePeer = new Peer.Model({
+        name: blob.userName,
+        locationID: locationID
       });
-      return dfd.promise;
+      activePeer.transport = transport;
+
+      return layout.startCall(activePeer).then(function(stream) {
+        var dfd = Q.defer();
+
+        activePeer.addStream(stream);
+
+        console.log('Creating remote session description:', remoteSession);
+        activePeer.setRemoteDescription(remoteSession);
+        console.log('Sending answer...');
+        activePeer.createAnswer(function(sessionDescription) {
+            this.setLocalDescription(sessionDescription);
+            dfd.resolve({
+              peer: true,
+              sessionDescription: sessionDescription
+            });
+          },
+          createAnswerFailed, mediaConstraints);
+
+        return dfd.promise;
+      });
     },
     bye: function() {
       activePeer.destroy();
@@ -119,31 +107,25 @@ require([
       // TODO: Remove this line and reduce dependence on global state.
       activePeer = peer;
 
-      /*
-      peer.on('addstream', function(stream) {
-        console.log('Remote stream added');
-        layout.playRemoteStream(stream);
-      });
-      */
-
-      layout.sendCall(peer).then(function() {
-      peer.createOffer(
-        function(sessionDescription) {
-          this.setLocalDescription(sessionDescription);
-          transport.peerLocationFind(peer.get('name'), {
-            session: sessionDescription,
-            userName: user.get('name')
-          }).then(function(findReply) {
-            peer.setRemoteDescription(findReply.sessionDescription);
-            peer.set('locationID', findReply.from);
-          }, function() {
-            // TODO: Update the UI to reflect this failure.
-            console.error('Find request failed.');
-          });
-        },
-        createOfferFailed,
-        mediaConstraints);
-      });
+      layout.startCall(peer)
+        .then(function() {
+          peer.createOffer(
+            function(sessionDescription) {
+              this.setLocalDescription(sessionDescription);
+              transport.peerLocationFind(peer.get('name'), {
+                session: sessionDescription,
+                userName: user.get('name')
+              }).then(function(findReply) {
+                peer.setRemoteDescription(findReply.sessionDescription);
+                peer.set('locationID', findReply.from);
+              }, function() {
+                // TODO: Update the UI to reflect this failure.
+                console.error('Find request failed.');
+              });
+            },
+            createOfferFailed,
+            mediaConstraints);
+        }, function() { console.error(arguments); });
     }
   });
   layout.on('hangup', function() {

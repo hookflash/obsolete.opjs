@@ -68,20 +68,14 @@ define([
     template: _.template(localHtml),
     className: StreamView.prototype.className + ' stream-local',
     requestMedia: function() {
-      var self = this;
       var dfd = Q.defer();
 
       gum.getUserMedia({
         video: true,
         audio: true
-      }, function() {
-        self.play.apply(self, arguments);
-        dfd.resolve.apply(dfd, arguments);
-      }, function() {
-        self.mediaRejected.apply(self, arguments);
-        dfd.reject.apply(dfd, arguments);
-      });
+      }, dfd.resolve.bind(dfd), dfd.reject.bind(dfd));
 
+      dfd.promise.then(this.play.bind(this), this.mediaRejected.bind(this));
       return dfd.promise;
     },
     mediaRejected: function(error) {
