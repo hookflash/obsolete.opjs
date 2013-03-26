@@ -1,7 +1,7 @@
 define([
   'modules/gum-compat', 'text!templates/stream-view-remote.html',
-  'text!templates/stream-view-local.html', 'layoutmanager', '_'
-  ], function(gum, remoteHtml, localHtml, Backbone, _) {
+  'text!templates/stream-view-local.html', 'layoutmanager', '_', 'q'
+  ], function(gum, remoteHtml, localHtml, Backbone, _, Q) {
   'use strict';
 
   var StreamView = Backbone.Layout.extend({
@@ -73,14 +73,20 @@ define([
     },
     requestMedia: function() {
       var self = this;
+      var dfd = Q.defer();
+
       gum.getUserMedia({
         video: true,
         audio: true
-      }, function() {
+      }, function(stream) {
         self.play.apply(self, arguments);
+        dfd.resolve(stream);
       }, function() {
         self.mediaRejected.apply(self, arguments);
+        dfd.reject();
       });
+
+      return dfd.promise;
     },
     mediaRejected: function(error) {
       console.error('Unable to set user media.', error);
