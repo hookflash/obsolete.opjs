@@ -5,6 +5,17 @@ define([
 
   var Peer = Backbone.Model.extend({
     nameRegex: /^[0-9a-z\.-]+$/i,
+    connectOptions: {
+      iceServers: [
+        { url: 'stun:stun.l.google.com:19302' },
+        { url: 'stun:23.21.150.121' }
+      ]
+    },
+    initialize: function(options) {
+      if (options && options.connectOptions) {
+        this.connectOptions = options.connectOptions;
+      }
+    },
     validate: function(attrs) {
       if (!attrs || !attrs.name) {
         return new Error('No username specified');
@@ -19,6 +30,7 @@ define([
     if (this.peerConn) {
       this.destroy();
     }
+    options = options || this.connectOptions;
     try {
       peerConn = this.peerConn = new rtc.RTCPeerConnection(options);
     } catch (e) {
@@ -137,5 +149,12 @@ define([
     delete this.peerConn;
   };
 
-  return Peer;
+  var Peers = Backbone.Collection.extend({
+    model: Peer
+  });
+
+  return {
+    Model: Peer,
+    Collection: Peers
+  };
 });

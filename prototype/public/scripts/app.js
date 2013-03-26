@@ -4,23 +4,19 @@ require([
   'use strict';
 
   var config = {
-    socketServer: 'ws://' + window.location.host,
-    pcConfig: {
-      iceServers: [
-        { url: 'stun:stun.l.google.com:19302' },
-        { url: 'stun:23.21.150.121' }
-      ]
-    }
+    socketServer: 'ws://' + window.location.host
   };
+  var user = new Peer.Model();
+  var pc = new Peer.Model();
   // TODO: Fetch contacts from remote identitiy provider
-  var contacts = [
+  var contacts = new Peer.Collection([
     { name: 'creationix' },
     { name: 'robin' },
     { name: 'erik' },
     { name: 'lawrence' },
     { name: 'cassie' },
     { name: 'jugglinmike' }
-  ];
+  ]);
   var mediaConstraints = {
     mandatory: {
       OfferToReceiveAudio: true,
@@ -36,12 +32,10 @@ require([
     console.error('Create Answer failed');
   }
 
-  var user = new Peer();
-  var pc = new Peer();
   var layout = new Layout({
     el: '#app',
     user: user,
-    contacts: new Backbone.Collection(contacts)
+    contacts: contacts
   });
   layout.render();
   layout.on('connectRequest', function(stream) {
