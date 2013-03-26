@@ -1,6 +1,6 @@
 define([
-  'modules/rtc-compat', 'backbone'
-  ], function(rtc, Backbone) {
+  'modules/rtc-compat', '_', 'backbone'
+  ], function(rtc, _, Backbone) {
   'use strict';
 
   var Peer = Backbone.Model.extend({
