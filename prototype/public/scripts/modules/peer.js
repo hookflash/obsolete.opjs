@@ -87,15 +87,19 @@ define([
 
   Peer.prototype._handleIceCandidate = function(evt) {
     var candidate = evt && evt.candidate;
+    var transport = this.getTransport();
     var msg;
-    if (candidate) {
+    if (candidate && transport) {
       msg = {
         type: 'candidate',
         sdpMLineIndex: evt.candidate.sdpMLineIndex,
         sdpMid: evt.candidate.sdpMid,
         candidate: evt.candidate.candidate
       };
-      this.trigger('ice', msg);
+      transport.request('update', {
+        candidate: msg,
+        to: this.get('locationID')
+      });
     } else {
       console.log('End of candidates.');
     }
@@ -157,7 +161,12 @@ define([
   };
 
   var Peers = Backbone.Collection.extend({
-    model: Peer
+    model: Peer,
+    initialize: function(models, options) {
+      if (options && options.transport) {
+        this.transport = options.transport;
+      }
+    }
   });
 
   return {

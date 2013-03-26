@@ -12,15 +12,7 @@ require([
   // TODO: Re-factor in order to support multiple simultaneous connections (and
   // remove this variable)
   var activePeer;
-  // TODO: Fetch contacts from remote identitiy provider
-  var contacts = new Peer.Collection([
-    { name: 'creationix' },
-    { name: 'robin' },
-    { name: 'erik' },
-    { name: 'lawrence' },
-    { name: 'cassie' },
-    { name: 'jugglinmike' }
-  ]);
+
   var mediaConstraints = {
     mandatory: {
       OfferToReceiveAudio: true,
@@ -35,55 +27,6 @@ require([
   function createAnswerFailed() {
     console.error('Create Answer failed');
   }
-
-  var layout = new Layout({
-    el: '#app',
-    user: user,
-    contacts: contacts
-  });
-  layout.render();
-  layout.on('send-connect-request', function(peer) {
-    if (transport.state === 'OPEN') {
-
-      // TODO: Remove this line and reduce dependence on global state.
-      activePeer = peer;
-
-      peer.on('ice', function(candidate) {
-        console.log('Sending ICE candidate:', candidate);
-        transport.request('update', {
-          candidate: candidate,
-          to: this.get('locationID')
-        });
-      });
-      peer.on('addstream', function(stream) {
-        console.log('Remote stream added');
-        layout.playRemoteStream(stream);
-      });
-
-      peer.createOffer(
-        function(sessionDescription) {
-          this.setLocalDescription(sessionDescription);
-          transport.peerLocationFind(peer.get('name'), {
-            session: sessionDescription,
-            userName: user.get('name')
-          }).then(function(findReply) {
-            peer.setRemoteDescription(findReply.sessionDescription);
-            peer.set('locationID', findReply.from);
-          }, function() {
-            // TODO: Update the UI to reflect this failure.
-            console.error('Find request failed.');
-          });
-        },
-        createOfferFailed,
-        mediaConstraints);
-    }
-  });
-  layout.on('hangup', function() {
-    transport.request('bye', {
-      to: activePeer.get('locationID')
-    });
-    activePeer.destroy();
-  });
   var transport = new Transport({
     invite: function(request) {
       var blob = request && request.username && request.username.blob;
@@ -105,6 +48,7 @@ require([
 
       if (!activePeer) {
         activePeer = new Peer.Model();
+        activePeer.transport = transport;
         activePeer.on('addstream', function(stream) {
           console.log('Remote stream added');
           layout.playRemoteStream(stream);
@@ -112,13 +56,6 @@ require([
         activePeer.on('removestream', function() {
           console.log('Remove remote stream');
           layout.stopRemoteStream();
-        });
-        activePeer.on('ice', function(candidate) {
-          console.log('Sending ICE candidate:', candidate);
-          transport.request('update', {
-            candidate: candidate,
-            to: this.get('locationID')
-          });
         });
       }
       if (!activePeer.isActive()) {
@@ -154,6 +91,56 @@ require([
       console.log('Received ICE candidate:', msg.candidate);
       activePeer.addIceCandidate(msg.candidate);
     }
+  });
+  // TODO: Fetch contacts from remote identitiy provider
+  var contacts = new Peer.Collection([
+    { name: 'creationix' },
+    { name: 'robin' },
+    { name: 'erik' },
+    { name: 'lawrence' },
+    { name: 'cassie' },
+    { name: 'jugglinmike' }
+  ], { transport: transport });
+  var layout = new Layout({
+    el: '#app',
+    user: user,
+    contacts: contacts
+  });
+  layout.render();
+  layout.on('send-connect-request', function(peer) {
+    if (transport.state === 'OPEN') {
+
+      // TODO: Remove this line and reduce dependence on global state.
+      activePeer = peer;
+
+      peer.on('addstream', function(stream) {
+        console.log('Remote stream added');
+        layout.playRemoteStream(stream);
+      });
+
+      peer.createOffer(
+        function(sessionDescription) {
+          this.setLocalDescription(sessionDescription);
+          transport.peerLocationFind(peer.get('name'), {
+            session: sessionDescription,
+            userName: user.get('name')
+          }).then(function(findReply) {
+            peer.setRemoteDescription(findReply.sessionDescription);
+            peer.set('locationID', findReply.from);
+          }, function() {
+            // TODO: Update the UI to reflect this failure.
+            console.error('Find request failed.');
+          });
+        },
+        createOfferFailed,
+        mediaConstraints);
+    }
+  });
+  layout.on('hangup', function() {
+    transport.request('bye', {
+      to: activePeer.get('locationID')
+    });
+    activePeer.destroy();
   });
 
   user.on('change:name', function() {
