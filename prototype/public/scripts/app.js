@@ -54,25 +54,26 @@ require([
       });
       peer.transport = transport;
 
-      return layout.startCall(peer).then(function(stream) {
+      return layout.startCall(peer)
+        .then(function(stream) {
 
-        peer.addStream(stream);
+          peer.addStream(stream);
 
-        console.log('Creating remote session description:', remoteSession);
-        peer.setRemoteDescription(remoteSession);
-        console.log('Sending answer...');
+          console.log('Creating remote session description:', remoteSession);
+          peer.setRemoteDescription(remoteSession);
+          console.log('Sending answer...');
 
-        return peer.createAnswer(mediaConstraints).then(
-          function(sessionDescription) {
-            peer.setLocalDescription(sessionDescription);
+          return peer.createAnswer(mediaConstraints);
+        })
+        .then(function(sessionDescription) {
+          peer.setLocalDescription(sessionDescription);
 
-            return {
-              peer: true,
-              sessionDescription: sessionDescription
-            };
-          },
-          createAnswerFailed);
-      });
+          return {
+            peer: true,
+            sessionDescription: sessionDescription
+          };
+        },
+        createAnswerFailed);
     },
     bye: function(msg) {
       var peer = msg && peers[msg.from];
@@ -111,23 +112,23 @@ require([
 
       layout.startCall(peer)
         .then(function() {
-          peer.createOffer(mediaConstraints).then(
-            function(sessionDescription) {
-              peer.setLocalDescription(sessionDescription);
-              transport.peerLocationFind(peer.get('name'), {
-                session: sessionDescription,
-                userName: user.get('name')
-              }).then(function(findReply) {
-                peers[findReply.from] = peer;
-                peer.setRemoteDescription(findReply.sessionDescription);
-                peer.set('locationID', findReply.from);
-              }, function() {
-                // TODO: Update the UI to reflect this failure.
-                console.error('Find request failed.');
-              });
-            },
-            createOfferFailed);
-        }, function() { console.error(arguments); });
+            return peer.createOffer(mediaConstraints);
+          })
+        .then(function(sessionDescription) {
+            peer.setLocalDescription(sessionDescription);
+            return transport.peerLocationFind(peer.get('name'), {
+              session: sessionDescription,
+              userName: user.get('name')
+            });
+          }, createOfferFailed)
+        .then(function(findReply) {
+            peers[findReply.from] = peer;
+            peer.setRemoteDescription(findReply.sessionDescription);
+            peer.set('locationID', findReply.from);
+          }, function() {
+            // TODO: Update the UI to reflect this failure.
+            console.error('Find request failed.');
+          });
     }
   });
   layout.on('hangup', function(peer) {
@@ -140,14 +141,14 @@ require([
   user.on('change:name', function() {
     transport.open(new WebSocket(config.socketServer))
       .then(function() {
-        return transport.sessionCreate(user.get('name'));
-      })
+          return transport.sessionCreate(user.get('name'));
+        })
       .then(function() {
-        // Simulate network latency
-        setTimeout(function() {
-          layout.login();
-        }, 800);
-      }, console.error.bind(console));
+          // Simulate network latency
+          setTimeout(function() {
+            layout.login();
+          }, 800);
+        }, console.error.bind(console));
   });
 
 });
