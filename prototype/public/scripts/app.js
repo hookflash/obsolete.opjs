@@ -7,11 +7,9 @@ require([
     socketServer: 'ws://' + window.location.host
   };
   var user = new Peer.Model();
-  // activePeer
-  // A global reference to the current call.
-  // TODO: Re-factor in order to support multiple simultaneous connections (and
-  // remove this variable)
-  var activePeer;
+  // peers
+  // A map of location IDs to peer connections.
+  var peers = {};
 
   var mediaConstraints = {
     mandatory: {
@@ -32,6 +30,7 @@ require([
       var blob = request && request.username && request.username.blob;
       var locationID = request && request.username && request.username.from;
       var remoteSession = blob && blob.session;
+      var peer;
 
       if (!blob) {
         console.error('No blob found. Ignoring invite.');
@@ -49,21 +48,21 @@ require([
       console.log('Receiving call from ' + blob.userName +
         '. Would you like to answer?');
 
-      activePeer = new Peer.Model({
+      peers[locationID] = peer = new Peer.Model({
         name: blob.userName,
         locationID: locationID
       });
-      activePeer.transport = transport;
+      peer.transport = transport;
 
-      return layout.startCall(activePeer).then(function(stream) {
+      return layout.startCall(peer).then(function(stream) {
         var dfd = Q.defer();
 
-        activePeer.addStream(stream);
+        peer.addStream(stream);
 
         console.log('Creating remote session description:', remoteSession);
-        activePeer.setRemoteDescription(remoteSession);
+        peer.setRemoteDescription(remoteSession);
         console.log('Sending answer...');
-        activePeer.createAnswer(function(sessionDescription) {
+        peer.createAnswer(function(sessionDescription) {
             this.setLocalDescription(sessionDescription);
             dfd.resolve({
               peer: true,
@@ -75,15 +74,21 @@ require([
         return dfd.promise;
       });
     },
-    bye: function() {
-      activePeer.destroy();
+    bye: function(msg) {
+      var peer = msg && peers[msg.from];
+      if (!peer) {
+        return;
+      }
+      peer.destroy();
+      delete peers[msg.from];
     },
     update: function(msg) {
-      if (!activePeer.isActive()) {
+      var peer = msg && peers[msg.from];
+      if (!peer) {
         return;
       }
       console.log('Received ICE candidate:', msg.candidate);
-      activePeer.addIceCandidate(msg.candidate);
+      peer.addIceCandidate(msg.candidate);
     }
   });
   // TODO: Fetch contacts from remote identitiy provider
@@ -104,9 +109,6 @@ require([
   contacts.on('send-connect-request', function(peer) {
     if (transport.state === 'OPEN') {
 
-      // TODO: Remove this line and reduce dependence on global state.
-      activePeer = peer;
-
       layout.startCall(peer)
         .then(function() {
           peer.createOffer(
@@ -116,6 +118,7 @@ require([
                 session: sessionDescription,
                 userName: user.get('name')
               }).then(function(findReply) {
+                peers[findReply.from] = peer;
                 peer.setRemoteDescription(findReply.sessionDescription);
                 peer.set('locationID', findReply.from);
               }, function() {
@@ -128,11 +131,11 @@ require([
         }, function() { console.error(arguments); });
     }
   });
-  layout.on('hangup', function() {
+  layout.on('hangup', function(peer) {
     transport.request('bye', {
-      to: activePeer.get('locationID')
+      to: peer.get('locationID')
     });
-    activePeer.destroy();
+    peer.destroy();
   });
 
   user.on('change:name', function() {
