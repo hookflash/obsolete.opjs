@@ -5,6 +5,9 @@ define([
 
   var Peer = Backbone.Model.extend({
     nameRegex: /^[0-9a-z\.-]+$/i,
+    url: function() {
+      return 'https://api.github.com/users/' + this.get('name');
+    },
     connectOptions: {
       iceServers: [
         { url: 'stun:stun.l.google.com:19302' },

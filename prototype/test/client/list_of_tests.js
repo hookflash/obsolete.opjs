@@ -1,3 +1,4 @@
 define([
-  'tests/peer'
+  'tests/peer',
+  'tests/oauth-prefilter'
 ]);

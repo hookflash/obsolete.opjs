@@ -1,12 +1,14 @@
 require([
-  'modules/peer', 'modules/transport', 'modules/layout', 'modules/incoming-call'
-  ], function(Peer, Transport, Layout, IncomingCall) {
+  'modules/peer', 'modules/transport', 'modules/layout', 'modules/incoming-call',
+  'jquery', 'modules/oauth-prefilter'
+  ], function(Peer, Transport, Layout, IncomingCall, $, oauthPrefilter) {
   'use strict';
 
   var config = {
     socketServer: 'ws://' + window.location.host
   };
   var user = new Peer.Model();
+  $.ajaxPrefilter(oauthPrefilter);
   // peers
   // A map of location IDs to peer connections.
   var peers = {};
@@ -133,6 +135,7 @@ require([
   });
 
   user.on('change:name', function() {
+    user.fetch();
     transport.open(new WebSocket(config.socketServer))
       .then(function() {
           return transport.sessionCreate(user.get('name'));

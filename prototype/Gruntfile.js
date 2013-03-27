@@ -33,6 +33,7 @@ module.exports = function(grunt) {
       },
       clientTests: {
         options: {
+          browser: true,
           globals: {
             define: true,
             assert: true,
