@@ -24,7 +24,7 @@ define([
       event.preventDefault();
     },
     reject: function(event) {
-      this._dfd.reject(new Error('Call Rejected'));
+      this._dfd.reject({ reason: 'Call Rejected' });
       event.preventDefault();
     },
     serialize: function() {

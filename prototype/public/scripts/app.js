@@ -68,9 +68,6 @@ require([
             peer: true,
             sessionDescription: sessionDescription
           };
-        },
-        function() {
-          console.error('Create answer failed.', arguments);
         });
     },
     bye: function(msg) {
