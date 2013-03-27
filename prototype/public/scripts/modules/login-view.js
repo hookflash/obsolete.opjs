@@ -26,6 +26,9 @@ define([
           isPending: this.isPending
         }
       };
+    },
+    afterRender: function() {
+      this.$('.username').focus();
     }
   });
 
