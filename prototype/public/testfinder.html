@@ -81,23 +81,35 @@ require(['transport', 'dombuilder', 'q'], function (Transport, domBuilder, Q) {
     }
   });
 
+  var id = document.cookie.match(/session_id=([^;]*)/)[1];
+  var client_id = document.cookie.match(/client_id=([^;]*)/)[1];
+
   transport.open(new WebSocket(url))
-  .then(function () {
-    return aprompt('Username:', 'Create Session');
+  // .then(function (username) {
+  //   return transport.sessionCreate(username);
+  // })
+  .then(function (result) {
+    document.body.appendChild(domBuilder([
+      ["button", {onclick: function (evt) {
+        var child = window.open('https://github.com/login/oauth/authorize'
+          + '?client_id=' + client_id
+          + '&state=' + id, "github_oauth", "menubar=no,location=no,resizable=yes,scrollbars=yes,status=no,width=960,height=640");
+        child.addEventListener('message', function (evt) {
+          console.log(evt.data);
+        }, false);
+      }}, "Log in using Github..."]
+    ]));
   })
-  .then(function (username) {
-    return transport.sessionCreate(username);
-  })
-  .then(function () {
-    return aprompt('Friendname:', 'Call Friend');
-  })
-  .then(function (friendname) {
-    var blob = (Math.random() * 0x100000000).toString(32);
-    return transport.peerLocationFind(friendname, blob);
-  })
-  .then(function (reply) {
-    console.log("find-reply!", reply);
-  });
+  // .then(function () {
+  //   return aprompt('Friendname:', 'Call Friend');
+  // })
+  // .then(function (friendname) {
+  //   var blob = (Math.random() * 0x100000000).toString(32);
+  //   return transport.peerLocationFind(friendname, blob);
+  // })
+  // .then(function (reply) {
+  //   console.log("find-reply!", reply);
+  // });
 });
 </script>
 </body>

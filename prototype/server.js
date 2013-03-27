@@ -1,6 +1,8 @@
 /*jshint node: true */
 'use strict';
 
+var https = require('https');
+var http = require('http');
 var urlParse = require('url').parse;
 var pathJoin = require('path').join;
 var send = require('send');
@@ -8,22 +10,62 @@ var WebSocketServer = require('ws').Server;
 var Transport = require('./lib/transport');
 var cookie = require('cookie');
 
+
+var sessions = {};
+var client_id = '2e8c9abbee702e36c03c';
+var client_secret = '112bbb3ebc5a5e156a27afacd108b219938dfe35';
+
 function handler(req, res) {
   var cookies = cookie.parse(req.headers.cookie || '');
-  var id = cookies.sessID;
-  if (!(id && id in transports)) {
+  var id = cookies.session_id;
+  if (!(id && id in sessions)) {
     do {
       id = (Math.random() * 0x100000000).toString(32);
-    } while (id in transports);
-    transports[id] = null;
+    } while (id in sessions);
+    sessions[id] = {};
   }
-  res.setHeader('Set-Cookie', cookie.serialize(
-    'sessID', id, {
-      httpOnly: true,
-      path: '/'
-    })
-  );
+  var session = sessions[id];
+
+
+  res.setHeader('Set-Cookie', [
+    cookie.serialize('session_id', id, { path: '/' }),
+    cookie.serialize('client_id', client_id, { path: '/' }),
+  ]);
   var pathname = urlParse(req.url).pathname;
+
+  if (pathname === '/github') {
+    var query = urlParse(req.url, true).query;
+    var body = JSON.stringify({
+      client_id: client_id,
+      client_secret: client_secret,
+      code: query.code
+    });
+    var post = https.request({
+      method: 'POST',
+      hostname: 'github.com',
+      path: '/login/oauth/access_token',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(body),
+        'Accept': 'application/json'
+      }
+    }, function (response) {
+      var result = '';
+      response.on('data', function (chunk) {
+        result += chunk;
+      });
+      response.on('end', function () {
+        var body = JSON.parse(result);
+        session.access_token = body.access_token;
+        session.token_type = body.token_type;
+        res.setHeader('Content-Type', 'text/html');
+        res.end('<script>window.parent.postMessage(true, "*");window.close();</script>');
+      });
+    });
+    post.write(body);
+    post.end();
+    return;
+  }
 
   if (pathname.slice(0, 6) === '/opjs/') {
     send(req, pathname.slice(5))
@@ -37,11 +79,9 @@ function handler(req, res) {
     .pipe(res);
 }
 
-var sessions = {};
-var transports = {};
 var api = {
   'update': function (request, transport) {
-    var target = transports[request.to];
+    var target = session[request.to].transport;
     if (!target) {
       throw new Error('Invalid transport ID');
     }
@@ -49,7 +89,7 @@ var api = {
     return target.request('update', request);
   },
   'bye': function (request, transport) {
-    var target = transports[request.to];
+    var target = session[request.to].transport;
     if (!target) {
       throw new Error('Invalid transport ID');
     }
@@ -114,13 +154,14 @@ var api = {
 
 function wsHandler(socket) {
   var cookies = cookie.parse(socket.upgradeReq.headers.cookie || '');
-  var id = cookies.sessID;
-  if (!(id in transports)) {
+  var id = cookies.session_id;
+  var session = sessions[id];
+  if (!session) {
     console.error('Invalid session id in cookie', cookies);
     return socket.close();
   }
   var transport = new Transport(api);
-  transports[id] = transport;
+  session.transport = transport;
   transport.id = id;
   transport.open(socket);
   transport.on('closed', function (reason) {
@@ -139,8 +180,6 @@ function wsHandler(socket) {
 // Start the server(s)
 // Run in production mode if the process is root
 
-var https = require('https');
-var http = require('http');
 
 var server = http.createServer(handler);
 var wsServer = new WebSocketServer({server: server});
