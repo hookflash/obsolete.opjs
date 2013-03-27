@@ -12,8 +12,8 @@ var cookie = require('cookie');
 
 
 var sessions = {};
-var client_id = '2e8c9abbee702e36c03c';
-var client_secret = '112bbb3ebc5a5e156a27afacd108b219938dfe35';
+var client_id = process.env.CLIENT_ID || '2e8c9abbee702e36c03c';
+var client_secret = process.env.CLIENT_SECRET || '112bbb3ebc5a5e156a27afacd108b219938dfe35';
 
 function handler(req, res) {
   var cookies = cookie.parse(req.headers.cookie || '');
