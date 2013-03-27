@@ -1,6 +1,6 @@
 require([
-  'modules/peer', 'modules/transport', 'modules/layout'
-  ], function(Peer, Transport, Layout) {
+  'modules/peer', 'modules/transport', 'modules/layout', 'modules/incoming-call'
+  ], function(Peer, Transport, Layout, IncomingCall) {
   'use strict';
 
   var config = {
@@ -30,7 +30,7 @@ require([
       var blob = request && request.username && request.username.blob;
       var locationID = request && request.username && request.username.from;
       var remoteSession = blob && blob.session;
-      var peer;
+      var peer, incomingCall;
 
       if (!blob) {
         console.error('No blob found. Ignoring invite.');
@@ -43,18 +43,21 @@ require([
         return;
       }
 
-      // TODO: Prompt user to accept/reject call (instead of blindly accepting)
-      // and move following logic into "Accept" handler.
-      console.log('Receiving call from ' + blob.userName +
-        '. Would you like to answer?');
-
-      peers[locationID] = peer = new Peer.Model({
+      peer = new Peer.Model({
         name: blob.userName,
         locationID: locationID
       });
       peer.transport = transport;
 
-      return layout.startCall(peer)
+      incomingCall = new IncomingCall({ model: peer });
+      layout.insertView(incomingCall).render();
+
+      return incomingCall.then(function() {
+
+          peers[locationID] = peer;
+
+          return layout.startCall(peer);
+        })
         .then(function(stream) {
 
           peer.addStream(stream);

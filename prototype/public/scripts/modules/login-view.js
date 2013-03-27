@@ -4,7 +4,7 @@ define([
   'use strict';
 
   var LoginView = Backbone.Layout.extend({
-    className: 'login',
+    className: 'modal login',
     events: {
       submit: 'setName'
     },
