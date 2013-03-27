@@ -99,6 +99,9 @@
         else if (message.reply) {
           transport.onReply(message.reply);
         }
+        else if (message.fail) {
+          transport.onFail(message.fail);
+        }
         else {
           throw new Error('Unknown message type: ' + json);
         }
@@ -120,6 +123,18 @@
     };
     this.emit('open');
     return deferred.promise;
+  };
+
+  Transport.prototype.fail = function (request, reason) {
+    var message = {
+      $id: request.$id,
+      $timestamp: Date.now() / 1000,
+      $reason: reason
+    };
+    message = {fail: message};
+
+    var json = JSON.stringify(message);
+    this.socket.send(json);
   };
 
   Transport.prototype.result = function (request, result, isReply) {
@@ -185,6 +200,16 @@
     return deferred.promise;
   };
 
+  Transport.prototype.onFail = function (fail) {
+    console.log('onFail', fail);
+    var deferred = this.pending[fail.$id];
+    if (!deferred) {
+      throw new Error('Received failure with invalid $id: ' + fail.$id);
+    }
+    delete this.pending[fail.$id];
+    deferred.reject(fail.$reason);
+  };
+
   Transport.prototype.onRequest = function (request) {
     console.log('onRequest', request);
     var handler = this.api[request.$method];
@@ -203,9 +228,9 @@
       }
       transport.result(request, result, isReply);
     }).fail(function (err) {
-      // TODO: What should I do here?
-      // What is the proper way to communicate this failure across the wire?
-      console.error(err);
+      // We send a custom message type to forward the failed promise.
+      // TODO: find a way to do this within the openpeer protocol.
+      transport.fail(request, err);
     });
   };
 
