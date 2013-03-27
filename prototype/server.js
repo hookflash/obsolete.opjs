@@ -6,8 +6,23 @@ var pathJoin = require('path').join;
 var send = require('send');
 var WebSocketServer = require('ws').Server;
 var Transport = require('./lib/transport');
+var cookie = require('cookie');
 
 function handler(req, res) {
+  var cookies = cookie.parse(req.headers.cookie || '');
+  var id = cookies.sessID;
+  if (!(id && id in transports)) {
+    do {
+      id = (Math.random() * 0x100000000).toString(32);
+    } while (id in transports);
+    transports[id] = null;
+  }
+  res.setHeader('Set-Cookie', cookie.serialize(
+    'sessID', id, {
+      httpOnly: true,
+      path: '/'
+    })
+  );
   var pathname = urlParse(req.url).pathname;
 
   if (pathname.slice(0, 6) === '/opjs/') {
@@ -58,7 +73,8 @@ var api = {
     }
 
     return {
-      server: 'node.js ' + process.version
+      server: 'node.js ' + process.version,
+      id: transport.id
     };
   },
   'session-delete': function (request) {
@@ -97,11 +113,13 @@ var api = {
 };
 
 function wsHandler(socket) {
+  var cookies = cookie.parse(socket.upgradeReq.headers.cookie || '');
+  var id = cookies.sessID;
+  if (!(id in transports)) {
+    console.error('Invalid session id in cookie', cookies);
+    return socket.close();
+  }
   var transport = new Transport(api);
-  var id;
-  do {
-    id = (Math.random() * 0x100000000).toString(32);
-  } while (id in transports);
   transports[id] = transport;
   transport.id = id;
   transport.open(socket);
