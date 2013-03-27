@@ -1,14 +1,13 @@
 /*jshint node: true */
 'use strict';
 
-var http = require('http');
 var urlParse = require('url').parse;
 var pathJoin = require('path').join;
 var send = require('send');
 var WebSocketServer = require('ws').Server;
 var Transport = require('./lib/transport');
 
-var server = http.createServer(function (req, res) {
+function handler(req, res) {
   var pathname = urlParse(req.url).pathname;
 
   if (pathname.slice(0, 6) === '/opjs/') {
@@ -21,7 +20,7 @@ var server = http.createServer(function (req, res) {
   send(req, pathname)
     .root(pathJoin(__dirname, 'public'))
     .pipe(res);
-});
+}
 
 var sessions = {};
 var transports = {};
@@ -95,9 +94,7 @@ var api = {
   }
 };
 
-
-var wsServer = new WebSocketServer({server: server});
-wsServer.on('connection', function (socket) {
+function wsHandler(socket) {
   var transport = new Transport(api);
   var id;
   do {
@@ -117,17 +114,44 @@ wsServer.on('connection', function (socket) {
     });
     delete transports[id];
   });
-});
+}
 
-var PORT = process.env.PORT || process.getuid() ? 8080 : 80;
+// Start the server(s)
+// Run in production mode if the process is root
 
-server.listen(PORT, function () {
-  console.log('Server listening at', server.address());
-});
+var https = require('https');
+var http = require('http');
 
+var server = http.createServer(handler);
+var wsServer = new WebSocketServer({server: server});
+wsServer.on('connection', wsHandler);
+server.listen(process.getuid() ? 8080 : 80);
+console.log('HTTP server listening at', server.address());
+
+// If a certificate file exists, start an https server too
+var pfx;
+try {
+  pfx = require('fs').readFileSync('certificate.pfx');
+}
+catch (err) {
+
+}
+if (pfx) {
+  server = https.createServer({
+    pfx: pfx,
+    honorCipherOrder: true
+  }, handler);
+  wsServer = new WebSocketServer({server: server});
+  wsServer.on('connection', wsHandler);
+  server.listen(process.getuid() ? 8443 : 443);
+  console.log('HTTPS server listening at', server.address());
+}
+
+// drop to normal user after binding to the port
 if (!process.getuid()) {
   // If we're running as root, drop down to a regular user after binding to 80
   var stat = require('fs').statSync(__filename);
+  console.log('Dropping to normal user', {gid: stat.gid, uid: stat.uid});
   process.setgid(stat.gid);
   process.setuid(stat.uid);
 }
