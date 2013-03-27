@@ -115,16 +115,13 @@ require([
               session: sessionDescription,
               userName: user.get('name')
             });
-          }, function() {
-            console.error('Create offer failed.', arguments);
           })
         .then(function(findReply) {
             peers[findReply.from] = peer;
             peer.setRemoteDescription(findReply.sessionDescription);
             peer.set('locationID', findReply.from);
-          }, function() {
-            // TODO: Update the UI to reflect this failure.
-            console.error('Find request failed.');
+          }, function(reason) {
+            layout.endCall(reason);
           });
     }
   });

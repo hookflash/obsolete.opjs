@@ -17,10 +17,10 @@ define([
       this.setView('.remote', this.remoteStreamView);
     },
     startCall: function(peer) {
+      // Ensure that any previous call is ended
+      this.endCall();
+
       // TODO: Re-factor to support multiple remote peers
-      if (this.peer) {
-        this.stopListening(this.peer);
-      }
       this.peer = peer;
       this.listenTo(this.peer, 'addstream', function(stream) {
         console.log('Remote stream added');
@@ -30,15 +30,25 @@ define([
         console.log('Remove remote stream');
         this.stopRemoteStream();
       });
+      this.listenTo(this.peer, 'destroy', this.endCall);
 
       return this.localStreamView.requestMedia().then(function(stream) {
         peer.addStream(stream);
+        this.setStatus({ calling: true });
         return stream;
-      });
+      }.bind(this));
+    },
+    endCall: function(reason) {
+      if (this.peer) {
+        this.stopListening(this.peer);
+      }
+      this.setStatus(reason);
+      this.stopRemoteStream();
+      this.stopLocalStream();
+      this.render();
     },
     hangUp: function() {
-      console.log('Hang up.');
-      this.stopRemoteStream();
+      this.endCall();
       this.trigger('hangup', this.peer);
     },
     playLocalStream: function(stream) {
@@ -47,7 +57,7 @@ define([
     },
     playRemoteStream: function(stream) {
       this.remoteStreamView.play(stream);
-      this.render();
+      this.setStatus({ active: true });
     },
     stopLocalStream: function() {
       this.localStreamView.stop();
@@ -57,8 +67,14 @@ define([
       this.remoteStreamView.stop();
       this.render();
     },
+    setStatus: function(status) {
+      this.status = status;
+      this.render();
+    },
     serialize: function() {
       return {
+        status: this.status,
+        peer: this.peer && this.peer.toJSON(),
         isPlaying: this.remoteStreamView.isPlaying()
       };
     }

@@ -1,3 +1,17 @@
+<div class="controls">
+<span class="status"><%
+if (peer && status) {
+  if (status.rejected) {
+    print(peer.name + ' has ended the call.');
+  } else if (status.calling) {
+    print('Now calling ' + peer.name + '...');
+  } else {
+    print('On call with ' + peer.name + '.');
+  }
+} %></span>
+<% if (isPlaying) { %>
+<button class="btn btn-hang-up">Hang Up</button>
+<% } %>
+</div>
 <div class="source"></div>
 <div class="remote"></div>
-<button class="btn btn-hang-up">Hang Up</button>

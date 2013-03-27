@@ -24,6 +24,9 @@ define([
     startCall: function(peer) {
       peer.connect();
       return this.conversationView.startCall(peer);
+    },
+    endCall: function(reason) {
+      this.conversationView.endCall(reason);
     }
   });
 
