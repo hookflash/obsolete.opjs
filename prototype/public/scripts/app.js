@@ -18,13 +18,6 @@ require([
     }
   };
 
-  function createOfferFailed() {
-    console.error('Create Answer failed');
-  }
-
-  function createAnswerFailed() {
-    console.error('Create Answer failed');
-  }
   var transport = new Transport({
     invite: function(request) {
       var blob = request && request.username && request.username.blob;
@@ -76,7 +69,9 @@ require([
             sessionDescription: sessionDescription
           };
         },
-        createAnswerFailed);
+        function() {
+          console.error('Create answer failed.', arguments);
+        });
     },
     bye: function(msg) {
       var peer = msg && peers[msg.from];
@@ -123,7 +118,9 @@ require([
               session: sessionDescription,
               userName: user.get('name')
             });
-          }, createOfferFailed)
+          }, function() {
+            console.error('Create offer failed.', arguments);
+          })
         .then(function(findReply) {
             peers[findReply.from] = peer;
             peer.setRemoteDescription(findReply.sessionDescription);
