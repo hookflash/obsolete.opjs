@@ -26,18 +26,20 @@ var server = http.createServer(function (req, res) {
 var sessions = {};
 var transports = {};
 var api = {
-  'update': function (request) {
+  'update': function (request, transport) {
     var target = transports[request.to];
     if (!target) {
       throw new Error('Invalid transport ID');
     }
+    request.from = transport.id;
     return target.request('update', request);
   },
-  'bye': function (request) {
+  'bye': function (request, transport) {
     var target = transports[request.to];
     if (!target) {
       throw new Error('Invalid transport ID');
     }
+    request.from = transport.id;
     return target.request('bye', request);
   },
   'session-create': function (request, transport) {
