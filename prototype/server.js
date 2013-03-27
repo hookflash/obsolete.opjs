@@ -85,6 +85,8 @@ var api = {
       targetTransport.peerLocationFind(request).then(function (reply) {
         reply.from = targetTransport.id;
         transport.result(request, reply, true);
+      }, function(reason) {
+        transport.fail(request, reason);
       });
     });
 
