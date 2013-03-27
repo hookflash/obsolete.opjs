@@ -1,6 +1,6 @@
 require([
-  'modules/peer', 'modules/transport', 'modules/layout', 'backbone', 'q'
-  ], function(Peer, Transport, Layout, Backbone, Q) {
+  'modules/peer', 'modules/transport', 'modules/layout'
+  ], function(Peer, Transport, Layout) {
   'use strict';
 
   var config = {
@@ -55,24 +55,23 @@ require([
       peer.transport = transport;
 
       return layout.startCall(peer).then(function(stream) {
-        var dfd = Q.defer();
 
         peer.addStream(stream);
 
         console.log('Creating remote session description:', remoteSession);
         peer.setRemoteDescription(remoteSession);
         console.log('Sending answer...');
-        peer.createAnswer(mediaConstraints).then(
+
+        return peer.createAnswer(mediaConstraints).then(
           function(sessionDescription) {
             peer.setLocalDescription(sessionDescription);
-            dfd.resolve({
+
+            return {
               peer: true,
               sessionDescription: sessionDescription
-            });
+            };
           },
           createAnswerFailed);
-
-        return dfd.promise;
       });
     },
     bye: function(msg) {
