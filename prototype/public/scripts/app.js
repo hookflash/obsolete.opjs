@@ -62,14 +62,15 @@ require([
         console.log('Creating remote session description:', remoteSession);
         peer.setRemoteDescription(remoteSession);
         console.log('Sending answer...');
-        peer.createAnswer(function(sessionDescription) {
-            this.setLocalDescription(sessionDescription);
+        peer.createAnswer(mediaConstraints).then(
+          function(sessionDescription) {
+            peer.setLocalDescription(sessionDescription);
             dfd.resolve({
               peer: true,
               sessionDescription: sessionDescription
             });
           },
-          createAnswerFailed, mediaConstraints);
+          createAnswerFailed);
 
         return dfd.promise;
       });
@@ -111,9 +112,9 @@ require([
 
       layout.startCall(peer)
         .then(function() {
-          peer.createOffer(
+          peer.createOffer(mediaConstraints).then(
             function(sessionDescription) {
-              this.setLocalDescription(sessionDescription);
+              peer.setLocalDescription(sessionDescription);
               transport.peerLocationFind(peer.get('name'), {
                 session: sessionDescription,
                 userName: user.get('name')
@@ -126,8 +127,7 @@ require([
                 console.error('Find request failed.');
               });
             },
-            createOfferFailed,
-            mediaConstraints);
+            createOfferFailed);
         }, function() { console.error(arguments); });
     }
   });

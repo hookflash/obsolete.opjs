@@ -1,6 +1,6 @@
 define([
-  'modules/rtc-compat', '_', 'backbone'
-  ], function(rtc, _, Backbone) {
+  'modules/rtc-compat', 'backbone', 'q'
+  ], function(rtc, Backbone, Q) {
   'use strict';
 
   var Peer = Backbone.Model.extend({
@@ -117,41 +117,18 @@ define([
     return !!this.peerConn;
   };
 
-  Peer.prototype.createOffer = function(success, failure, mediaConstraints) {
-    var cbs = this._wrapCallbacks({
-      success: success,
-      failure: failure
-    });
-    this.peerConn.createOffer(cbs.success, cbs.failure, mediaConstraints);
+  Peer.prototype.createOffer = function(mediaConstraints) {
+    var dfd = Q.defer();
+    this.peerConn.createOffer(dfd.resolve.bind(dfd), dfd.reject.bind(dfd),
+      mediaConstraints);
+    return dfd.promise;
   };
 
-  Peer.prototype.createAnswer = function(success, failure, mediaConstraints) {
-    var cbs = this._wrapCallbacks({
-      success: success,
-      failure: failure
-    });
-    this.peerConn.createAnswer(cbs.success, cbs.failure, mediaConstraints);
-  };
-
-  // _wrapCallbacks
-  // Private method to create callbacks that will be invoked in the context of
-  // the Peer object. Avoiding `Function.prototype.bind` allows users to
-  // optionally override the context of their callback functions.
-  Peer.prototype._wrapCallbacks = function(callbacks) {
-    var self = this;
-    var success = callbacks.success;
-    var failure = callbacks.failure;
-    if (typeof success === 'function') {
-      callbacks.success = function() {
-        success.apply(self, arguments);
-      };
-    }
-    if (typeof failure === 'function') {
-      callbacks.failure = function() {
-        failure.apply(self, arguments);
-      };
-    }
-    return callbacks;
+  Peer.prototype.createAnswer = function(mediaConstraints) {
+    var dfd = Q.defer();
+    this.peerConn.createAnswer(dfd.resolve.bind(dfd), dfd.reject.bind(dfd),
+        mediaConstraints);
+    return dfd.promise;
   };
 
   Peer.prototype.destroy = function() {
