@@ -152,11 +152,9 @@
       }
     }
     if (isReply) {
-      console.log('reply', message);
       message = {reply: message};
     }
     else {
-      console.log('result', message);
       message = {result: message};
     }
 
@@ -182,7 +180,6 @@
         message[key] = request[key];
       }
     }
-    console.log('request', message);
     message = {request: message};
 
     var deferred = Q.defer();
@@ -204,7 +201,6 @@
   };
 
   Transport.prototype.onFail = function (fail) {
-    console.log('onFail', fail);
     var deferred = this.pending[fail.$id];
     if (!deferred) {
       throw new Error('Received failure with invalid $id: ' + fail.$id);
@@ -214,7 +210,6 @@
   };
 
   Transport.prototype.onRequest = function (request) {
-    console.log('onRequest', request);
     var handler = this.api[request.$method];
     var isReply = false;
     if (!handler && request.$method === 'peer-location-find') {
@@ -238,7 +233,6 @@
   };
 
   Transport.prototype.onResult = function (result) {
-    console.log('onResult', result);
     if (result.$method === 'peer-location-find') {
       return;
     }
@@ -251,7 +245,6 @@
   };
 
   Transport.prototype.onReply = function (reply) {
-    console.log('onReply', reply);
     var deferred = this.pending[reply.$id];
     if (!deferred) {
       return;
