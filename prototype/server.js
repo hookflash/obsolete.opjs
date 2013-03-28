@@ -170,7 +170,7 @@ var api = {
       };
     });
 
-    locations.forEach(function (targetTransport) {
+    transports.forEach(function (targetTransport) {
       targetTransport.peerLocationFind(request).then(function (reply) {
         reply.from = targetTransport.id;
         transport.result(request, reply, true);
@@ -199,13 +199,6 @@ function wsHandler(socket) {
   transport.open(socket);
   transport.on('closed', function (reason) {
     console.log('socket closed: ' + reason);
-    Object.keys(sessions).forEach(function (username) {
-      var list = sessions[username];
-      var index = list.indexOf(transport);
-      if (index >= 0) {
-        list.splice(index, 1);
-      }
-    });
     delete sessions[id];
   });
 }
