@@ -8,6 +8,15 @@ body {
   width: 90%;
   margin: 0 auto;
 }
+
+.btn {
+  background-color: #eee;
+  border: solid 1px #ccc;
+  cursor: pointer;
+} .btn[disabled] {
+  cursor: default;
+}
+
 .contacts-cont, .conversation-cont {
   display: block;
   float: left;
@@ -39,10 +48,7 @@ body {
   display: block;
 } .conversation .controls .btn {
   margin: 0.5em 0;
-  background-color: #eee;
-  border: solid 1px #ccc;
   padding-bottom: 0.4em;
-  cursor: pointer;
 }
 
 .contacts .title {

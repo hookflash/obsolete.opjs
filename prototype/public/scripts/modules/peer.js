@@ -5,9 +5,6 @@ define([
 
   var Peer = Backbone.Model.extend({
     nameRegex: /^[0-9a-z\.-]+$/i,
-    url: function() {
-      return 'https://api.github.com/users/' + this.get('name');
-    },
     connectOptions: {
       iceServers: [
         { url: 'stun:stun.l.google.com:19302' },
@@ -25,6 +22,16 @@ define([
       } else if (!this.nameRegex.test(attrs.name)) {
         return new Error('Invalid username');
       }
+    },
+    // getContactId
+    // Compose the string contact ID for this peer
+    getContactId: function() {
+      return this.get('name') + '@' + this.get('domain');
+    },
+    // getCollectionCtor
+    // Return the constructor for Peers of this type
+    getCollection: function() {
+      return this.constructor.Peers;
     },
     // getTransport
     // Return a reference to the model's transport. If the model does not
@@ -140,12 +147,41 @@ define([
     delete this.peerConn;
   };
 
-  var Peers = Backbone.Collection.extend({
+  var Peers = Peer.Peers = Backbone.Collection.extend({
     model: Peer,
     initialize: function(models, options) {
-      if (options && options.transport) {
-        this.transport = options.transport;
+      if (options) {
+        if (options.transport) {
+          this.transport = options.transport;
+        }
+        // Make Peer collections aware of the user they have been created for
+        // so they can properly fetch their own data.
+        if (options.user) {
+          this.user = options.user;
+        }
       }
+    }
+  });
+
+  Peer.GitHub = Peer.extend({
+    defaults: {
+      domain: 'github'
+    },
+    url: function() {
+      return 'https://api.github.com/users/' + this.get('name');
+    },
+    parse: function(attrs) {
+      var whitelist = {};
+      whitelist.name = attrs.login;
+      return whitelist;
+    }
+  });
+
+  Peer.GitHub.Peers = Peers.extend({
+    model: Peer.GitHub,
+    url: function() {
+      return 'https://api.github.com/users/' + this.user.get('name') +
+        '/following';
     }
   });
 

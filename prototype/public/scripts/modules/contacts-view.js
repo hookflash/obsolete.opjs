@@ -12,7 +12,7 @@ define(['text!templates/contacts-list.html',
       'click .option-call': 'call'
     },
     call: function() {
-      this.model.trigger('send-connect-request', this.model);
+      this.trigger('send-connect-request', this.model);
     },
     serialize: function() {
       return this.model.toJSON();
@@ -22,6 +22,9 @@ define(['text!templates/contacts-list.html',
   var ContactsView = Backbone.Layout.extend({
     className: 'contacts',
     template: _.template(contactListHtml),
+    initialize: function() {
+      this.listenTo(this.collection, 'sync', this.render);
+    },
     beforeRender: function() {
       this.collection.forEach(function(contact) {
         this.insertView('.contacts-list', new ContactView({ model: contact }));

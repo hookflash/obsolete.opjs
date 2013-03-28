@@ -1,13 +1,14 @@
 require([
-  'modules/peer', 'modules/transport', 'modules/layout', 'modules/incoming-call',
+  'modules/peer', 'modules/transport', 'modules/layout', 'modules/login',
+  'modules/incoming-call',
   'jquery', 'modules/oauth-prefilter'
-  ], function(Peer, Transport, Layout, IncomingCall, $, oauthPrefilter) {
+  ], function(Peer, Transport, Layout, Login, IncomingCall, $, oauthPrefilter) {
   'use strict';
 
   var config = {
     socketServer: 'ws://' + window.location.host
   };
-  var user = new Peer.Model();
+  var user;
   $.ajaxPrefilter(oauthPrefilter);
   // peers
   // A map of location IDs to peer connections.
@@ -67,7 +68,6 @@ require([
           peer.setLocalDescription(sessionDescription);
 
           return {
-            peer: true,
             sessionDescription: sessionDescription
           };
         });
@@ -89,22 +89,10 @@ require([
       peer.addIceCandidate(msg.candidate);
     }
   });
-  // TODO: Fetch contacts from remote identitiy provider
-  var contacts = new Peer.Collection([
-    { name: 'creationix' },
-    { name: 'robin' },
-    { name: 'erik' },
-    { name: 'lawrence' },
-    { name: 'cassie' },
-    { name: 'jugglinmike' }
-  ], { transport: transport });
   var layout = new Layout({
-    el: '#app',
-    user: user,
-    contacts: contacts
+    el: '#app'
   });
-  layout.render();
-  contacts.on('send-connect-request', function(peer) {
+  layout.on('send-connect-request', function(peer) {
     if (transport.state === 'OPEN') {
 
       layout.startCall(peer)
@@ -113,9 +101,9 @@ require([
           })
         .then(function(sessionDescription) {
             peer.setLocalDescription(sessionDescription);
-            return transport.peerLocationFind(peer.get('name'), {
+            return transport.peerLocationFind(peer.getContactId(), {
               session: sessionDescription,
-              userName: user.get('name')
+              userName: user.getContactId()
             });
           })
         .then(function(findReply) {
@@ -134,18 +122,28 @@ require([
     peer.destroy();
   });
 
-  user.on('change:name', function() {
-    user.fetch();
-    transport.open(new WebSocket(config.socketServer))
-      .then(function() {
-          return transport.sessionCreate(user.get('name'));
-        })
-      .then(function() {
-          // Simulate network latency
-          setTimeout(function() {
-            layout.login();
-          }, 800);
-        }, console.error.bind(console));
-  });
-
+  var loginView = new Login.View();
+  loginView.$el.appendTo('body');
+  loginView.render();
+  loginView
+    .then(function(userModel) {
+        var Contacts = userModel.getCollection();
+        var contacts = new Contacts(null, {
+          transport: transport,
+          user: userModel
+        });
+        user = userModel;
+        layout.setContacts(contacts);
+        return contacts.fetch();
+      })
+    .then(function() {
+        layout.render();
+        return transport.open(new WebSocket(config.socketServer));
+      })
+    .then(function() {
+        console.log('Locked and loaded!');
+      }, function(reason) {
+        // TODO: Update UI to communicate failure
+        console.error('Unable to proceed. Reason: ', reason);
+      });
 });

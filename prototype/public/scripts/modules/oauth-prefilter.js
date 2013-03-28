@@ -6,8 +6,10 @@ define(['jquery', '_'], function($, _) {
       url: 'https://api.github.com/',
       varName: 'access_token',
       getToken: function() {
-        var match = document.cookie.match(/client_id=([a-f0-9]+)/i);
-        return match && match[1];
+        // TODO: Do not rely on global scope.
+        return window.access_token || null;
+        //var match = document.cookie.match(/client_id=([a-f0-9]+)/i);
+        //return match && match[1];
       }
     }
   ];

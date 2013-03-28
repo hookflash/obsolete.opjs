@@ -5,7 +5,27 @@
     <div class="error"><%= login.error %></div>
   <% } %>
   <form>
-    <input type="text" class="username"<%= login.isPending ? ' disabled' : '' %>>
-    <input type="submit" class="submit" value="Submit"<%= login.isPending ? ' disabled' : '' %>>
+    <ul>
+      <li>
+        <button class='btn btn-github' data-provider='GitHub'>
+          GitHub.com
+        </button>
+      </li>
+      <li>
+        <button class='btn btn-twitter' disabled>
+          Twitter.com
+        </button>
+      </li>
+      <li>
+        <button class='btn btn-facebook' disabled>
+          Facebook.com
+        </button>
+      </li>
+      <li>
+        <button class='btn btn-linkedin' disabled>
+          LinkedIn.com
+        </button>
+      </li>
+    </ul>
   </form>
 </div>
