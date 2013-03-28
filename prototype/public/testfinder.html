@@ -50,6 +50,29 @@ require.config({
 });
 require(['transport', 'dombuilder', 'q'], function (Transport, domBuilder, Q) {
 
+  function githubLogin() {
+    var deferred = new Q.defer();
+    document.body.appendChild(domBuilder([
+      ["button", {onclick: function (evt) {
+        var child = window.open('https://github.com/login/oauth/authorize'
+          + '?client_id=' + client_id
+          + '&state=' + id, "github_oauth", "menubar=no,location=no,resizable=yes,scrollbars=yes,status=no,width=960,height=640");
+        var button = this;
+        child.addEventListener('message', function (evt) {
+          evt.preventDefault();
+          evt.stopPropagation();
+          document.body.removeChild(button);
+          var data = evt.data;
+          if (data.error) {
+            return deferred.reject(data.error);
+          }
+          deferred.resolve(data);
+        }, false);
+      }}, "Log in using Github..."]
+    ]));
+    return deferred.promise;
+  }
+
   function aprompt(label, action) {
     var deferred = new Q.defer();
     document.body.appendChild(domBuilder([
@@ -57,6 +80,7 @@ require(['transport', 'dombuilder', 'q'], function (Transport, domBuilder, Q) {
         deferred.resolve(this.value.value);
         evt.preventDefault();
         evt.stopPropagation();
+        document.body.removeChild(this);
       }},
         ['label', label],
         ['input', {name: 'value', autofocus: true}],
@@ -85,31 +109,23 @@ require(['transport', 'dombuilder', 'q'], function (Transport, domBuilder, Q) {
   var client_id = document.cookie.match(/client_id=([^;]*)/)[1];
 
   transport.open(new WebSocket(url))
-  // .then(function (username) {
-  //   return transport.sessionCreate(username);
-  // })
   .then(function (result) {
-    document.body.appendChild(domBuilder([
-      ["button", {onclick: function (evt) {
-        var child = window.open('https://github.com/login/oauth/authorize'
-          + '?client_id=' + client_id
-          + '&state=' + id, "github_oauth", "menubar=no,location=no,resizable=yes,scrollbars=yes,status=no,width=960,height=640");
-        child.addEventListener('message', function (evt) {
-          console.log(evt.data);
-        }, false);
-      }}, "Log in using Github..."]
-    ]));
+    return githubLogin();
   })
-  // .then(function () {
-  //   return aprompt('Friendname:', 'Call Friend');
-  // })
-  // .then(function (friendname) {
-  //   var blob = (Math.random() * 0x100000000).toString(32);
-  //   return transport.peerLocationFind(friendname, blob);
-  // })
-  // .then(function (reply) {
-  //   console.log("find-reply!", reply);
-  // });
+  .then(function (session) {
+    console.log('SESSION', session);
+    return aprompt('Friendname:', 'Call Friend');
+  })
+  .then(function (friendname) {
+    var blob = (Math.random() * 0x100000000).toString(32);
+    return transport.peerLocationFind(friendname, blob);
+  })
+  .then(function (reply) {
+    console.log("find-reply!", reply);
+  })
+  .fail(function (err) {
+    throw err;
+  });
 });
 </script>
 </body>
