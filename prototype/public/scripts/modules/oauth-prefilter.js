@@ -1,33 +1,42 @@
-define(['jquery', '_'], function($, _) {
+define(function() {
   'use strict';
 
-  var services = [
-    {
+  var services = {
+    GitHub: {
       url: 'https://api.github.com/',
-      varName: 'access_token',
-      getToken: function() {
-        // TODO: Do not rely on global scope.
-        return window.access_token || null;
-        //var match = document.cookie.match(/client_id=([a-f0-9]+)/i);
-        //return match && match[1];
-      }
+      varName: 'access_token'
     }
-  ];
+  };
 
-  return function(options) {
-    var service = _.find(services, function(service) {
-      return options.url.indexOf(service.url) === 0;
-    });
+  // create
+  // Given a provider name and an access token, generate a jQuery AJAX
+  // prefilter that will append the access token to request to that endpoint.
+  var create = function(provider, token) {
+    var service = services[provider];
+
     if (!service) {
-      return;
+      throw new Error('Unable to create prefilter for specified provider: "' +
+        provider + '"');
     }
 
-    if (options.url.indexOf('?') === -1) {
-      options.url += '?';
-    } else {
-      options.url += '&';
-    }
+    return function(options) {
+      // Only modify requests to the provider's domain
+      if (options.url.indexOf(service.url) !== 0) {
+        return;
+      }
 
-    options.url += service.varName + '=' + service.getToken();
+      if (options.url.indexOf('?') === -1) {
+        options.url += '?';
+      } else {
+        options.url += '&';
+      }
+
+      options.url += service.varName + '=' + token;
+    };
+  };
+
+  return {
+    services: services,
+    create: create
   };
 });

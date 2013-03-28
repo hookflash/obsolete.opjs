@@ -1,15 +1,13 @@
 require([
   'modules/peer', 'modules/transport', 'modules/layout', 'modules/login',
-  'modules/incoming-call',
-  'jquery', 'modules/oauth-prefilter'
-  ], function(Peer, Transport, Layout, Login, IncomingCall, $, oauthPrefilter) {
+  'modules/incoming-call', 'jquery'
+  ], function(Peer, Transport, Layout, Login, IncomingCall, $) {
   'use strict';
 
   var config = {
     socketServer: 'ws://' + window.location.host
   };
   var user;
-  $.ajaxPrefilter(oauthPrefilter);
   // peers
   // A map of location IDs to peer connections.
   var peers = {};
@@ -126,14 +124,17 @@ require([
   loginView.$el.appendTo('body');
   loginView.render();
   loginView
-    .then(function(userModel) {
-        var Contacts = userModel.getCollection();
+    .then(function(result) {
+        var Contacts = result.user.getCollection();
         var contacts = new Contacts(null, {
           transport: transport,
-          user: userModel
+          user: result.user
         });
-        user = userModel;
+
+        $.ajaxPrefilter(result.prefilter);
+        user = result.user;
         layout.setContacts(contacts);
+
         return contacts.fetch();
       })
     .then(function() {

@@ -1,7 +1,8 @@
 define([
-  'text!templates/login.html', 'modules/peer', 'layoutmanager', '_', 'q',
+  'text!templates/login.html', 'modules/peer', 'modules/oauth-prefilter',
+  'layoutmanager', '_', 'q',
   'jquery'
-  ], function(html, Peer, Backbone, _, Q, $) {
+  ], function(html, Peer, OauthPrefilter, Backbone, _, Q, $) {
   'use strict';
 
   var RequestStrategies = {
@@ -42,14 +43,20 @@ define([
     },
     handleAuth: function(provider, data) {
       var PeerModel = Peer.models[provider];
-      var user;
+      var user, prefilter;
+
       if (data.error) {
         this._dfd.reject(data.error);
         return;
       }
-      window.access_token = data.access_token;
+
       user = new PeerModel(data.user, { parse: true });
-      this._dfd.resolve(user);
+      prefilter = OauthPrefilter.create(provider, data.access_token);
+
+      this._dfd.resolve({
+        prefilter: prefilter,
+        user: user
+      });
     },
     serialize: function() {
       return {
