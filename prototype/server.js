@@ -12,7 +12,6 @@ var Transport = require('./lib/transport');
 var cookie = require('cookie');
 var Q = require('q');
 
-
 var sessions = {};
 var client_id = process.env.CLIENT_ID || '2e8c9abbee702e36c03c';
 var client_secret = process.env.CLIENT_SECRET || '112bbb3ebc5a5e156a27afacd108b219938dfe35';
@@ -26,6 +25,10 @@ function request(options, query) {
   options.headers = options.headers || {};
 
   var headers = options.headers;
+  if (options.token) {
+    headers.Authorization = 'token ' + options.token;
+    delete options.token;
+  }
   var body;
   if (options.method === 'POST') {
     body = JSON.stringify(query);
@@ -70,7 +73,6 @@ function request(options, query) {
   return deferred.promise;
 }
 
-
 function handler(req, res) {
   var cookies = cookie.parse(req.headers.cookie || '');
   var id = cookies.session_id;
@@ -104,13 +106,11 @@ function handler(req, res) {
       return request({
         method: 'GET',
         path: '/user',
-        headers: {
-          'Authorization': 'token ' + session.access_token
-        }
+        token: session.access_token
       });
     }).then(function (result) {
-      session.user = result;
       session.username = result.login + '@github';
+      session.user = result;
       res.setHeader('Content-Type', 'text/html');
       var message = JSON.stringify(session, function (key, value) {
         if (key === 'transport') { return; }
