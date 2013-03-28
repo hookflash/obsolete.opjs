@@ -4,16 +4,72 @@
 var https = require('https');
 var http = require('http');
 var urlParse = require('url').parse;
+var querystring = require('querystring');
 var pathJoin = require('path').join;
 var send = require('send');
 var WebSocketServer = require('ws').Server;
 var Transport = require('./lib/transport');
 var cookie = require('cookie');
+var Q = require('q');
 
 
 var sessions = {};
 var client_id = process.env.CLIENT_ID || '2e8c9abbee702e36c03c';
 var client_secret = process.env.CLIENT_SECRET || '112bbb3ebc5a5e156a27afacd108b219938dfe35';
+
+function request(options, query) {
+  var deferred = Q.defer();
+  deferred.reject = deferred.reject.bind(deferred);
+
+  options.method = options.method || 'POST';
+  options.hostname = options.hostname || 'api.github.com';
+  options.headers = options.headers || {};
+
+  var headers = options.headers;
+  var body;
+  if (options.method === 'POST') {
+    body = JSON.stringify(query);
+    headers['Content-Type'] = 'application/json';
+    headers['Content-Length'] = Buffer.byteLength(body);
+  }
+  else if (options.method === 'GET' && query) {
+    options.url += '?' + querystring.stringify(query);
+  }
+  headers.Accept = 'application/json';
+  console.log(options);
+  var req = https.request(options, function (res) {
+    res.on('error', deferred.reject);
+    var body = '';
+    res.on('data', function (chunk) {
+      body += chunk;
+    });
+    res.on('end', function () {
+      if (res.code >= 400) {
+        deferred.reject(new Error(res.code + ': ' + body));
+        return;
+      }
+      var message;
+      try {
+        message = JSON.parse(body);
+      }
+      catch (err) {
+        deferred.reject(err);
+        return;
+      }
+      if (message.error) {
+        return deferred.reject(message.error);
+      }
+      deferred.resolve(message);
+    });
+  });
+  req.on('error', deferred.reject);
+  if (body) {
+    req.write(body);
+  }
+  req.end();
+  return deferred.promise;
+}
+
 
 function handler(req, res) {
   var cookies = cookie.parse(req.headers.cookie || '');
@@ -34,44 +90,44 @@ function handler(req, res) {
   var pathname = urlParse(req.url).pathname;
 
   if (pathname === '/github') {
-    var query = urlParse(req.url, true).query;
-    var body = JSON.stringify({
+    var code = urlParse(req.url, true).query.code;
+    return request({
+      hostname: 'github.com',
+      path: '/login/oauth/access_token'
+    }, {
       client_id: client_id,
       client_secret: client_secret,
-      code: query.code
-    });
-    var post = https.request({
-      method: 'POST',
-      hostname: 'github.com',
-      path: '/login/oauth/access_token',
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(body),
-        'Accept': 'application/json'
-      }
-    }, function (response) {
-      var result = '';
-      response.on('data', function (chunk) {
-        result += chunk;
+      code: code
+    }).then(function (result) {
+      session.access_token = result.access_token;
+      session.token_type = result.token_type;
+      return request({
+        method: 'GET',
+        path: '/user',
+        headers: {
+          'Authorization': 'token ' + session.access_token
+        }
       });
-      response.on('end', function () {
-        var body = JSON.parse(result);
-        session.access_token = body.access_token;
-        session.token_type = body.token_type;
-        res.setHeader('Content-Type', 'text/html');
-        res.end('<script>window.parent.postMessage(true, "*");window.close();</script>');
+    }).then(function (result) {
+      session.user = result;
+      session.username = result.login + '@github';
+      res.setHeader('Content-Type', 'text/html');
+      var message = JSON.stringify(session, function (key, value) {
+        if (key === 'transport') { return; }
+        return value;
       });
+      res.end('<script>window.parent.postMessage(' + message + ', "*");window.close();</script>');
+    }).fail(function (err) {
+      console.error('OAUTH ERROR:', err);
+      res.code = 500;
+      res.end(err);
     });
-    post.write(body);
-    post.end();
-    return;
   }
 
   if (pathname.slice(0, 6) === '/opjs/') {
-    send(req, pathname.slice(5))
+    return send(req, pathname.slice(5))
       .root(pathJoin(__dirname, '..', 'lib'))
       .pipe(res);
-    return;
   }
 
   send(req, pathname)
@@ -81,7 +137,7 @@ function handler(req, res) {
 
 var api = {
   'update': function (request, transport) {
-    var target = session[request.to].transport;
+    var target = sessions[request.to].transport;
     if (!target) {
       throw new Error('Invalid transport ID');
     }
@@ -89,45 +145,22 @@ var api = {
     return target.request('update', request);
   },
   'bye': function (request, transport) {
-    var target = session[request.to].transport;
+    var target = sessions[request.to].transport;
     if (!target) {
       throw new Error('Invalid transport ID');
     }
     request.from = transport.id;
     return target.request('bye', request);
   },
-  'session-create': function (request, transport) {
-    var username = request.username;
-    if (!username) {
-      throw new Error('Missing username field');
-    }
-
-    var session = transport;
-
-    var list = sessions[username];
-    if (!list) {
-      sessions[username] = [session];
-    }
-    else {
-      list.push(session);
-    }
-
-    return {
-      server: 'node.js ' + process.version,
-      id: transport.id
-    };
-  },
-  'session-delete': function (request) {
-    console.error('TODO: Implement session-delete request handler', request);
-  },
-  'session-keep-alive': function (request) {
-    console.error('TODO: Implement session-keep-alive request handler', request);
-  },
   'peer-location-find': function (request, transport) {
     request.from = transport.id;
     var username = request.username;
-    var list = sessions[username] || [];
-    var locations = list.map(function (targetTransport) {
+    var transports = Object.keys(sessions).filter(function (id) {
+      return sessions[id].username === username;
+    }).map(function (id) {
+      return sessions[id].transport;
+    });
+    var locations = transports.map(function (targetTransport) {
       var socket = targetTransport.socket._socket;
       return {
         localAddress: socket.localAddress,
@@ -137,11 +170,11 @@ var api = {
       };
     });
 
-    list.forEach(function (targetTransport) {
+    locations.forEach(function (targetTransport) {
       targetTransport.peerLocationFind(request).then(function (reply) {
         reply.from = targetTransport.id;
         transport.result(request, reply, true);
-      }, function(reason) {
+      }, function (reason) {
         transport.fail(request, reason);
       });
     });
@@ -173,7 +206,7 @@ function wsHandler(socket) {
         list.splice(index, 1);
       }
     });
-    delete transports[id];
+    delete sessions[id];
   });
 }
 
