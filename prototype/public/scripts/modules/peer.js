@@ -163,7 +163,11 @@ define([
     }
   });
 
-  Peer.GitHub = Peer.extend({
+  // models
+  // Map of identity provider name to specialized Peer Model constructor.
+  var models = {};
+
+  models.GitHub = Peer.extend({
     defaults: {
       domain: 'github'
     },
@@ -177,8 +181,8 @@ define([
     }
   });
 
-  Peer.GitHub.Peers = Peers.extend({
-    model: Peer.GitHub,
+  models.GitHub.Peers = Peers.extend({
+    model: models.GitHub,
     url: function() {
       return 'https://api.github.com/users/' + this.user.get('name') +
         '/following';
@@ -187,6 +191,7 @@ define([
 
   return {
     Model: Peer,
+    models: models,
     Collection: Peers
   };
 });

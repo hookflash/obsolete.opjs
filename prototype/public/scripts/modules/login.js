@@ -41,7 +41,7 @@ define([
       requestAuth(this.handleAuth.bind(this, provider));
     },
     handleAuth: function(provider, data) {
-      var PeerModel = Peer.Model[provider] || Peer.Model;
+      var PeerModel = Peer.models[provider];
       var user;
       if (data.error) {
         this._dfd.reject(data.error);
