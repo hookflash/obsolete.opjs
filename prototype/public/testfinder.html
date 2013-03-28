@@ -95,7 +95,6 @@ require(['transport', 'dombuilder', 'q'], function (Transport, domBuilder, Q) {
   var transport = new Transport({
     'invite': function (request, transport) {
       return {
-        peer: true,
         blob: (Math.random() * 0x100000000).toString(32)
       };
     },
