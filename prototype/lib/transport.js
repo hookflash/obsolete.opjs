@@ -126,6 +126,9 @@
   };
 
   Transport.prototype.fail = function (request, reason) {
+    if (reason instanceof Error) {
+      reason = reason.stack;
+    }
     var message = {
       $id: request.$id,
       $timestamp: Date.now() / 1000,
