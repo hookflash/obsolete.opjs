@@ -39,7 +39,6 @@ function request(options, query) {
     options.url += '?' + querystring.stringify(query);
   }
   headers.Accept = 'application/json';
-  console.log(options);
   var req = https.request(options, function (res) {
     res.on('error', deferred.reject);
     var body = '';
@@ -80,16 +79,38 @@ function handler(req, res) {
     do {
       id = (Math.random() * 0x100000000).toString(32);
     } while (id in sessions);
-    sessions[id] = {};
+    sessions[id] = {id: id};
   }
   var session = sessions[id];
 
-
-  res.setHeader('Set-Cookie', [
+  var cookies = [
     cookie.serialize('session_id', id, { path: '/' }),
     cookie.serialize('client_id', client_id, { path: '/' }),
-  ]);
+    cookie.serialize('access_token', session.access_token || '', { path: '/' })
+  ];
+  res.setHeader('Set-Cookie', cookies);
   var pathname = urlParse(req.url).pathname;
+
+  if (pathname === '/logout') {
+    delete sessions[id];
+    res.writeHead(302, {
+      Location: '/'
+    });
+    return res.end();
+  }
+
+
+  if (pathname === '/session') {
+    var body = JSON.stringify(session, function (key, value) {
+      if (key === 'transport') { return; }
+      return value;
+    });
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(body)
+    });
+    return res.end(body);
+  }
 
   if (pathname === '/github') {
     var code = urlParse(req.url, true).query.code;
@@ -111,15 +132,21 @@ function handler(req, res) {
     }).then(function (result) {
       session.username = result.login + '@github';
       session.user = result;
-      res.setHeader('Content-Type', 'text/html');
       var message = JSON.stringify(session, function (key, value) {
         if (key === 'transport') { return; }
         return value;
       });
-      res.end('<script>window.parent.postMessage(' + message + ', "*");window.close();</script>');
+      res.writeHead(302, {
+        Location: process.env.HOME_URL || '/'
+      });
+      res.end();
     }).fail(function (err) {
-      console.error('OAUTH ERROR:', err);
+      if (err instanceof Error) {
+        err = err.stack;
+      }
+      console.error(err);
       res.code = 500;
+      res.setHeader('Content-Type', 'text/plain');
       res.end(err);
     });
   }
@@ -198,8 +225,8 @@ function wsHandler(socket) {
   transport.id = id;
   transport.open(socket);
   transport.on('closed', function (reason) {
-    console.log('socket closed: ' + reason);
-    delete sessions[id];
+    console.log('socket closed:', reason);
+    delete session.transport;
   });
 }
 

@@ -50,25 +50,15 @@ require.config({
 });
 require(['transport', 'dombuilder', 'q'], function (Transport, domBuilder, Q) {
 
-  function githubLogin() {
+  function abutton(label) {
     var deferred = new Q.defer();
     document.body.appendChild(domBuilder([
       ["button", {onclick: function (evt) {
-        var child = window.open('https://github.com/login/oauth/authorize'
-          + '?client_id=' + client_id
-          + '&state=' + id, "github_oauth", "menubar=no,location=no,resizable=yes,scrollbars=yes,status=no,width=960,height=640");
-        var button = this;
-        child.addEventListener('message', function (evt) {
-          evt.preventDefault();
-          evt.stopPropagation();
-          document.body.removeChild(button);
-          var data = evt.data;
-          if (data.error) {
-            return deferred.reject(data.error);
-          }
-          deferred.resolve(data);
-        }, false);
-      }}, "Log in using Github..."]
+        evt.preventDefault();
+        evt.stopPropagation();
+        document.body.removeChild(this);
+        deferred.resolve();
+      }}, label]
     ]));
     return deferred.promise;
   }
@@ -90,8 +80,25 @@ require(['transport', 'dombuilder', 'q'], function (Transport, domBuilder, Q) {
     return deferred.promise;
   }
 
-  document.body.textContent = '';
-  var url = window.location.toString().replace(/^http/, 'ws');
+  var cookie = {};
+  document.cookie.split(/; */).forEach(function (part) {
+    var index = part.indexOf('=');
+    cookie[part.substr(0, index)] = part.substr(index + 1);
+  });
+
+  // If not logged in, show a login button
+  if (!cookie.access_token) {
+    return abutton("Log in using Github...").then(function () {
+      window.location = 'https://github.com/login/oauth/authorize' +
+        '?client_id=' + cookie.client_id + '&state=' + cookie.session_id;
+    });
+  }
+
+  // We have a token, let's query github for some stuff.
+  document.body.appendChild(domBuilder([
+    ["h1", cookie.access_token]
+  ]));
+  console.log('Github authentication success', cookie);
   var transport = new Transport({
     'invite': function (request, transport) {
       return {
@@ -103,26 +110,28 @@ require(['transport', 'dombuilder', 'q'], function (Transport, domBuilder, Q) {
       throw new Error("TODO: Implement update");
     }
   });
-
-  var id = document.cookie.match(/session_id=([^;]*)/)[1];
-  var client_id = document.cookie.match(/client_id=([^;]*)/)[1];
-
+  var url = window.location.toString().replace(/^http/, 'ws');
   transport.open(new WebSocket(url))
-  .then(function (result) {
-    return githubLogin();
-  })
-  .then(function (session) {
-    console.log('SESSION', session);
+  .then(function () {
+    console.log("Websocket connection success", transport);
     return aprompt('Friendname:', 'Call Friend');
   })
   .then(function (friendname) {
+    if (friendname.indexOf('@') < 0) {
+      friendname += '@github';
+    }
     var blob = (Math.random() * 0x100000000).toString(32);
+    console.log("Calling friend", {
+      friendname: friendname,
+      blob: blob
+    });
     return transport.peerLocationFind(friendname, blob);
   })
   .then(function (reply) {
-    console.log("find-reply!", reply);
+    console.log("Find reply", reply);
   })
   .fail(function (err) {
+    console.error(err);
     throw err;
   });
 });
