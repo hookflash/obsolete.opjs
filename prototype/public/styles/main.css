@@ -56,14 +56,30 @@ body {
   margin-bottom: 0.6em;
 } .contacts .contact {
   display: block;
-  border-bottom: solid 1px #888;
-  padding: 0.5em 0.3em;
+  border-bottom: solid 1px #bbb;
+  padding: 0.2em 0.3em 0.2em 2.6em;
+  position: relative;
 }
 
-.contact .name {
-  float: left;
+.contact .identifier {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+} .contact:hover .identifier {
+  overflow: visible;
+} .contact .domain {
+  color: #555;
+  font-size: 0.8em;
+} .contact .domain:before {
+  content: '@';
+} .contact .avatar {
+  height: 2.2em;
+  border: solid 1px #444;
+  margin-right: 0.4em;
+  vertical-align: middle;
+  position: absolute;
+  left: 0;
 } .contact .options {
-  float: right;
   visibility: hidden;
 } .contact:hover .options {
   visibility: visible;

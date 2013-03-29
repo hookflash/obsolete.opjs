@@ -182,6 +182,7 @@ define([
     parse: function(attrs) {
       var whitelist = {};
       whitelist.name = attrs.login;
+      whitelist.avatarUrl = attrs.avatar_url;
       return whitelist;
     }
   });
