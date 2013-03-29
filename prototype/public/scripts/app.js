@@ -1,8 +1,10 @@
 require([
   'modules/peer', 'modules/transport', 'modules/layout', 'modules/login',
-  'modules/incoming-call', 'jquery'
-  ], function(Peer, Transport, Layout, Login, IncomingCall, $) {
+  'modules/incoming-call', 'modules/util'
+  ], function(Peer, Transport, Layout, Login, IncomingCall, util) {
   'use strict';
+
+  var cookies = util.parseCookies(document.cookie);
 
   var config = {
     socketServer: 'ws://' + window.location.host
@@ -120,24 +122,13 @@ require([
     peer.destroy();
   });
 
-  var loginView = new Login.View();
+  var loginView = new Login.View({ cookies: cookies });
   loginView.$el.appendTo('body');
   loginView.render();
   loginView
     .then(function(result) {
-        var Contacts = result.user.getCollection();
-        var contacts = new Contacts(null, {
-          transport: transport,
-          user: result.user
-        });
-
-        $.ajaxPrefilter(result.prefilter);
         user = result.user;
-        layout.setContacts(contacts);
-
-        return contacts.fetch();
-      })
-    .then(function() {
+        layout.setContacts(result.contacts);
         layout.render();
         return transport.open(new WebSocket(config.socketServer));
       })

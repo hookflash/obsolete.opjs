@@ -5,22 +5,9 @@ define([
   ], function(html, Peer, OauthPrefilter, Backbone, _, Q, $) {
   'use strict';
 
-  var RequestStrategies = {
-    GitHub: function(callback) {
-      var match = document.cookie.match(/session_id=([^;]*)/);
-      var sessionId, clientId, child;
-      sessionId = match && match[1];
-      match = document.cookie.match(/client_id=([^;]*)/);
-      clientId = match && match[1];
-      child = window.open('https://github.com/login/oauth/authorize' +
-          '?client_id=' + clientId + '&state=' + sessionId,
-        'github_oauth',
-        'menubar=no,location=no,resizable=yes,scrollbars=yes,status=no,' +
-          'width=960,height=640');
-      child.addEventListener('message', function (event) {
-        callback(event.data);
-      }, false);
-    }
+  var AuthEndpoints = {
+    GitHub: 'https://github.com/login/oauth/authorize' +
+      '?client_id=<%= client_id %>&state=<%= session_id %>'
   };
 
   var LoginView = Backbone.Layout.extend({
@@ -29,46 +16,40 @@ define([
       'click .btn[data-provider]': 'requestAuth'
     },
     template: _.template(html),
-    initialize: function() {
+    initialize: function(options) {
       var dfd = this._dfd = Q.defer();
       var prms = dfd.promise;
-      prms.fin(this.remove.bind(this));
+      this.cookies = options.cookies;
       this.then = prms.then.bind(prms);
+      if (this.cookies.access_token) {
+        // thing
+        $.ajaxPrefilter(OauthPrefilter.create('GitHub', this.cookies.access_token));
+        var user = new Peer.models.GitHub();
+        var Collection = user.getCollection();
+        var contacts = new Collection();
+        Q.all([user.fetch(), contacts.fetch()]).then(function() {
+            this.remove();
+            dfd.resolve({ user: user, contacts: contacts });
+          }.bind(this), function() {
+            this.render();
+          }.bind(this));
+      }
+    },
+    redirect: function(location) {
+      window.location = location;
     },
     requestAuth: function(event) {
-      var provider = $(event.target).data('provider');
-      var requestAuth = RequestStrategies[provider];
       event.preventDefault();
-      requestAuth(this.handleAuth.bind(this, provider));
-    },
-    handleAuth: function(provider, data) {
-      var PeerModel = Peer.models[provider];
-      var user, prefilter;
-
-      if (data.error) {
-        this._dfd.reject(data.error);
-        return;
-      }
-
-      user = new PeerModel(data.user, { parse: true });
-      prefilter = OauthPrefilter.create(provider, data.access_token);
-
-      this._dfd.resolve({
-        prefilter: prefilter,
-        user: user
-      });
-    },
-    serialize: function() {
-      return {
-        login: {
-          isPending: this.isPending
-        }
-      };
+      var provider = $(event.target).data('provider');
+      var endpointTmpl = _.template(AuthEndpoints[provider]);
+      console.log(Object.keys(this.cookies));
+      var endpoint = endpointTmpl(this.cookies);
+      this.redirect(endpoint);
     }
   });
 
   return {
-    RequestStrategies: RequestStrategies,
+    AuthEndpoints: AuthEndpoints,
     View: LoginView
   };
 });

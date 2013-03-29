@@ -172,7 +172,12 @@ define([
       domain: 'github'
     },
     url: function() {
-      return 'https://api.github.com/users/' + this.get('name');
+      var name = this.get('name');
+      if (!name) {
+        return 'https://api.github.com/user';
+      } else {
+        return 'https://api.github.com/users/' + name;
+      }
     },
     parse: function(attrs) {
       var whitelist = {};
@@ -184,8 +189,12 @@ define([
   models.GitHub.Peers = Peers.extend({
     model: models.GitHub,
     url: function() {
-      return 'https://api.github.com/users/' + this.user.get('name') +
-        '/following';
+      var name = this.user && this.user.get('name');
+      if (!name) {
+        return 'https://api.github.com/user/following';
+      } else {
+        return 'https://api.github.com/users/' + name + '/following';
+      }
     }
   });
 
