@@ -21,19 +21,20 @@ define([
       var prms = dfd.promise;
       this.cookies = options.cookies;
       this.then = prms.then.bind(prms);
+      this.status = { prompt: true };
       if (this.cookies.access_token) {
-        // thing
-        $.ajaxPrefilter(OauthPrefilter.create('GitHub', this.cookies.access_token));
-        var user = new Peer.models.GitHub();
-        var Collection = user.getCollection();
-        var contacts = new Collection();
-        Q.all([user.fetch(), contacts.fetch()]).then(function() {
-            this.remove();
-            dfd.resolve({ user: user, contacts: contacts });
-          }.bind(this), function() {
-            this.render();
-          }.bind(this));
+        // TODO: Infer provider from application state
+        var provider = 'GitHub';
+        dfd.resolve({
+          PeerCtor: Peer.models[provider],
+          PeersCtor: Peer.models[provider].Peers,
+          prefilter: OauthPrefilter.create(provider, this.cookies.access_token)
+        });
       }
+    },
+    setStatus: function(status) {
+      this.status = status;
+      this.render();
     },
     redirect: function(location) {
       window.location = location;
@@ -45,6 +46,11 @@ define([
       console.log(Object.keys(this.cookies));
       var endpoint = endpointTmpl(this.cookies);
       this.redirect(endpoint);
+    },
+    serialize: function() {
+      return {
+        status: this.status
+      };
     }
   });
 

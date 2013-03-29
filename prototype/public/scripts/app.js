@@ -1,7 +1,7 @@
 require([
   'modules/peer', 'modules/transport', 'modules/layout', 'modules/login',
-  'modules/incoming-call', 'modules/util'
-  ], function(Peer, Transport, Layout, Login, IncomingCall, util) {
+  'modules/incoming-call', 'modules/util', 'q', 'jquery'
+  ], function(Peer, Transport, Layout, Login, IncomingCall, util, Q, $) {
   'use strict';
 
   var cookies = util.parseCookies(document.cookie);
@@ -127,15 +127,30 @@ require([
   loginView.render();
   loginView
     .then(function(result) {
-        user = result.user;
-        layout.setContacts(result.contacts);
-        layout.render();
+
+        var prefilter = result.prefilter;
+        var Model = result.PeerCtor;
+        var Collection = result.PeersCtor;
+        var user = new Model();
+        var contacts = new Collection();
+
+        loginView.setStatus({ fetching: true });
+
+        $.ajaxPrefilter(prefilter);
+
+        return Q.all([user.fetch(), contacts.fetch()]).then(function() {
+          user = result.user;
+          layout.setContacts(contacts);
+          layout.render();
+        });
+      })
+    .then(function() {
+        loginView.setStatus({ connecting: true });
         return transport.open(new WebSocket(config.socketServer));
       })
     .then(function() {
-        console.log('Locked and loaded!');
+        loginView.remove();
       }, function(reason) {
-        // TODO: Update UI to communicate failure
-        console.error('Unable to proceed. Reason: ', reason);
+        loginView.setStatus({ error: reason });
       });
 });

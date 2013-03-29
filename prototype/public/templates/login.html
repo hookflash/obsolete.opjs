@@ -1,5 +1,12 @@
 <div class="screen"></div>
 <div class="dialog">
+  <% if (status.fetching) { %>
+  <div class="status">Fetching your public information from GitHub...</div>
+  <% } else if (status.connecting) { %>
+  <div class="status">Connecting to the Signaling Server...</div>
+  <% } else if (status.error) { %>
+  <div class="Status error">Error! <%= status.error %></div>
+  <% } else { %>
   <h1 class="title">Please Log In</h1>
   <form>
     <ul>
@@ -25,4 +32,5 @@
       </li>
     </ul>
   </form>
+  <% } %>
 </div>
