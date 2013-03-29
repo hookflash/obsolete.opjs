@@ -131,8 +131,8 @@ require([
         var prefilter = result.prefilter;
         var Model = result.PeerCtor;
         var Collection = result.PeersCtor;
-        var user = new Model();
-        var contacts = new Collection();
+        user = new Model(null, { transport: transport });
+        var contacts = new Collection(null, { transport: transport });
 
         loginView.setStatus({ fetching: true });
 
