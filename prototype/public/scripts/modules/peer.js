@@ -165,6 +165,9 @@ define([
 
   // models
   // Map of identity provider name to specialized Peer Model constructor.
+  // These specialized Models have the following responsibilities:
+  // - Defining HTTP endpoints for fetching (via the `url` method)
+  // - Normalizing model data (via the `parse` method)
   var models = {};
 
   models.GitHub = Peer.extend({
