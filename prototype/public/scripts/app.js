@@ -139,7 +139,6 @@ require([
         $.ajaxPrefilter(prefilter);
 
         return Q.all([user.fetch(), contacts.fetch()]).then(function() {
-          user = result.user;
           layout.setContacts(contacts);
           layout.render();
         });
