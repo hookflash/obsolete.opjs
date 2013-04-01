@@ -20,8 +20,10 @@ define(function() {
     },
     stopStream: {
       moz: function(videoElem) {
+        if (videoElem.mozSrcObject) {
+          videoElem.mozSrcObject.stop();
+        }
         delete videoElem.mozSrcObject;
-        videoElem.src = null;
       },
       webkit: function(videoElem) {
         videoElem.pause();
