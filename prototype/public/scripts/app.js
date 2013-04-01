@@ -83,6 +83,8 @@ require([
     update: function(msg) {
       var peer = msg && peers[msg.from];
       if (!peer) {
+        console.warn('Rejecting ICE candidate--unknown peer:', msg,
+          'Location IDs:', Object.keys(peers));
         return;
       }
       console.log('Received ICE candidate:', msg.candidate);
