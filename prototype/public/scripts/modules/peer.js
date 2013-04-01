@@ -110,8 +110,10 @@ define([
     // completed. In this case, save the candidate data to a buffer so it may
     // be sent when the request completes.
     if (!locationID) {
+      console.log('ICE: Buffering candidate.');
       this._iceBuffer.push(evt);
     } else if (candidate) {
+      console.log('ICE: Sending candidate.');
       msg = {
         type: 'candidate',
         sdpMLineIndex: evt.candidate.sdpMLineIndex,
@@ -123,7 +125,7 @@ define([
         to: locationID
       });
     } else {
-      console.log('End of candidates.');
+      console.log('ICE: End of candidates.');
     }
   };
 
@@ -131,6 +133,10 @@ define([
   // Internal method intended to send any ICE candidate data that has been
   // queued while a Peer Location Find request was being processed.
   Peer.prototype._flushIceBuffer = function() {
+    var len = this._iceBuffer.length;
+    console.log('ICE: Flushing ' + len + ' buffered candidate' +
+      (len === 1 ? '' : 's') + '.');
+
     this._iceBuffer.forEach(function(evt) {
       this._handleIceCandidate(evt);
     }, this);
