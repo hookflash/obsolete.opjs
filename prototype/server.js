@@ -83,7 +83,7 @@ function handler(req, res) {
   }
   var session = sessions[id];
 
-  var cookies = [
+  cookies = [
     cookie.serialize('session_id', id, { path: '/' }),
     cookie.serialize('client_id', client_id, { path: '/' }),
     cookie.serialize('access_token', session.access_token || '', { path: '/' })
@@ -132,10 +132,6 @@ function handler(req, res) {
     }).then(function (result) {
       session.username = result.login + '@github';
       session.user = result;
-      var message = JSON.stringify(session, function (key, value) {
-        if (key === 'transport') { return; }
-        return value;
-      });
       res.writeHead(302, {
         Location: process.env.HOME_URL || '/'
       });
@@ -164,9 +160,13 @@ function handler(req, res) {
 
 var api = {
   'update': function (request, transport) {
-    var target = sessions[request.to].transport;
+    var target = sessions[request.to];
     if (!target) {
       throw new Error('Invalid transport ID');
+    }
+    target = target.transport;
+    if (!target) {
+      throw new Error('Target session does not have transport');
     }
     request.from = transport.id;
     return target.request('update', request);
