@@ -182,6 +182,7 @@ define([
 
   Peer.prototype.destroy = function() {
     this.trigger('destroy');
+    this.unset('locationID');
     this._iceBuffer.length = 0;
     this.peerConn.close();
     delete this.peerConn;
