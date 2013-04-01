@@ -160,6 +160,9 @@ function handler(req, res) {
 
 var api = {
   'update': function (request, transport) {
+    if (!request.to) {
+      throw new Error('Missing transport ID');
+    }
     var target = sessions[request.to];
     if (!target) {
       throw new Error('Invalid transport ID');
@@ -172,9 +175,16 @@ var api = {
     return target.request('update', request);
   },
   'bye': function (request, transport) {
-    var target = sessions[request.to].transport;
+    if (!request.to) {
+      throw new Error('Missing transport ID');
+    }
+    var target = sessions[request.to];
     if (!target) {
       throw new Error('Invalid transport ID');
+    }
+    target = target.transport;
+    if (!target) {
+      throw new Error('Target session does not have transport');
     }
     request.from = transport.id;
     return target.request('bye', request);
