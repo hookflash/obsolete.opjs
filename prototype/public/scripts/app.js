@@ -47,11 +47,9 @@ require([
 
       incomingCall = new IncomingCall({ model: peer });
       layout.insertView(incomingCall).render();
+      peers[locationID] = peer;
 
       return incomingCall.then(function() {
-
-          peers[locationID] = peer;
-
           return layout.startCall(peer);
         })
         .then(function(stream) {
@@ -70,6 +68,9 @@ require([
           return {
             sessionDescription: sessionDescription
           };
+        }, function() {
+          peer.destroy();
+          delete peers[locationID];
         });
     },
     bye: function(msg) {
