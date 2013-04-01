@@ -15,6 +15,11 @@ define([
       if (options && options.connectOptions) {
         this.connectOptions = options.connectOptions;
       }
+      // Because ICE candidates may be emitted before a Peer connection is
+      // completed, the Peer should store any candidate data it receives and
+      // send once the connection is established.
+      this._iceBuffer = [];
+      this.on('change:locationID', this._flushIceBuffer, this);
     },
     validate: function(attrs) {
       if (!attrs || !attrs.name) {
@@ -98,8 +103,15 @@ define([
   Peer.prototype._handleIceCandidate = function(evt) {
     var candidate = evt && evt.candidate;
     var transport = this.getTransport();
+    var locationID = this.get('locationID');
     var msg;
-    if (candidate && transport) {
+
+    // If the locationID is unset, the Peer Location Find request has not yet
+    // completed. In this case, save the candidate data to a buffer so it may
+    // be sent when the request completes.
+    if (!locationID) {
+      this._iceBuffer.push(evt);
+    } else if (candidate) {
       msg = {
         type: 'candidate',
         sdpMLineIndex: evt.candidate.sdpMLineIndex,
@@ -108,11 +120,21 @@ define([
       };
       transport.request('update', {
         candidate: msg,
-        to: this.get('locationID')
+        to: locationID
       });
     } else {
       console.log('End of candidates.');
     }
+  };
+
+  // _flushIceBuffer
+  // Internal method intended to send any ICE candidate data that has been
+  // queued while a Peer Location Find request was being processed.
+  Peer.prototype._flushIceBuffer = function() {
+    this._iceBuffer.forEach(function(evt) {
+      this._handleIceCandidate(evt);
+    }, this);
+    this._iceBuffer.length = 0;
   };
 
   Peer.prototype._handleAddStream = function(event) {
@@ -143,6 +165,7 @@ define([
 
   Peer.prototype.destroy = function() {
     this.trigger('destroy');
+    this._iceBuffer.length = 0;
     this.peerConn.close();
     delete this.peerConn;
   };
