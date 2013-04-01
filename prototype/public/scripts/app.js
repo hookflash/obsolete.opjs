@@ -7,8 +7,7 @@ require([
   var cookies = util.parseCookies(document.cookie);
 
   var config = {
-    socketServer: 'ws' + (window.location.protocol === 'https:' ? 's' : '') +
-      '://' + window.location.host
+    socketServer: document.location.origin.toString().replace(/^http/, 'ws')
   };
   var user;
   // peers
