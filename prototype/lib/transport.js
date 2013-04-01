@@ -112,8 +112,8 @@
     };
     socket.onclose = function (evt) {
       transport.emit('closed', evt.reason);
-      if (!evt.wasClean) {
-        transport.emit('error', new Error(evt.reason));
+      if (evt.wasClean === false && evt.reason) {
+        transport.emit('error', evt.reason);
       }
       deferred.reject();
     };

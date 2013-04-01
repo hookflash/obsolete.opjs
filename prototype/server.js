@@ -238,6 +238,9 @@ function wsHandler(socket) {
     console.log('socket closed:', reason);
     delete session.transport;
   });
+  transport.on('error', function (err) {
+    console.error('Transport ERROR:', err);
+  });
 }
 
 // Start the server(s)
