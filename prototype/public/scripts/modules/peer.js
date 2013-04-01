@@ -133,14 +133,25 @@ define([
   // Internal method intended to send any ICE candidate data that has been
   // queued while a Peer Location Find request was being processed.
   Peer.prototype._flushIceBuffer = function() {
-    var len = this._iceBuffer.length;
+    var buffer, len;
+
+    // Do not flush the buffer if the location ID is unset
+    if (!this.get('locationID')) {
+      return;
+    }
+
+    // Create a temporary copy of the buffer and clear the original prior to
+    // re-sending the candidates.
+    buffer = this._iceBuffer.slice();
+    len = buffer.length;
     console.log('ICE: Flushing ' + len + ' buffered candidate' +
       (len === 1 ? '' : 's') + '.');
 
-    this._iceBuffer.forEach(function(evt) {
+    this._iceBuffer.length = 0;
+
+    buffer.forEach(function(evt) {
       this._handleIceCandidate(evt);
     }, this);
-    this._iceBuffer.length = 0;
   };
 
   Peer.prototype._handleAddStream = function(event) {
