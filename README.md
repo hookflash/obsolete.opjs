@@ -1,6 +1,36 @@
-opjs
-====
+*Status: DEV*
 
-Open Peer SDK for JavaScript - WebRTC P2P signalling, federated identities and more
+Open Peer SDK for JavaScript
+============================
 
-This is under *heavy* development.  Please don't try to use this code yet.
+WebRTC P2P signalling, federated identities and more.
+
+
+Usage
+-----
+
+*TODO: Instructions on how to use the SDK*
+
+
+Development
+-----------
+
+Development of this SDK is done via a development UI:
+
+	make install-dev
+	node dev
+	open http://localhost:8080/
+
+Development Process:
+
+  1. Launch UI
+  2. Run all tests (only proceed if all pass)
+  3. Make changes
+  4. Run/write individual tests to verify changes
+  5. Run all tests (only proceed if all pass)
+  6. Commit
+
+Notes:
+
+  * OpenPeer library source: `./lib`
+  * Client tests: `./dev/tests`

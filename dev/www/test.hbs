@@ -1,0 +1,17 @@
+<div id="mocha"></div>
+
+<script>
+
+window.__TestHarnessReady.then(function() {
+
+	mocha.setup('bdd');
+	var expect = chai.expect;
+	var assert = chai.assert;
+
+	{{{tests}}}
+
+	mocha.run();
+
+});
+
+</script>
