@@ -21,10 +21,6 @@ BODY > TABLE > TBODY > TR > TD > H1 {
 	font-size: 16px;
 }
 
-BODY > TABLE > TBODY > TR > TD > UL > LI {
-	margin-bottom: 5px;
-}
-
 BODY > TABLE > TBODY > TR > TD:nth-child(1) {
 	width: 30%;
 	background-color: #ececec;
