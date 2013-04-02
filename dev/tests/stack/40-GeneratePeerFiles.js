@@ -1,7 +1,7 @@
 
 define(function() {
 
-	suite("ConnectToFinder", function() {
+	suite("GeneratePeerFiles", function() {
 
 		test("TODO", function() {
 		});

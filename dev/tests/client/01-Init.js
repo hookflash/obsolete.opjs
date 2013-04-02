@@ -1,16 +1,24 @@
 
-describe("Init", function() {
+define(['opjs/OpenPeer'], function(OpenPeer) {
 
-	describe("OpenPeer", function() {
+	'use strict';
 
-		it("should be a global function", function() {
-			assert.isFunction(OpenPeer);
-		});
+	suite('Init', function() {
 
-		describe("when instanciated", function() {
-			it("should give us an object", function() {
-				assert.isObject(new OpenPeer());
+		suite('OpenPeer', function() {
+
+			test('should be a function', function() {
+				assert.isFunction(OpenPeer);
 			});
+
+			suite('when instanciated', function() {
+
+				test("should give us an object", function() {
+					assert.isObject(new OpenPeer());
+				});
+
+			});
+
 		});
 
 	});

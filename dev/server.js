@@ -31,6 +31,8 @@ function main(callback) {
     });
 
     mountStaticDir(app, /^\/ui\/(.*)$/, PATH.join(__dirname, "ui"));
+    mountStaticDir(app, /^\/tests\/(.*)$/, PATH.join(__dirname, "tests"));
+    mountStaticDir(app, /^\/mocks\/(.*)$/, PATH.join(__dirname, "mocks"));
     mountStaticDir(app, /^\/lib\/opjs\/(.*)$/, PATH.join(__dirname, "../lib"));
     mountStaticDir(app, /^\/lib\/cifre\/(.*)$/, PATH.join(__dirname, "node_modules/cifre"));
     mountStaticDir(app, /^\/lib\/q\/(.*)$/, PATH.join(__dirname, "node_modules/q"));
@@ -79,7 +81,7 @@ function getTemplateData(page, callback) {
                 var name = parts[1].replace(/\.js$/, "");
                 tests.tests[parts[0]].tests.push({
                     url: "/test/" + parts[0] + "/" + name,
-                    label: name
+                    label: name.replace(/^(\d*)-/, "$1 - ")
                 });
             });
             return callback(null, tests);
@@ -89,18 +91,26 @@ function getTemplateData(page, callback) {
         return getTests(function(err, files) {
             if (err) return callback(err);
             var tests = [];
-            files.forEach(function(filepath) {
-                tests.push(FS.readFileSync(PATH.join(__dirname, "tests", filepath)).toString());
+            files.forEach(function(filepath, index) {
+                tests.push({
+                    id: "tests/" + filepath.replace(/\.js$/, ""),
+                    more: (index < (files.length-1)) ? true : false
+                });
             });
             return callback(null, {
-                tests: tests.join("\n")
+                tests: tests
             });
         });
     } else {
         var m = page.match(/^test\/(.*)$/)
         if (!m) return callback(null, {});
         return callback(null, {
-            tests: FS.readFileSync(PATH.join(__dirname, "tests", m[1] + ".js")).toString()
+            tests: [
+                {
+                    id: "tests/" + m[1],
+                    more: false
+                }
+            ]
         });
     }
 }

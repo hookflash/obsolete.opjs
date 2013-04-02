@@ -34,3 +34,4 @@ Notes:
 
   * OpenPeer library source: `./lib`
   * Client tests: `./dev/tests`
+  * Mocks for client tests: `./dev/mocks`

@@ -4,14 +4,19 @@
 
 window.__TestHarnessReady.then(function() {
 
-	mocha.setup('bdd');
-	var expect = chai.expect;
-	var assert = chai.assert;
+	mocha.setup('tdd');
+	window.expect = chai.expect;
+	window.assert = chai.assert;
 
-	{{{tests}}}
+	requirejs([
+		{{#each tests}}
+			"{{id}}"{{#if more}},{{/if}}
+		{{/each}}
+	], function() {
 
-	mocha.run();
+		mocha.run();
 
+	});
 });
 
 </script>

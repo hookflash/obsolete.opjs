@@ -1,5 +1,5 @@
 /* global suite, test, assert, beforeEach */
-define(['opjs/stack/account', 'mocks/peer'], function (Account, PeerMock) {
+define(['opjs/stack/account', 'mocks/Peer'], function (Account, PeerMock) {
   'use strict';
   suite('Account', function () {
 
