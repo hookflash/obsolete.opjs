@@ -1,9 +1,0 @@
-{
-  "name": "opjs-fake-server",
-  "version": "0.0.0",
-  "private": true,
-  "dependencies": {
-    "ws": "~0.4.25",
-    "send": "~0.1.0"
-  }
-}
