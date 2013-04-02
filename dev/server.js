@@ -1,7 +1,6 @@
 
 const PATH = require("path");
 const EXPRESS = require("express");
-const PINF = require("pinf").for(module);
 const HBS = require("hbs");
 const GLOB = require("glob");
 const FS = require("fs-extra");
@@ -41,11 +40,6 @@ function main(callback) {
 
     app.listen(8080);
     console.log("open http://localhost:8080/");
-}
-
-
-if (require.main === module) {
-	PINF.run(main);
 }
 
 
@@ -125,3 +119,13 @@ function getTests(callback) {
     });
 }
 
+
+if (require.main === module) {
+    main(function(err) {
+        if (err) {
+            console.error(err.stack);
+            process.exit(1);
+        }
+        process.exit(0);
+    });
+}
