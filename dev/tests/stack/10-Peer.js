@@ -1,5 +1,7 @@
 /* global suite, test, assert */
-define(['opjs/stack/peer'], function (Peer) {
+define([
+  'opjs/stack/peer'
+], function (Peer) {
 
   'use strict';
 

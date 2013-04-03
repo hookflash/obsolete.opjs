@@ -18,8 +18,8 @@ Development
 Development of this SDK is done via a development UI:
 
 	make install-dev
-	node dev
-	open http://localhost:8080/
+  make run-dev
+	open http://localhost:8081/
 
 Development Process:
 
@@ -35,3 +35,19 @@ Notes:
   * OpenPeer library source: `./lib`
   * Client tests: `./dev/tests`
   * Mocks for client tests: `./dev/mocks`
+
+
+Prototype
+---------
+
+Install:
+
+  make install-proto
+
+Run:
+
+  make run-proto
+
+Test:
+
+  make test-proto

@@ -1,5 +1,8 @@
 
-define(['opjs/OpenPeer'], function(OpenPeer) {
+define([
+  'opjs/OpenPeer',
+  'opjs/Stack'
+], function(OpenPeer, Stack) {
 
 	'use strict';
 
@@ -15,6 +18,22 @@ define(['opjs/OpenPeer'], function(OpenPeer) {
 
 				test("should give us an object", function() {
 					assert.isObject(new OpenPeer());
+				});
+
+			});
+
+		});
+
+		suite('Stack', function() {
+
+			test('should be a function', function() {
+				assert.isFunction(Stack);
+			});
+
+			suite('when instanciated', function() {
+
+				test("should give us an object", function() {
+					assert.isObject(new Stack());
 				});
 
 			});
