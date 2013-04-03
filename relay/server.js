@@ -127,3 +127,12 @@ function join(socket) {
     socket.send('ready');
   });
 }
+
+// drop to normal user after binding to the port
+if (!process.getuid()) {
+  // If we're running as root, drop down to a regular user after binding to 80
+  var stat = require('fs').statSync(__filename);
+  console.log('Dropping to normal user', {gid: stat.gid, uid: stat.uid});
+  process.setgid(stat.gid);
+  process.setuid(stat.uid);
+}
