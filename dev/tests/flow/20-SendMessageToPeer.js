@@ -7,15 +7,15 @@ Test is successful if messages are received and replied to.
 */
 define([
   'opjs/stack/util',
-  'opjs/OpenPeer'
-], function(Util, OpenPeer) {
+  'opjs/Stack'
+], function(Util, Stack) {
 
   suite("StartChat", function() {
 
-    var client1 = new OpenPeer({
+    var client1 = new Stack({
       deviceID: Util.randomHex(32)
     });
-    var client2 = new OpenPeer({
+    var client2 = new Stack({
       deviceID: Util.randomHex(32)
     });
 

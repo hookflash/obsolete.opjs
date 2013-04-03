@@ -7,14 +7,14 @@ Test is successful if clients are deemed to be connected to finder service.
 */
 define([
   'opjs/stack/util',
-  'opjs/OpenPeer'
-], function(Util, OpenPeer) {
+  'opjs/Stack'
+], function(Util, Stack) {
 
   suite("Connect", function() {
 
     test('one client', function(done) {
 
-      var client = new OpenPeer({
+      var client = new Stack({
         deviceID: Util.randomHex(32)
       });
 
@@ -30,10 +30,10 @@ define([
 
     test('two clients', function(done) {
 
-      var client1 = new OpenPeer({
+      var client1 = new Stack({
         deviceID: Util.randomHex(32)
       });
-      var client2 = new OpenPeer({
+      var client2 = new Stack({
         deviceID: Util.randomHex(32)
       });
 
