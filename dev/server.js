@@ -6,6 +6,8 @@ const GLOB = require("glob");
 const FS = require("fs-extra");
 const MARKED = require("marked");
 
+const PORT = 8081;
+
 
 function main(callback) {
 
@@ -39,8 +41,8 @@ function main(callback) {
 
     app.use(EXPRESS.static(PATH.join(__dirname, "www")));
 
-    app.listen(8080);
-    console.log("open http://localhost:8080/");
+    app.listen(PORT);
+    console.log("open http://localhost:" + PORT + "/");
 }
 
 
