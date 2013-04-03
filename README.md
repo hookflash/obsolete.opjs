@@ -18,7 +18,7 @@ Development
 Development of this SDK is done via a development UI:
 
 	make install-dev
-	node dev
+  make run-dev
 	open http://localhost:8080/
 
 Development Process:
