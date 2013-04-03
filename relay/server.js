@@ -50,22 +50,29 @@ console.log('TCP relay listening at', tcpServer.address());
 var peers = {};
 function join(socket) {
 
+  var timer = setTimeout(function () {
+    socket.close()
+  }, 2 * 60 * 1000);
+
   socket.once('message', function (token) {
 
     // Make sure the token is a string
     if (Buffer.isBuffer(token)) {
       token = token.toString();
     }
+    clearTimeout(timer);
 
     // If this is the first peer to submit the token, store the socket
     if (!(token in peers)) {
       peers[token] = socket;
       socket.on('end', onEarly);
       socket.on('close', onEarly);
+      timer = setTimeout(onEarly, 2 * 60 * 1000);
       socket.cleanEarly = function () {
         delete peers[token];
         socket.removeListener('end', onEarly);
         socket.removeListener('close', onEarly);
+        clearTimeout(timer);
       };
       return;
     }
@@ -79,7 +86,6 @@ function join(socket) {
     var peer = peers[token];
     peer.cleanEarly();
 
-    var timer;
     reset();
     function reset() {
       if (timer) {
