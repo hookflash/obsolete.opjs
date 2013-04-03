@@ -1,6 +1,6 @@
 /* global suite, test, assert, beforeEach */
 define([
-  'opjs/stack/account',
+  'opjs/stack/Account',
   'mocks/Peer'
 ], function (Account, PeerMock) {
 

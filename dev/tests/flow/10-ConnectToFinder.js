@@ -6,7 +6,7 @@ Test is successful if clients are deemed to be connected to finder service.
 
 */
 define([
-  'opjs/stack/util',
+  'opjs/util',
   'opjs/Stack'
 ], function(Util, Stack) {
 

@@ -1,5 +1,7 @@
 /* global suite, test, assert */
-define(['opjs/stack/message/MessageRequest'], function (MessageRequest) {
+define([
+  'opjs/stack/message/MessageRequest'
+], function (MessageRequest) {
 
   'use strict';
 

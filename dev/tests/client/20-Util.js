@@ -1,5 +1,7 @@
 /* global suite, test, assert */
-define(['opjs/stack/util'], function (util) {
+define([
+  'opjs/util'
+], function (util) {
 
   'use strict';
 

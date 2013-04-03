@@ -1,5 +1,7 @@
 /* global suite, test, assert */
-define(['opjs/stack/message/peer-finder/PeerLocationFindRequest'], function (PeerLocationFindRequest) {
+define([
+  'opjs/stack/message/peer-finder/PeerLocationFindRequest'
+], function (PeerLocationFindRequest) {
   'use strict';
 
   suite('PeerLocationFindRequest', function () {

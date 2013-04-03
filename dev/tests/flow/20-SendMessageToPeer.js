@@ -6,7 +6,7 @@ Test is successful if messages are received and replied to.
 
 */
 define([
-  'opjs/stack/util',
+  'opjs/util',
   'opjs/Stack'
 ], function(Util, Stack) {
 
