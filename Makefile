@@ -7,6 +7,8 @@ run-dev:
 
 install-proto:
 	cd prototype; npm install
+	# TMP: Until `grunt-lib-phantomjs` is republished with `phantomjs@1.9.0-1` as dependency.
+	cd prototype/node_modules/grunt-mocha/node_modules/grunt-lib-phantomjs; npm install phantomjs@1.9.0-1
 
 run-proto:
 	node prototype
