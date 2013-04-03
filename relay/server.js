@@ -1,9 +1,9 @@
-/*jshint node:true, bitwise:false*/
+/*jshint node:true*/
 'use strict';
 
 var WebSocketServer = require('ws').Server;
 var net = require('net');
-var EventEmitter = require('events').EventEmitter;
+var deFramer = require('./deframer');
 
 var wsServer = new WebSocketServer({port: 3000});
 wsServer.on('connection', function (socket) {
@@ -19,13 +19,17 @@ wsServer.on('connection', function (socket) {
   join(socket);
 });
 
+console.log('websocket relay listening at ws://localhost:3000/');
+
 var tcpServer = net.createServer(function (socket) {
   var header = new Buffer(4);
-  var emitter = new EventEmitter();
   socket.on('data', deFramer(function (frame) {
-    emitter.emit('message', frame);
+    socket.emit('message', frame);
   }));
-  emitter.send = function (message) {
+  socket.close = function () {
+    socket.end();
+  };
+  socket.send = function (message) {
     var length;
     if (Buffer.isBuffer(message)) {
       length = message.length;
@@ -37,71 +41,18 @@ var tcpServer = net.createServer(function (socket) {
     socket.write(header);
     socket.write(message);
   };
+  join(socket);
 });
 tcpServer.listen(4000);
 
-
-// A simple state machine that consumes raw bytes and emits frame events.
-// Messages are framed using 32-bit big-endian unsigned integers length headers.
-// Returns a parser function that consumes buffers.  It emits message buffers
-// via onFrame callback passed in.
-function deFramer(onFrame) {
-  var buffer;
-  var state = 0;
-  var length = 0;
-  var offset;
-  return function parse(chunk) {
-    for (var i = 0, l = chunk.length; i < l; i++) {
-      switch (state) {
-      case 0:
-        length |= chunk[i] << 24;
-        state = 1;
-        break;
-      case 1:
-        length |= chunk[i] << 16;
-        state = 2;
-        break;
-      case 2:
-        length |= chunk[i] << 8;
-        state = 3;
-        break;
-      case 3:
-        length |= chunk[i];
-        state = 4;
-        if (length > 100 * 1024 * 1024) {
-          throw new Error('Too big buffer ' + length +
-                          ', chunk: ' + chunk);
-        }
-        buffer = new Buffer(length);
-        offset = 0;
-        break;
-      case 4:
-        var len = l - i;
-        var emit = false;
-        if (len + offset >= length) {
-          emit = true;
-          len = length - offset;
-        }
-        // TODO: optimize for case where a copy isn't needed can a slice can
-        // be used instead?
-        chunk.copy(buffer, offset, i, i + len);
-        offset += len;
-        i += len - 1;
-        if (emit) {
-          onFrame(buffer);
-          state = 0;
-          length = 0;
-          buffer = undefined;
-          offset = undefined;
-        }
-        break;
-      }
-    }
-  };
-}
+console.log('TCP relay listening at', tcpServer.address());
 
 var peers = {};
 function join(socket) {
+
+  var timer = setTimeout(function () {
+    socket.close()
+  }, 2 * 60 * 1000);
 
   socket.once('message', function (token) {
 
@@ -109,23 +60,85 @@ function join(socket) {
     if (Buffer.isBuffer(token)) {
       token = token.toString();
     }
+    clearTimeout(timer);
 
     // If this is the first peer to submit the token, store the socket
     if (!(token in peers)) {
       peers[token] = socket;
+      socket.on('end', onEarly);
+      socket.on('close', onEarly);
+      timer = setTimeout(onEarly, 2 * 60 * 1000);
+      socket.cleanEarly = function () {
+        delete peers[token];
+        socket.removeListener('end', onEarly);
+        socket.removeListener('close', onEarly);
+        clearTimeout(timer);
+      };
       return;
+    }
+
+    function onEarly() {
+      socket.cleanEarly();
+      socket.close();
     }
 
     // If it's the second, we have a pair, recycle the token.
     var peer = peers[token];
-    delete peers[token];
+    peer.cleanEarly();
+
+    reset();
+    function reset() {
+      if (timer) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(onTimeout, 10 * 60 * 1000);
+    }
+    function onTimeout() {
+      console.error('Timeout');
+      onEnd();
+    }
 
     // Otherwise pipe them together
     socket.on('message', function (message) {
+      reset();
       peer.send(message);
     });
     peer.on('message', function (message) {
+      reset();
       socket.send(message);
     });
+
+    peer.on('end', onEnd);
+    socket.on('end', onEnd);
+    peer.on('close', onEnd);
+    socket.on('close', onEnd);
+    peer.on('error', onError);
+    socket.on('error', onError);
+
+    var alive = true;
+    function onEnd() {
+      if (!alive) { return; }
+      clearTimeout(timer);
+      alive = false;
+      console.log('Closing pair');
+      peer.close();
+      socket.close();
+    }
+
+    function onError(err) {
+      console.error(err.stack);
+      onEnd();
+    }
+    peer.send('ready');
+    socket.send('ready');
   });
+}
+
+// drop to normal user after binding to the port
+if (!process.getuid()) {
+  // If we're running as root, drop down to a regular user after binding to 80
+  var stat = require('fs').statSync(__filename);
+  console.log('Dropping to normal user', {gid: stat.gid, uid: stat.uid});
+  process.setgid(stat.gid);
+  process.setuid(stat.uid);
 }
