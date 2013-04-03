@@ -1,4 +1,10 @@
+/*!markdown
 
+Instanciate 1+ clients and have them connect to finder service.
+
+Test is successful if clients are deemed to be connected to finder service.
+
+*/
 define([
   'opjs/stack/util',
   'opjs/OpenPeer'

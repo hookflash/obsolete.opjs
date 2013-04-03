@@ -1,4 +1,10 @@
+/*!markdown
 
+Instanciate 2 clients and have them send messages back and forth.
+
+Test is successful if messages are received and replied to.
+
+*/
 define([
   'opjs/stack/util',
   'opjs/OpenPeer'
