@@ -4,6 +4,7 @@ const EXPRESS = require("express");
 const HBS = require("hbs");
 const GLOB = require("glob");
 const FS = require("fs-extra");
+const MARKED = require("marked");
 
 
 function main(callback) {
@@ -98,7 +99,9 @@ function getTemplateData(page, callback) {
     } else {
         var m = page.match(/^test\/(.*)$/)
         if (!m) return callback(null, {});
+        var m2 = FS.readFileSync(PATH.join(__dirname, "tests", m[1] + ".js")).toString().match(/\/\*!markdown\s*\n([\s\S]*?)\n\*\//);
         return callback(null, {
+            docs: (m2 && m2[1] && MARKED(m2[1])) || "",
             tests: [
                 {
                     id: "tests/" + m[1],
