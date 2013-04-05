@@ -13,6 +13,8 @@ function main(callback) {
 
     var app = EXPRESS();
 
+    require("./helpers/bootstrapper-middleware/app").hook(app);
+
     var hbs = HBS.create();
     
     app.set("view engine", "hbs");

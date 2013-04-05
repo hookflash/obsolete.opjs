@@ -25,7 +25,7 @@ define([
           done(null);
        
         }, done);
-      });
+      }, done);
     });
 
     test('two clients', function(done) {
@@ -47,8 +47,8 @@ define([
 
             }, done);
           }, done);
-        });
-      });
+        }, done);
+      }, done);
     });
   });
 
