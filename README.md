@@ -76,3 +76,8 @@ Initial [dotCloud](http://dotcloud.com) application setup:
       'APP_GITHUB_CLIENT_ID=<Client ID>' \
       'APP_GITHUB_CLIENT_SECRET=<Client Secret>'
     dotcloud push
+
+Deployments:
+
+  * Staging: http://opjsdemostage-hookflash.dotcloud.com/
+  * Production: http://webrtc.hookflash.me/
