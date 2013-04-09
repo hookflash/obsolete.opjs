@@ -17,9 +17,9 @@ Development
 
 Development of this SDK is done via a development UI:
 
-	make install-dev
-  make run-dev
-	open http://localhost:8081/
+    make install-dev
+    make run-dev
+    open http://localhost:8081/
 
 Development Process:
 
@@ -42,12 +42,21 @@ Prototype
 
 Install:
 
-  make install-proto
+    make install-proto
 
 Run:
 
-  make run-proto
+    make run-proto
 
 Test:
 
-  make test-proto
+    make test-proto
+
+Deploy:
+
+    make deploy-proto
+
+First time deploy setup:
+
+    sudo easy_install pip && sudo pip install dotcloud
+    dotcloud setup

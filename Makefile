@@ -5,6 +5,7 @@ install-dev:
 run-dev:
 	node dev
 
+
 install-proto:
 	cd prototype; npm install
 	# TMP: Until `grunt-lib-phantomjs` is republished with `phantomjs@1.9.0-1` as dependency.
@@ -16,3 +17,9 @@ run-proto:
 test-proto:
 	if ! hash grunt 2>/dev/null; then npm install -g grunt-cli; fi
 	cd prototype; npm test
+
+deploy-proto:
+	cd prototype; dotcloud push
+
+
+.PHONY: install-dev run-dev install-proto run-proto test-proto deploy-proto
