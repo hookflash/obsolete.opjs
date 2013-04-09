@@ -25,7 +25,7 @@ exports.connect = function(host, port, callback) {
           return self.emit("close");
         });
         self.socket.on('data', deFramer(function (chunk) {
-          return self.emit("data", chunk);
+          return self.emit("data", chunk.toString());
         }));
       }
       Client.prototype = new events.EventEmitter();

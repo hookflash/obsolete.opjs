@@ -5,6 +5,9 @@ install-dev:
 run-dev:
 	node dev
 
+test-dev:
+	cd dev; make test
+
 
 install-proto:
 	cd prototype; npm install
@@ -22,4 +25,4 @@ deploy-proto:
 	cd prototype; dotcloud push
 
 
-.PHONY: install-dev run-dev install-proto run-proto test-proto deploy-proto
+.PHONY: install-dev run-dev test-dev install-proto run-proto test-proto deploy-proto

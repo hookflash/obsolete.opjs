@@ -8,10 +8,17 @@ var deFramer = require('./deframer');
 var VERBOSE = false;
 
 
-exports.main = function(callback) {
+exports.main = function(options, callback) {
   try {
-    var wsServerPort = 3000;
-    var wsServer = new WebSocketServer({port: wsServerPort});
+
+    options = options || {};
+
+    options.connectTimeout = options.connectTimeout || 2 * 60 * 1000;
+    options.idleTimeout = options.idleTimeout || 10 * 60 * 1000;
+
+    options.wsServerPort = options.wsServerPort || 3000;
+
+    var wsServer = new WebSocketServer({port: options.wsServerPort});
     wsServer.on('connection', function (socket) {
       var realSend = socket.send;
       socket.send = function (message) {
@@ -22,17 +29,24 @@ exports.main = function(callback) {
           realSend.call(socket, message);
         }
       };
-      join(socket);
+      join(options, socket);
     });
 
-    if (VERBOSE) console.log('websocket relay listening at ws://localhost:' + wsServerPort + '/');
+    if (VERBOSE) console.log('websocket relay listening at ws://localhost:' + options.wsServerPort + '/');
 
-    var tcpServerPort = 4000;
+    options.tcpServerPort = options.tcpServerPort || 4000;
     var tcpServer = net.createServer(function (socket) {
       var header = new Buffer(4);
-      socket.on('data', deFramer(function (frame) {
+      var deFramerParser = deFramer(function (frame) {
         socket.emit('message', frame);
-      }));
+      });
+      socket.on('data', function(chunk) {
+        try {
+          deFramerParser(chunk);
+        } catch(err) {
+console.log("TODO: CLOSE SOCKET");          
+        }
+      });
       socket.close = function () {
         socket.end();
       };
@@ -48,9 +62,9 @@ exports.main = function(callback) {
         socket.write(header);
         socket.write(message);
       };
-      join(socket);
+      join(options, socket);
     });
-    tcpServer.listen(tcpServerPort);
+    tcpServer.listen(options.tcpServerPort);
 
     if (VERBOSE) console.log('TCP relay listening at', tcpServer.address());
 
@@ -60,18 +74,18 @@ exports.main = function(callback) {
 
   return callback(null, {
     wsServer: wsServer,
-    wsServerPort: wsServerPort,
+    wsServerPort: options.wsServerPort,
     tcpServer: tcpServer,
-    tcpServerPort: tcpServerPort
+    tcpServerPort: options.tcpServerPort
   });
 }
 
 var peers = {};
-function join(socket) {
+function join(options, socket) {
 
   var timer = setTimeout(function () {
     socket.close()
-  }, 2 * 60 * 1000);
+  }, options.connectTimeout);
 
   socket.once('message', function (token) {
 
@@ -86,7 +100,7 @@ function join(socket) {
       peers[token] = socket;
       socket.on('end', onEarly);
       socket.on('close', onEarly);
-      timer = setTimeout(onEarly, 2 * 60 * 1000);
+      timer = setTimeout(onEarly, options.connectTimeout);
       socket.cleanEarly = function () {
         delete peers[token];
         socket.removeListener('end', onEarly);
@@ -110,7 +124,7 @@ function join(socket) {
       if (timer) {
         clearTimeout(timer);
       }
-      timer = setTimeout(onTimeout, 10 * 60 * 1000);
+      timer = setTimeout(onTimeout, options.idleTimeout);
     }
     function onTimeout() {
       if (VERBOSE) console.error('Timeout');
@@ -145,7 +159,7 @@ function join(socket) {
     }
 
     function onError(err) {
-      console.error(err.stack);
+      console.error("SERVER ERROR", err.stack);
       onEnd();
     }
     peer.send('ready');
@@ -158,7 +172,7 @@ if (require.main === module) {
 
   VERBOSE = true;
 
-  return exports.main(function(err) {
+  return exports.main({}, function(err) {
     if (err) {
       console.error(err.stack);
       process.exit(1);

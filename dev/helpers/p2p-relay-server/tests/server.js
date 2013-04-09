@@ -5,13 +5,26 @@ const SERVER = require("../server");
 const CLIENT_TCP = require("../client-tcp");
 const CLIENT_WS = require("../client-ws");
 
+/*
+
+More tests if needed:
+
+  * connect both, send token, but matching token does not get sent within 2 mins
+  * one client connects to relay and disconnects (server needs to cleanely close and not leak)
+  * one client connects, sends token, closes before timeout (server needs to cleanup token)
+  * what if TCP client or websocket sends incorrect frames (we don't want to crash server)
+
+*/
 
 describe('server', function() {
 
 	var serverInfo = null;
 
 	it('should start ws and tcp server', function(done) {
-		return SERVER.main(function(err, info) {
+		return SERVER.main({
+			connectTimeout: 100,
+		    idleTimeout: 200
+		}, function(err, info) {
 			if (err) return done(err);
 			serverInfo = info;
 			return done(null);
@@ -84,11 +97,120 @@ describe('server', function() {
 	});
 
 	it('should connect two ws clients and relay messages', function(done) {
-		return CLIENT_WS.connect('localhost', serverInfo.tcpServerPort, function(err, client1) {
+		return CLIENT_WS.connect('localhost', serverInfo.wsServerPort, function(err, client1) {
 			if (err) return done(err);
-			return CLIENT_WS.connect('localhost', serverInfo.tcpServerPort, function(err, client2) {
+			return CLIENT_WS.connect('localhost', serverInfo.wsServerPort, function(err, client2) {
 				if (err) return done(err);
 				return testCommSequence(client1, client2, done);
+			});
+		});
+	});
+
+	it('should connect one tcp and one ws client and relay messages', function(done) {
+		return CLIENT_TCP.connect('localhost', serverInfo.tcpServerPort, function(err, client1) {
+			if (err) return done(err);
+			return CLIENT_WS.connect('localhost', serverInfo.wsServerPort, function(err, client2) {
+				if (err) return done(err);
+				return testCommSequence(client1, client2, done);
+			});
+		});
+	});
+
+	/*
+	TODO: @tim
+	it('should close connection if ws client connects to tcp port', function(done) {
+		return CLIENT_WS.connect('localhost', serverInfo.tcpServerPort, function(err, client1) {
+
+console.error("ERR", err);
+//			ASSERT(typeof err === "object");
+//			if (err) return done(err);
+		});
+	});
+	*/
+
+	it('should connect one client at a time', function(done) {
+		return CLIENT_TCP.connect('localhost', serverInfo.tcpServerPort, function(err, client1) {
+			if (err) return done(err);
+			client1.on("data", function(message) {
+				ASSERT.equal(message, "ready");
+				return done(null);
+			});
+			client1.send("secret-token");
+			return CLIENT_WS.connect('localhost', serverInfo.wsServerPort, function(err, client2) {
+				if (err) return done(err);
+				return client2.send("secret-token");
+			});
+		});
+	});
+
+	it('should close tcp client if no token within `connectTimeout`', function(done) {
+		return CLIENT_TCP.connect('localhost', serverInfo.tcpServerPort, function(err, client1) {
+			if (err) return done(err);
+			var closed = false;
+			client1.on("close", function() {
+				closed = true;
+			});
+			return setTimeout(function() {
+				ASSERT.equal(closed, true);
+				return done(null);
+				/*
+				try {
+					client1.send("secret-token");
+				} catch(err) {
+					// NOTE: The above throws with 'This socket is closed.' but for some reason
+					//       we cannot catch it.
+					ASSERT.equal(closed, true);
+					return done(null);
+				}
+				*/
+			}, 200);
+		});
+	});
+
+	it('should close ws client if no token within `connectTimeout`', function(done) {
+		return CLIENT_WS.connect('localhost', serverInfo.wsServerPort, function(err, client1) {
+			if (err) return done(err);
+			var closed = false;
+			client1.on("close", function() {
+				closed = true;
+			});
+			return setTimeout(function() {
+				try {
+					client1.send("secret-token");
+				} catch(err) {
+					ASSERT.equal(err.message, "not opened");
+					ASSERT.equal(closed, true);
+					return done(null);
+				}
+			}, 200);
+		});
+	});
+
+	it('should close clients if no message within `idleTimeout`', function(done) {
+		return CLIENT_TCP.connect('localhost', serverInfo.tcpServerPort, function(err, client1) {
+			if (err) return done(err);
+			return CLIENT_WS.connect('localhost', serverInfo.wsServerPort, function(err, client2) {
+				if (err) return done(err);
+				client1.once("data", function(message) {
+					ASSERT.equal(message, "ready");
+					client1.once("data", function(message) {
+						ASSERT.equal(message, "message1");
+						var closed = 0;
+						client1.once("close", function() {
+							closed += 1;
+						});
+						client2.once("close", function() {
+							closed += 1;
+						});
+						setTimeout(function() {
+							ASSERT.equal(closed, 2);
+							return done(null);
+						}, 300);
+					});
+					client2.send("message1");
+				});
+				client1.send("secret-token");
+				return client2.send("secret-token");
 			});
 		});
 	});
@@ -103,17 +225,3 @@ describe('server', function() {
 	});
 
 });
-
-
-/*
-
-TODO:
-
-  * connect and don't send token within timeout (2 min)
-  * connect, send token but matching token does not get sent within 2 mins
-  * both connected, been talking but no activity for 10 mins
-  * one client connects to relay and disconnects (server needs to cleanely close and not leak)
-  * one client connects, sends token, closes before timeout (server needs to cleanup token)
-  * what if TCP client or websocket sends incorrect frames (we don't want to crash server)
-    * spew invliad packates: get tim to finish this.
-*/
