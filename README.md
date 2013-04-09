@@ -5,6 +5,11 @@ Open Peer SDK for JavaScript
 
 WebRTC P2P signalling, federated identities and more.
 
+Based on the following specifications:
+
+  * [Open Peer Protocol](http://docs.openpeer.org/OpenPeerProtocolSpecification)
+  * [WebRTC 1.0: Real-time Communication Between Browsers](http://dev.w3.org/2011/webrtc/editor/webrtc.html)
+
 
 Usage
 -----
