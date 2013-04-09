@@ -38,24 +38,24 @@ Notes:
   * Mocks for client tests: `./dev/mocks`
 
 
-Prototype
----------
+Demo
+----
 
 Install:
 
-    make install-proto
+    make install-demo
 
 Run:
 
-    make run-proto
+    make run-demo
 
 Test:
 
-    make test-proto
+    make test-demo
 
 Deploy:
 
-    make deploy-proto
+    make deploy-demo
 
 First time deploy setup:
 

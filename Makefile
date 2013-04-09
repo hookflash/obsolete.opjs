@@ -9,20 +9,20 @@ test-dev:
 	cd dev; make test
 
 
-install-proto:
-	cd prototype; npm install
+install-demo:
+	cd demo; npm install
 	# TMP: Until `grunt-lib-phantomjs` is republished with `phantomjs@1.9.0-1` as dependency.
-	cd prototype/node_modules/grunt-mocha/node_modules/grunt-lib-phantomjs; npm install phantomjs@1.9.0-1
+	cd demo/node_modules/grunt-mocha/node_modules/grunt-lib-phantomjs; npm install phantomjs@1.9.0-1
 
-run-proto:
-	node prototype
+run-demo:
+	node demo
 
-test-proto:
+test-demo:
 	if ! hash grunt 2>/dev/null; then npm install -g grunt-cli; fi
-	cd prototype; npm test
+	cd demo; npm test
 
-deploy-proto:
-	cd prototype; dotcloud push
+deploy-demo:
+	cd demo; dotcloud push
 
 
-.PHONY: install-dev run-dev test-dev install-proto run-proto test-proto deploy-proto
+.PHONY: install-dev run-dev test-dev install-demo run-demo test-demo deploy-demo
