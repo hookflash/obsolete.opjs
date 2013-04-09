@@ -13,8 +13,9 @@ var cookie = require('cookie');
 var Q = require('q');
 
 var sessions = {};
-var client_id = process.env.CLIENT_ID || '2e8c9abbee702e36c03c';
-var client_secret = process.env.CLIENT_SECRET || '112bbb3ebc5a5e156a27afacd108b219938dfe35';
+// @see https://github.com/organizations/openpeer/settings/applications/39871
+var client_id = process.env.APP_GITHUB_CLIENT_ID || '2e8c9abbee702e36c03c';
+var client_secret = process.env.APP_GITHUB_CLIENT_SECRET || '112bbb3ebc5a5e156a27afacd108b219938dfe35';
 
 function request(options, query) {
   var deferred = Q.defer();

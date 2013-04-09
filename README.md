@@ -66,3 +66,11 @@ First time deploy setup:
 
     sudo easy_install pip && sudo pip install dotcloud
     dotcloud setup
+
+Initial application configuration:
+
+    cd demo
+    # Setup github application: http://developer.github.com/v3/oauth/
+    dotcloud env set \
+      'APP_GITHUB_CLIENT_ID=<Client ID>' \
+      'APP_GITHUB_CLIENT_SECRET=<Client Secret>'
