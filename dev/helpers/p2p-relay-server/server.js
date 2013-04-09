@@ -5,47 +5,66 @@ var WebSocketServer = require('ws').Server;
 var net = require('net');
 var deFramer = require('./deframer');
 
-var wsServer = new WebSocketServer({port: 3000});
-wsServer.on('connection', function (socket) {
-  var realSend = socket.send;
-  socket.send = function (message) {
-    if (Buffer.isBuffer(message)) {
-      realSend.call(socket, message, {binary: true});
-    }
-    else {
-      realSend.call(socket, message);
-    }
-  };
-  join(socket);
-});
+var VERBOSE = false;
 
-console.log('websocket relay listening at ws://localhost:3000/');
 
-var tcpServer = net.createServer(function (socket) {
-  var header = new Buffer(4);
-  socket.on('data', deFramer(function (frame) {
-    socket.emit('message', frame);
-  }));
-  socket.close = function () {
-    socket.end();
-  };
-  socket.send = function (message) {
-    var length;
-    if (Buffer.isBuffer(message)) {
-      length = message.length;
-    }
-    else {
-      length = Buffer.byteLength(message);
-    }
-    header.writeUInt32BE(length, 0);
-    socket.write(header);
-    socket.write(message);
-  };
-  join(socket);
-});
-tcpServer.listen(4000);
+exports.main = function(callback) {
+  try {
+    var wsServerPort = 3000;
+    var wsServer = new WebSocketServer({port: wsServerPort});
+    wsServer.on('connection', function (socket) {
+      var realSend = socket.send;
+      socket.send = function (message) {
+        if (Buffer.isBuffer(message)) {
+          realSend.call(socket, message, {binary: true});
+        }
+        else {
+          realSend.call(socket, message);
+        }
+      };
+      join(socket);
+    });
 
-console.log('TCP relay listening at', tcpServer.address());
+    if (VERBOSE) console.log('websocket relay listening at ws://localhost:' + wsServerPort + '/');
+
+    var tcpServerPort = 4000;
+    var tcpServer = net.createServer(function (socket) {
+      var header = new Buffer(4);
+      socket.on('data', deFramer(function (frame) {
+        socket.emit('message', frame);
+      }));
+      socket.close = function () {
+        socket.end();
+      };
+      socket.send = function (message) {
+        var length;
+        if (Buffer.isBuffer(message)) {
+          length = message.length;
+        }
+        else {
+          length = Buffer.byteLength(message);
+        }
+        header.writeUInt32BE(length, 0);
+        socket.write(header);
+        socket.write(message);
+      };
+      join(socket);
+    });
+    tcpServer.listen(tcpServerPort);
+
+    if (VERBOSE) console.log('TCP relay listening at', tcpServer.address());
+
+  } catch(err) {
+    return callback(err);
+  }
+
+  return callback(null, {
+    wsServer: wsServer,
+    wsServerPort: wsServerPort,
+    tcpServer: tcpServer,
+    tcpServerPort: tcpServerPort
+  });
+}
 
 var peers = {};
 function join(socket) {
@@ -94,7 +113,7 @@ function join(socket) {
       timer = setTimeout(onTimeout, 10 * 60 * 1000);
     }
     function onTimeout() {
-      console.error('Timeout');
+      if (VERBOSE) console.error('Timeout');
       onEnd();
     }
 
@@ -120,7 +139,7 @@ function join(socket) {
       if (!alive) { return; }
       clearTimeout(timer);
       alive = false;
-      console.log('Closing pair');
+      if (VERBOSE) console.log('Closing pair');
       peer.close();
       socket.close();
     }
@@ -134,11 +153,24 @@ function join(socket) {
   });
 }
 
-// drop to normal user after binding to the port
-if (!process.getuid()) {
-  // If we're running as root, drop down to a regular user after binding to 80
-  var stat = require('fs').statSync(__filename);
-  console.log('Dropping to normal user', {gid: stat.gid, uid: stat.uid});
-  process.setgid(stat.gid);
-  process.setuid(stat.uid);
+
+if (require.main === module) {
+
+  VERBOSE = true;
+
+  return exports.main(function(err) {
+    if (err) {
+      console.error(err.stack);
+      process.exit(1);
+    }
+
+    // drop to normal user after binding to the port
+    if (!process.getuid()) {
+      // If we're running as root, drop down to a regular user after binding to 80
+      var stat = require('fs').statSync(__filename);
+      console.log('Dropping to normal user', {gid: stat.gid, uid: stat.uid});
+      process.setgid(stat.gid);
+      process.setuid(stat.uid);
+    }    
+  });
 }

@@ -4,5 +4,11 @@
   "private": true,
   "dependencies": {
     "ws": "~0.4.25"
+  },
+  "devDependencies": {
+    "mocha": "~1.9.0"
+  },
+  "scripts": {
+  	"test": "make test"
   }
 }
