@@ -1,5 +1,5 @@
 {
-  "name": "openpeer-relay",
+  "name": "opjs2-dev-helpers-p2p-relay-server",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
