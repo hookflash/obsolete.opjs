@@ -7,6 +7,8 @@ define([
 
   suite('Peer', function () {
 
+
+/*
     test('.isValid', function () {
       assert.isTrue(Peer.isValid('peer://domain.com/abcdef0123456789'));
       assert.isTrue(Peer.isValid('peer://sub.domain.com/abcdef0123456789'));
@@ -36,6 +38,8 @@ define([
         contactID: '34'
       }), false);
     });
+*/
+
   });
 
 });

@@ -8,6 +8,10 @@ define([
 
   suite('Account', function () {
 
+
+
+
+/*
     suite('#addPeer', function () {
       beforeEach(function () {
         this.acct = new Account();
@@ -33,5 +37,6 @@ define([
         assert.equal(added2.getPeerURI(), p2.getPeerURI());
       });
     });
+*/    
   });
 });
