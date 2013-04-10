@@ -1,6 +1,7 @@
 
 install:
 	cd helpers/p2p-relay-server; npm install
+	cd helpers/websocket-test-server; npm install
 
 test:
 	cd helpers/p2p-relay-server; make test

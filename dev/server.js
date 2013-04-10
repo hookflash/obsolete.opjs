@@ -10,41 +10,58 @@ const PORT = 8081;
 
 
 function main(callback) {
+    try {
+        var app = EXPRESS();
 
-    var app = EXPRESS();
+        require("./helpers/bootstrapper-middleware/app").hook(app);
 
-    require("./helpers/bootstrapper-middleware/app").hook(app);
+        var hbs = HBS.create();
+        
+        app.set("view engine", "hbs");
 
-    var hbs = HBS.create();
-    
-    app.set("view engine", "hbs");
-
-    app.engine("html", hbs.__express);
-    app.engine("hbs", hbs.__express);
-    app.set("views", PATH.join(__dirname, "www"));
-    app.get(/^\/($|test$|test\/.*$)/, function(req, res, next) {
-        var page = req.params[0] || "index";
-        return getTemplateData(page, function(err, data) {
-            if (err) return next(err);
-            try {
-                res.render(page.split("/")[0], data);
-            } catch(err) {
-                return next();
-            }
+        app.engine("html", hbs.__express);
+        app.engine("hbs", hbs.__express);
+        app.set("views", PATH.join(__dirname, "www"));
+        app.get(/^\/($|test$|test\/.*$)/, function(req, res, next) {
+            var page = req.params[0] || "index";
+            return getTemplateData(page, function(err, data) {
+                if (err) return next(err);
+                try {
+                    res.render(page.split("/")[0], data);
+                } catch(err) {
+                    return next();
+                }
+            });
         });
-    });
 
-    mountStaticDir(app, /^\/ui\/(.*)$/, PATH.join(__dirname, "ui"));
-    mountStaticDir(app, /^\/tests\/(.*)$/, PATH.join(__dirname, "tests"));
-    mountStaticDir(app, /^\/mocks\/(.*)$/, PATH.join(__dirname, "mocks"));
-    mountStaticDir(app, /^\/lib\/opjs\/(.*)$/, PATH.join(__dirname, "../lib"));
-    mountStaticDir(app, /^\/lib\/cifre\/(.*)$/, PATH.join(__dirname, "node_modules/cifre"));
-    mountStaticDir(app, /^\/lib\/q\/(.*)$/, PATH.join(__dirname, "node_modules/q"));
+        mountStaticDir(app, /^\/ui\/(.*)$/, PATH.join(__dirname, "ui"));
+        mountStaticDir(app, /^\/tests\/(.*)$/, PATH.join(__dirname, "tests"));
+        mountStaticDir(app, /^\/mocks\/(.*)$/, PATH.join(__dirname, "mocks"));
+        mountStaticDir(app, /^\/lib\/opjs\/(.*)$/, PATH.join(__dirname, "../lib"));
+        mountStaticDir(app, /^\/lib\/cifre\/(.*)$/, PATH.join(__dirname, "node_modules/cifre"));
+        mountStaticDir(app, /^\/lib\/q\/(.*)$/, PATH.join(__dirname, "node_modules/q"));
 
-    app.use(EXPRESS.static(PATH.join(__dirname, "www")));
+        app.use(EXPRESS.static(PATH.join(__dirname, "www")));
 
-    app.listen(PORT);
-    console.log("open http://localhost:" + PORT + "/");
+        app.listen(PORT);
+
+        return require("./helpers/websocket-test-server/server").main({}, function(err, info) {
+            if (err) {
+                return callback(err);
+            }
+
+            console.log('[websocket-test-server] started on port ' + info.port);
+
+            // TODO: Override `app._server.close` and trigger `info.server.close` as well.
+
+            console.log("open http://localhost:" + PORT + "/");
+
+            return callback(null);
+        });
+
+    } catch(err) {
+        return callback(err);
+    }
 }
 
 
@@ -133,6 +150,5 @@ if (require.main === module) {
             console.error(err.stack);
             process.exit(1);
         }
-        process.exit(0);
     });
 }
