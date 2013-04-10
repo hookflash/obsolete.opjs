@@ -44,7 +44,7 @@ exports.main = function(options, callback) {
         try {
           deFramerParser(chunk);
         } catch(err) {
-console.log("TODO: CLOSE SOCKET");          
+          socket.close();
         }
       });
       socket.close = function () {

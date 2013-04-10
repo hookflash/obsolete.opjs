@@ -12,12 +12,15 @@ exports.connect = function(host, port, callback) {
     if (VERBOSE) console.log('Connecting to relay server at %s:%s', host, port);
 
     var ws = new WebSocket('ws://' + host + ':' + port + '/');
+    ws.once('error', function (err) {
+      return callback(err);
+    });
     ws.on('open', function() {
 
       var Client = function(ws) {
         var self = this;
         self.ws = ws;
-        self.ws.on('error', function (code, description) {
+        self.ws.once('error', function (code, description) {
           return self.emit("error", new Error(code + (description ? ' ' + description : '')));
         });
         self.ws.on('close', function () {

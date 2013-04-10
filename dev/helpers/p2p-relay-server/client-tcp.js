@@ -18,7 +18,7 @@ exports.connect = function(host, port, callback) {
       var Client = function(socket) {
         var self = this;
         self.socket = socket;
-        self.socket.on('error', function (err) {
+        self.socket.once('error', function (err) {
           return self.emit("error", err);
         });
         self.socket.on('close', function () {
@@ -49,6 +49,9 @@ exports.connect = function(host, port, callback) {
       var client = new Client(socket);
 
       return callback(null, client);
+    });
+    socket.once('error', function (err) {
+      return callback(err);
     });
   } catch(err) {
     return callback(err);

@@ -116,17 +116,12 @@ describe('server', function() {
 		});
 	});
 
-	/*
-	TODO: @tim
 	it('should close connection if ws client connects to tcp port', function(done) {
 		return CLIENT_WS.connect('localhost', serverInfo.tcpServerPort, function(err, client1) {
-
-console.error("ERR", err);
-//			ASSERT(typeof err === "object");
-//			if (err) return done(err);
+			ASSERT.equal(err.message, "socket hang up");
+			return done(null);
 		});
 	});
-	*/
 
 	it('should connect one client at a time', function(done) {
 		return CLIENT_TCP.connect('localhost', serverInfo.tcpServerPort, function(err, client1) {
@@ -175,11 +170,11 @@ console.error("ERR", err);
 				closed = true;
 			});
 			return setTimeout(function() {
+				ASSERT.equal(closed, true);
 				try {
 					client1.send("secret-token");
 				} catch(err) {
 					ASSERT.equal(err.message, "not opened");
-					ASSERT.equal(closed, true);
 					return done(null);
 				}
 			}, 200);
