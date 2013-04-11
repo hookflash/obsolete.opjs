@@ -15,7 +15,19 @@
 
 	window.__TestHarnessReady = ready.promise;
 
-//	requirejs([], function() {
+	require([
+		"q/q"
+	], function(Q) {
+
+		window.HELPERS = {
+			callServerHelper: function(uri, data, callback) {
+				$.post("/.helpers/" + uri, data || {})
+				 .done(function(data) {
+				 	return callback(null, data);
+				 })
+				 .fail(callback);
+			}
+		}
 
 		// Wait for DOM to be ready.
 		$(document).ready(function() {
@@ -27,6 +39,6 @@
 			// Signal that everything is ready for use.
 			ready.resolve();
 		});
-//	});
+	});
 
 })());

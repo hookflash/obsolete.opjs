@@ -35,5 +35,26 @@ define([
       ws.close();
     });
 
+    suite('#connectTo()', function() {
+
+      test('returns promise and eventually resolves', function (done) {
+        return WS.connectTo('ws://localhost:3001').then(function(ws) {
+          ws.on('message', function(message) {
+            assert.equal(message, 'echo:message1');
+            return done(null);
+          });
+          ws.send('message1');
+        }).fail(done);
+      });
+
+      test('returns promise and eventually rejects on connect fail', function (done) {
+        return WS.connectTo('ws://localhost:-3001').then(function(ws) {
+          throw new Error("should never resolve");
+        }, function(err) {
+            return done(null);
+        }).fail(done);
+      });
+    });
+
   });
 });
