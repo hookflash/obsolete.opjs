@@ -36,7 +36,7 @@ function main(callback) {
 
                 app.engine("html", hbs.__express);
                 app.engine("hbs", hbs.__express);
-                app.set("views", PATH.join(__dirname, "www"));
+                app.set("views", PATH.join(__dirname, "views"));
                 app.get(/^\/($|test$|test\/.*$)/, function(req, res, next) {
                     var page = req.params[0] || "index";
                     return getTemplateData(page, function(err, data) {
@@ -50,13 +50,11 @@ function main(callback) {
                 });
 
                 mountStaticDir(app, /^\/ui\/(.*)$/, PATH.join(__dirname, "ui"));
-                mountStaticDir(app, /^\/tests\/(.*)$/, PATH.join(__dirname, "tests"));
+                mountStaticDir(app, /^\/tests\/(.*)$/, PATH.join(__dirname, "tests-browser"));
                 mountStaticDir(app, /^\/mocks\/(.*)$/, PATH.join(__dirname, "mocks"));
                 mountStaticDir(app, /^\/lib\/opjs\/(.*)$/, PATH.join(__dirname, "../lib"));
                 mountStaticDir(app, /^\/lib\/cifre\/(.*)$/, PATH.join(__dirname, "node_modules/cifre"));
                 mountStaticDir(app, /^\/lib\/q\/(.*)$/, PATH.join(__dirname, "node_modules/q"));
-
-                app.use(EXPRESS.static(PATH.join(__dirname, "www")));
 
                 app.listen(PORT);
 
@@ -128,7 +126,7 @@ function getTemplateData(page, callback) {
     } else {
         var m = page.match(/^test\/(.*)$/)
         if (!m) return callback(null, {});
-        var m2 = FS.readFileSync(PATH.join(__dirname, "tests", m[1] + ".js")).toString().match(/\/\*!markdown\s*\n([\s\S]*?)\n\*\//);
+        var m2 = FS.readFileSync(PATH.join(__dirname, "tests-browser", m[1] + ".js")).toString().match(/\/\*!markdown\s*\n([\s\S]*?)\n\*\//);
         return callback(null, {
             docs: (m2 && m2[1] && MARKED(m2[1])) || "",
             tests: [
@@ -143,7 +141,7 @@ function getTemplateData(page, callback) {
 
 function getTests(callback) {
     return GLOB("**/*.js", {
-        cwd: PATH.join(__dirname, "tests")
+        cwd: PATH.join(__dirname, "tests-browser")
     }, function (err, files) {
         if (err) return callback(err);
         if (!files || files.length === 0) return callback(new Error("No tests found! This should not happen."));

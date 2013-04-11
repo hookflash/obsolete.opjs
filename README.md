@@ -36,12 +36,6 @@ Development Process:
   6. `make test-dev`
   7. Commit
 
-Notes:
-
-  * OpenPeer library source: `./lib`
-  * Client tests: `./dev/tests`
-  * Mocks for client tests: `./dev/mocks`
-
 
 Demo
 ----
