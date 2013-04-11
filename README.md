@@ -28,12 +28,12 @@ Development of this SDK is done via a development UI:
 
 Development Process:
 
-  1. `make test-dev` (this runs server-side and dev UI tests)
+  1. `make test` (this runs server-side, dev UI and demo tests)
   2. Launch dev UI
   3. Run all dev UI tests
   4. Make changes
   5. Run/write individual tests to verify changes
-  6. `make test-dev`
+  6. `make test`
   7. Commit
 
 

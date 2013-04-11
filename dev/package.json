@@ -14,7 +14,8 @@
         "marked": "~0.2.8",
         "grunt": "~0.4.1",
         "grunt-mocha": "~0.3.1",
-        "request": "~2.16.6"
+        "request": "~2.16.6",
+        "waitfor": "~0.1.2"
     },
     "scripts": {
         "install": "make install"

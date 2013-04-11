@@ -5,27 +5,28 @@ const HBS = require("hbs");
 const GLOB = require("glob");
 const FS = require("fs-extra");
 const MARKED = require("marked");
+const WAITFOR = require("waitfor");
 
 const PORT = 8081;
 
 
-function main(callback) {
+exports.main = function(callback) {
     try {
         var app = EXPRESS();
 
         require("./helpers/bootstrapper-middleware/app").hook(app);
 
+        var extraServers = [];
+
         return require("./helpers/websocket-test-server/server").main({}, function(err, info) {
             if (err) return callback(err);
             console.log('[websocket-test-server] started on port ' + info.port);
-
-            // TODO: Override `app._server.close` and trigger `info.server.close` as well.
+            extraServers.push(info.server);
 
             return require("./helpers/finder-server/server").main({}, function(err, info) {
                 if (err) return callback(err);
                 console.log('[finder-server] started on port ' + info.port);
-
-                // TODO: Override `app._server.close` and trigger `info.server.close` as well.
+                extraServers.push(info.server);
 
                 info.hook(app);
 
@@ -56,12 +57,24 @@ function main(callback) {
                 mountStaticDir(app, /^\/lib\/cifre\/(.*)$/, PATH.join(__dirname, "node_modules/cifre"));
                 mountStaticDir(app, /^\/lib\/q\/(.*)$/, PATH.join(__dirname, "node_modules/q"));
 
-                app.listen(PORT);
-
+                var server = app.listen(PORT);
+                var origClose = server.close;
+                server.close = function(callback) {
+                    var waitfor = WAITFOR.serial(function(err) {
+                        if (err) return callback(err);
+                        return origClose(callback);
+                    });
+                    extraServers.forEach(function(server) {
+                        waitfor(server.close);
+                    });
+                }
 
                 console.log("open http://localhost:" + PORT + "/");
 
-                return callback(null);
+                return callback(null, {
+                    server: server,
+                    port: PORT
+                });
             });
         });
 
@@ -151,7 +164,7 @@ function getTests(callback) {
 
 
 if (require.main === module) {
-    main(function(err) {
+    exports.main(function(err) {
         if (err) {
             console.error(err.stack);
             process.exit(1);

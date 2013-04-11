@@ -10,7 +10,7 @@ define([
   'opjs/Stack'
 ], function(Util, Stack) {
 
-  suite("StartChat", function() {
+  suite("SendMessageToPeer", function() {
 
     var client1 = new Stack({
       deviceID: Util.randomHex(32)
