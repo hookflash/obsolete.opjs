@@ -83,6 +83,17 @@ define([
         }).fail(done);
       });
 
+      test('`.getCertificates()` returns promise that resolves to object', function(done) {
+        var id = "peer://" + Util.getHost() + "/e433a6f9793567217787e33950211453582cadff";
+        var bootstrapper = new Bootstrapper(new StackMock(), id);
+        var certificates = bootstrapper.getCertificates();
+        assert.isTrue(Q.isPromise(certificates));
+        return certificates.then(function(certificates) {
+          assert.isArray(certificates);
+          return done(null);
+        }).fail(done);
+      });
+
     });
 
   });

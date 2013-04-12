@@ -45,10 +45,68 @@ exports.hook = function(options, app) {
 
 	// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#BootstrappedFinderServiceRequests-FindersGetRequest
 	app.post(/^\/.helpers\/bootstrapper-middleware\/finders-get$/, respond);
+
+	// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#CertificatesServiceRequests-CertificatesGetRequest
+	app.post(/^\/.helpers\/bootstrapper-middleware\/certificates-get$/, respond);
 }
 
 function getPayload(handler, method, options) {
 
+	if (handler === "certificates" && method === "certificates-get") {
+		return {
+			"result": {
+			    "$domain": "example.com",
+			    "$appid": "xyz123",
+			    "$id": "abc123",
+			    "$handler": "certificates",
+			    "$method": "certificates-get",
+			    "$timestamp": 439439493,
+
+			    "certificates": {
+			      "certificateBundle": [
+			        {
+			          "certificate": {
+			            "$id": "4bf7fff50ef9bb07428af6294ae41434da175538",
+			            "service": "finder",
+			            "expires": 48348383,
+			            "key": { "x509Data": "MIIDCCA0+gA...lVN" }
+			          },
+			          "signature": {
+			            "reference": "#4bf7fff50ef9bb07428af6294ae41434da175538",
+			            "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+			            "digestValue": "jeirjLrta6skoV5/A8Q38Gj4j323=",
+			            "digestSigned": "DEf...GM~C0/Ez=",
+			            "key": {
+			              "$id": "9bdd14...dda3fddd5bd2",
+			              "domain": "example.com",
+			              "service": "bootstrapper"
+			            }
+			          }
+			        },
+			        {
+			          "certificate": {
+			            "$id": "9bdd14...dda3fddd5bd2",
+			            "service": "bootstrapper",
+			            "expires": 48348383,
+			            "key": { "x509Data": "OWJkZD...GQ1YmQy=" }
+			          },
+			          "signature": {
+			            "reference": "#9bdd14...dda3fddd5bd2",
+			            "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+			            "digestValue": "amVpcmpMcn...RhNnNrb1Y1L0E4UTM4R2o0ajMyMz0=",
+			            "digestSigned": "YW1WcGNtcE1jb...lJoTm5OcmIxWTFMMEU0VVRNNFIybzBhak15TXowPQ==",
+			            "key": {
+			              "$id": "9bdd14...dda3fddd5bd2",
+			              "domain": "example.com",
+			              "service": "bootstrapper"
+			            }
+			          }
+			        }
+			      ]
+			    }
+			}
+		};
+	} else
 	if (handler === "bootstrapper-finder" && method === "finders-get") {
 		return {
 			"result": {
@@ -154,7 +212,7 @@ function getPayload(handler, method, options) {
 		                    "methods": {
 		                        "method": {
 		                            "name": "certificates-get",
-		                            "uri": "https://certificates.example.com/certificates-get"
+		                            "uri": "https://" + options.host + "/.helpers/bootstrapper-middleware/certificates-get"
 		                        }
 		                    }
 		                },
