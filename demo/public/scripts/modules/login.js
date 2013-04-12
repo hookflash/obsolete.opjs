@@ -7,7 +7,8 @@ define([
 
   var AuthEndpoints = {
     GitHub: 'https://github.com/login/oauth/authorize' +
-      '?client_id=<%= client_id %>&state=<%= session_id %>'
+      '?client_id=<%= client_id %>&state=<%= session_id %>',
+    Twitter: '/twitter_auth'
   };
 
   var LoginView = Backbone.Layout.extend({
@@ -22,14 +23,23 @@ define([
       this.cookies = options.cookies;
       this.then = prms.then.bind(prms);
       this.status = { prompt: true };
+      var provider;
+      var value;
+      // TODO: Infer provider from application state
       if (this.cookies.access_token) {
-        // TODO: Infer provider from application state
-        var provider = 'GitHub';
-        dfd.resolve({
-          PeerCtor: Peer.models[provider],
-          PeersCtor: Peer.models[provider].Peers,
-          prefilter: OauthPrefilter.create(provider, this.cookies.access_token)
-        });
+        provider = 'GitHub';
+        value = this.cookies.access_token;
+      } else if(this.cookies.tw_access_token){
+        provider = 'Twitter';
+        value = this.cookies.screen_name
+      }
+
+      if(provider){
+          dfd.resolve({
+              PeerCtor: Peer.models[provider],
+              PeersCtor: Peer.models[provider].Peers,
+              prefilter: OauthPrefilter.create(provider, value)
+          });
       }
     },
     setStatus: function(status) {
@@ -43,9 +53,12 @@ define([
       event.preventDefault();
       var provider = $(event.target).data('provider');
       var endpointTmpl = _.template(AuthEndpoints[provider]);
-      console.log(Object.keys(this.cookies));
+
+        console.log(Object.keys(this.cookies));
       var endpoint = endpointTmpl(this.cookies);
+
       this.redirect(endpoint);
+
     },
     serialize: function() {
       return {

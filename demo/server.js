@@ -11,11 +11,24 @@ var WebSocketServer = require('ws').Server;
 var Transport = require('./lib/transport');
 var cookie = require('cookie');
 var Q = require('q');
+var OAuth= require('oauth').OAuth;
+
+var oa = new OAuth(
+    "https://api.twitter.com/oauth/request_token",
+    "https://api.twitter.com/oauth/access_token",
+    "hFNTfDBDxIVFXbiXPgQ3rQ",
+    "Ul6nUDIL4fYqEXbtvLCLoa3PYGYzEfsxGMayGB9Log",
+    "1.0",
+    "http://localhost:8080/twitter_auth_callback",
+//    "",
+    "HMAC-SHA1"
+);
 
 var sessions = {};
 // @see https://github.com/organizations/openpeer/settings/applications/39871
 var client_id = process.env.APP_GITHUB_CLIENT_ID || '2e8c9abbee702e36c03c';
 var client_secret = process.env.APP_GITHUB_CLIENT_SECRET || '112bbb3ebc5a5e156a27afacd108b219938dfe35';
+
 
 function request(options, query) {
   var deferred = Q.defer();
@@ -87,7 +100,9 @@ function handler(req, res) {
   cookies = [
     cookie.serialize('session_id', id, { path: '/' }),
     cookie.serialize('client_id', client_id, { path: '/' }),
-    cookie.serialize('access_token', session.access_token || '', { path: '/' })
+    cookie.serialize('access_token', session.access_token || '', { path: '/' }),
+    cookie.serialize('screen_name', session.screen_name || '', { path: '/' }),
+    cookie.serialize('tw_access_token', session.tw_access_token || '', { path: '/' })
   ];
   res.setHeader('Set-Cookie', cookies);
   var pathname = urlParse(req.url).pathname;
@@ -148,6 +163,57 @@ function handler(req, res) {
     });
   }
 
+  if (pathname === '/twitter_auth') {
+
+      return (function(){
+          oa.getOAuthRequestToken(function(error, oauth_token, oauth_token_secret){
+              if (error) {
+                  console.log(error);
+              }
+              else {
+                  session.oauth = {};
+                  session.oauth.token = oauth_token;
+                  session.oauth.token_secret = oauth_token_secret;
+                  res.writeHead(302, {
+                      Location: 'https://twitter.com/oauth/authenticate?oauth_token=' + oauth_token
+                  });
+
+                  return res.end();
+              }
+          });
+      })();
+  }
+
+  if (pathname === '/twitter_auth_callback') {
+      var query = urlParse(req.url, true).query;
+      if (session.oauth) {
+
+          session.oauth.verifier = query.oauth_verifier;
+          var oauth = session.oauth;
+
+          return oa.getOAuthAccessToken(oauth.token,oauth.token_secret,oauth.verifier,
+              function(error, oauth_access_token, oauth_access_token_secret, results){
+                  if (error){
+                      console.log(error);
+                      res.send("yeah something broke.");
+                  } else {
+                      session.oauth.access_token = session.tw_access_token = oauth_access_token;
+                      session.oauth.access_token_secret = oauth_access_token_secret;
+                      session.user_id = results.user_id;
+                      session.screen_name = results.screen_name;
+                      session.username = results.screen_name + '@twitter';
+
+                      res.writeHead(302, {
+                          Location: process.env.HOME_URL || '/'
+                      });
+
+                      res.end();
+                  }
+              }
+          );
+      }
+  }
+
   if (pathname.slice(0, 6) === '/opjs/') {
     return send(req, pathname.slice(5))
       .root(pathJoin(__dirname, '..', 'lib'))
@@ -191,8 +257,10 @@ var api = {
     return target.request('bye', request);
   },
   'peer-location-find': function (request, transport) {
+
     request.from = transport.id;
     var username = request.username;
+
     var transports = Object.keys(sessions).filter(function (id) {
       return sessions[id].username === username;
     }).map(function (id) {
