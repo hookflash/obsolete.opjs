@@ -1,5 +1,5 @@
 define([
-  'mocks/StackMock',
+  'mocks/Stack',
   'opjs/stack/Bootstrapper',
   'opjs/util',
   'q/q'

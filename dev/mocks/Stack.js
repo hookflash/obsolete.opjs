@@ -6,7 +6,7 @@ define([
   function StackMock() {
   }
 
-  StackMock.prototype = new Events();
+  StackMock.prototype = Object.create(Events.prototype);
 
   return StackMock;
 });

@@ -1,14 +1,11 @@
 /* global suite, test, assert, beforeEach */
 define([
-  'opjs/stack/Account',
-  'mocks/Peer'
-], function (Account, PeerMock) {
+  'opjs/stack/Account'
+], function (Account) {
 
   'use strict';
 
   suite('Account', function () {
-
-
 
 
 /*
