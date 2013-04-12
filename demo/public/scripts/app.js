@@ -25,9 +25,9 @@ require([
     invite: function(request) {
       var blob = request && request.username && request.username.blob;
       var locationID = request && request.username && request.username.from;
+
       var remoteSession = blob && blob.session;
       var peer, incomingCall;
-
       if (!blob) {
         console.error('No blob found. Ignoring invite.');
         return;
@@ -43,9 +43,11 @@ require([
         name: blob.userName,
         locationID: locationID
       });
+
       peer.transport = transport;
 
       incomingCall = new IncomingCall({ model: peer });
+
       layout.insertView(incomingCall).render();
       peers[locationID] = peer;
 

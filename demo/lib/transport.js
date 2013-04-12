@@ -262,6 +262,7 @@
   };
 
   Transport.prototype.peerLocationFind = function (username, blob) {
+
     return this.request('peer-location-find', {
       username: username,
       blob: blob

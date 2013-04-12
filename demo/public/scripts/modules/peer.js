@@ -84,6 +84,7 @@ define([
   // Create a valid WebRTC Session Description object from the provided data
   // and set it as the remote description of the Peer Connection instance
   Peer.prototype.setRemoteDescription = function(desc) {
+      console.log('Remote Description: ', desc);
     desc = new rtc.RTCSessionDescription(desc);
     this.peerConn.setRemoteDescription(desc);
   };
@@ -217,6 +218,7 @@ define([
     },
     url: function() {
       var name = this.get('name');
+
       if (!name) {
         return 'https://api.github.com/user';
       } else {
@@ -242,6 +244,44 @@ define([
       }
     }
   });
+
+    models.Twitter = Peer.extend({
+        defaults: {
+            domain: 'twitter'
+        },
+        url: function() {
+            var name = this.get('name');
+            if (!name) {
+//                return 'http://api.twitter.com/1/statuses/friends.json?callback=?';
+                return 'http://api.twitter.com/1/users/show.json?callback=?';
+            } else {
+                return 'http://api.twitter.com/1/statuses/friends.json?callback=?';
+            }
+        },
+        parse: function(attrs) {
+            var whitelist = {};
+            whitelist.name = attrs.screen_name;
+            whitelist.avatarUrl = attrs.profile_image_url;
+
+            return whitelist;
+        }
+    });
+
+    models.Twitter.Peers = Peers.extend({
+        model: models.Twitter,
+        url: function() {
+           var name = this.user && this.user.get('name');
+            if (!name) {
+                return 'http://api.twitter.com/1/statuses/friends.json?callback=?'
+            } else {
+                return 'http://api.twitter.com/1/statuses/friends.json?callback=?'// + name;
+            }
+        }
+    });
+
+
+
+
 
   return {
     Model: Peer,
