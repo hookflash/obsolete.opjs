@@ -3,7 +3,7 @@ define([
 ], function (Events) {
   'use strict';
 
-  function StackMock() {
+  function StackMock() {  	
   }
 
   StackMock.prototype = Object.create(Events.prototype);
