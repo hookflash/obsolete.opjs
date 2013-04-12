@@ -14,12 +14,13 @@ define([
       client = new Stack();
       return client.ready().then(function() {
         return done(null);
-      });
+      }).fail(done);
     });
 
     test('reconnect after finder closes connection', function(done) {
       assert.equal(client._account._finder.isConnected(), 1);
       return HELPERS.callServerHelper("finder-server/close-all-connections", {}, function(err) {
+        if (err) return done(err);
         // Wait a bit for connection to drop and reconnect.
         setTimeout(function() {
           assert.equal(client._account._finder.isConnected(), 2);
@@ -33,15 +34,20 @@ define([
         return Q.resolve([
           // Send one bad url to test connection to multiple finders until one works.
           {
-            wsUri: "ws://localhost:-3002"
+            finder: {
+              wsUri: "ws://localhost:-3002"
+            }
           },
           {
-            wsUri: "ws://localhost:3002"
+            finder: {
+              wsUri: "ws://localhost:3002"
+            }
           }
         ]);
       };
       assert.equal(client._account._finder.isConnected(), 2);
       return HELPERS.callServerHelper("finder-server/close-all-connections", {}, function(err) {
+        if (err) return done(err);
         // Wait a bit for connection to drop and reconnect.
         setTimeout(function() {
           assert.equal(client._account._finder.isConnected(), 3);
@@ -53,7 +59,7 @@ define([
     test('destroy', function(done) {
       return client.destroy().then(function() {
         return done(null);
-      }, done);
+      }).fail(done);
     });
 
     suite('failures', function () {
@@ -62,32 +68,35 @@ define([
 
         var client = new Stack();
         return client.ready().then(function() {
-
           client._bootstrapper.getFinders = function() {
             return Q.resolve([
               // Send one bad url to test connection to multiple finders until one works.
               {
-                wsUri: "ws://localhost:-3002"
+                finder: {
+                  wsUri: "ws://localhost:-3002"
+                }
               },
               {
-                wsUri: "ws://localhost:-3002"
+                finder: {
+                  wsUri: "ws://localhost:-3002"
+                }
               }
             ]);
           };
-
           assert.equal(client._account._finder.isConnected(), 1);
           return HELPERS.callServerHelper("finder-server/close-all-connections", {}, function(err) {
+            if (err) return done(err);
             // Wait a bit for connection to drop and reconnect.
             setTimeout(function() {
               assert.equal(client._account._finder.isConnected(), false);
 
               return client.destroy().then(function() {
                 return done(null);
-              }, done);
+              }).fail(done);
             }, 100);
           });
 
-        });
+        }).fail(done);
       });
 
     });

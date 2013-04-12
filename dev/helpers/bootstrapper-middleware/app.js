@@ -1,213 +1,317 @@
 
 
-exports.hook = function(app) {
-
-	// `https://domain.com/.well-known/openpeer-services-get`
-	app.get(/^\/\.well-known\/openpeer-services-get$/, function(req, res, next) {
-		var payload = JSON.stringify(getServicesPayload().result, null, 4);
-		res.writeHead(200, {
-			"Content-Type": "application/json",
-			"Content-Length": payload.length
-		});
-		res.end(payload);
-	});
+function parseRequest(req, callback) {
+    var data = '';
+    req.setEncoding('utf8');
+    req.on('data', function(chunk) { 
+        data += chunk;
+    });
+    req.on('end', function() {
+    	try {
+	    	return callback(null, JSON.parse(data));
+	    } catch(err) {
+	    	return callback(err);
+	    }
+    });
 }
 
+exports.hook = function(options, app) {
 
-function getServicesPayload() {
-	return {
-	    "result": {
-	        "$domain": "example.com",
-	        "$handler": "bootstrapper",
-	        "$method": "services-get",
-	        "$timestamp": 439439493,
-	        "services": {
-	            "service": [
-	                {
-	                    "$id": "9bdd14ddad8465b6ee3fdd174b5d5bd2",
-	                    "type": "bootstrapper",
-	                    "version": "1.0",
-	                    "methods": {
-	                        "method": {
-	                            "name": "services-get",
-	                            "uri": "https://bootstrapper.example.com/services-get"
-	                        }
-	                    }
-	                },
-	                {
-	                    "$id": "596c4577a4efb2a13ded43a3851b7e51577ad186",
-	                    "type": "bootstrapped-finders",
-	                    "version": "1.0",
-	                    "methods": {
-	                        "method": {
-	                            "name": "finders-get",
-	                            "uri": "https://finders.example.com/finders-get"
-	                        }
-	                    }
-	                },
-	                {
-	                    "$id": "596c4577a4efb2a13ded43a3851b7e51577ad186",
-	                    "type": "certificates",
-	                    "version": "1.0",
-	                    "methods": {
-	                        "method": {
-	                            "name": "certificates-get",
-	                            "uri": "https://certificates.example.com/certificates-get"
-	                        }
-	                    }
-	                },
-	                {
-	                    "$id": "0c16f792d6e0727e0acdd9174ae737d0abedef12",
-	                    "type": "identity-lockbox",
-	                    "version": "1.0",
-	                    "methods": {
-	                        "method": [
-	                            {
-	                                "name": "public-peer-files-get",
-	                                "uri": "https://peer-contact.example.com/public-peer-files-get"
-	                            },
-	                            {
-	                                "name": "peer-contact-login",
-	                                "uri": "https://peer-contact.example.com/peer-contact-login"
-	                            },
-	                            {
-	                                "name": "private-peer-file-get",
-	                                "uri": "https://peer-contact.example.com/private-peer-file-get"
-	                            },
-	                            {
-	                                "name": "private-peer-file-set",
-	                                "uri": "https://peer-contact.example.com/private-peer-file-set"
-	                            },
-	                            {
-	                                "name": "peer-contact-identity-associate",
-	                                "uri": "https://peer-contact.example.com/peer-contact-identity-associate"
-	                            },
-	                            {
-	                                "name": "peer-contact-identity-association-update",
-	                                "uri": "https://peer-contact.ex.com/peer-contact-identity-association-update"
-	                            },
-	                            {
-	                                "name": "peer-contact-services-get",
-	                                "uri": "https://peer-contact.example.com/peer-contact-services-get"
-	                            }
-	                        ]
-	                    }
-	                },
-	                {
-	                    "$id": "d0b528b3f8e66455d154b1deac1e357e",
-	                    "type": "identity-lockbox",
-	                    "version": "1.0",
-	                    "methods": {
-	                        "method": [
-	                            {
-	                                "name": "lockbox-access",
-	                                "uri": "https://lockbox.example.com/lockbox-access"
-	                            },
-	                            {
-	                                "name": "lockbox-identities-update",
-	                                "uri": "https://lockbox.example.com/lockbox-identities-update"
-	                            },
-	                            {
-	                                "name": "lockbox-permissions-grant-inner-frame",
-	                                "uri": "https://lockbox.example.com/lockbox-permissions-grant-inner-frame"
-	                            },
-	                            {
-	                                "name": "lockbox-content-get",
-	                                "uri": "https://lockbox.example.com/lockbox-content-get"
-	                            },
-	                            {
-	                                "name": "lockbox-content-set",
-	                                "uri": "https://lockbox.example.com/lockbox-content-set"
-	                            },
-	                            {
-	                                "name": "lockbox-admin-inner-frame",
-	                                "uri": "https://lockbox.example.com/lockbox-admin-inner-frame"
-	                            }
-	                        ]
-	                    }
-	                },
-	                {
-	                    "$id": "d0b528b3f8e66455d154b1deac1e357e",
-	                    "type": "identity-lookup",
-	                    "version": "1.0",
-	                    "methods": {
-	                        "method": [
-	                            {
-	                                "name": "identity-lookup-check",
-	                                "uri": "https://identity-lookup.example.com/identity-check"
-	                            },
-	                            {
-	                                "name": "identity-lookup",
-	                                "uri": "https://identity-lookup.example.com/identity-lookup"
-	                            }
-	                        ]
-	                    }
-	                },
-	                {
-	                    "$id": "f98b4d1ff0f1acf3054fefc560866e61",
-	                    "type": "identity",
-	                    "version": "1.0",
-	                    "methods": {
-	                        "method": [
-	                            {
-	                                "name": "identity-access-inner-frame",
-	                                "uri": "https://identity.example.com/identity-access-inner-frame"
-	                            },
-	                            {
-	                                "name": "identity-access-validate",
-	                                "uri": "https://identity.example.com/identity-access-validate"
-	                            },
-	                            {
-	                                "name": "identity-lookup-update",
-	                                "uri": "https://identity.example.com/identity-lookup-update"
-	                            },
-	                            {
-	                                "name": "identity-sign",
-	                                "uri": "https://identity.example.com/identity-sign"
-	                            }
-	                        ]
-	                    }
-	                },
-	                {
-	                    "$id": "2b24016d58b04f0a3b157a82ddd5f18b44d8912a",
-	                    "type": "peer",
-	                    "version": "1.0",
-	                    "methods": {
-	                        "method": {
-	                            "name": "peer-services-get",
-	                            "uri": "https://peer.example.com/peer-services-get"
-	                        }
-	                    }
-	                },
-	                {
-	                    "$id": "db144bb314f8e018f103033cbba7d52e",
-	                    "type": "salt",
-	                    "version": "1.0",
-	                    "methods": {
-	                        "method": {
-	                            "name": "signed-salt-get",
-	                            "uri": "https://salt.example.com/signed-salt-get"
-	                        }
-	                    }
-	                },
-	                {
-	                    "$id": "db144bb314f8e018f103033cbba7d52e",
-	                    "type": "example",
-	                    "version": "1.0",
-	                    "key": {
-	                        "$id": "8cd14dda3...d5bd2",
-	                        "domain": "example.com",
-	                        "service": "something"
-	                    },
-	                    "methods": {
-	                        "method": {
-	                            "name": "example-method",
-	                            "uri": "peer://example.com/5ff106c7db894b96a1432c35c246f36d8414bbd3"
-	                        }
-	                    }
-	                }
-	            ]
-	        }
-	    }
-	};
+	function respond(req, res, next) {
+		return parseRequest(req, function(err, data) {
+			if (err) return next(err);
+
+			// TODO: Verify `data.request.$domain`?
+
+			var response = getPayload(data.request.$handler, data.request.$method, options);
+			if (!response) {
+				res.writeHead(404);
+				res.end("Not found");
+				return;
+			}
+
+			var payload = JSON.stringify(response, null, 4);
+			res.writeHead(200, {
+				"Content-Type": "application/json",
+				"Content-Length": payload.length
+			});
+			res.end(payload);
+        });
+	}
+
+	// `https://domain.com/.well-known/openpeer-services-get`
+	// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#BootstrapperServiceRequests-ServicesGetRequest
+	app.post(/^\/\.well-known\/openpeer-services-get$/, respond);
+
+	// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#BootstrappedFinderServiceRequests-FindersGetRequest
+	app.post(/^\/.helpers\/bootstrapper-middleware\/finders-get$/, respond);
+}
+
+function getPayload(handler, method, options) {
+
+	if (handler === "bootstrapper-finder" && method === "finders-get") {
+		return {
+			"result": {
+			    "$domain": "example.com",
+			    "$appid": "xyz123",
+			    "$handler": "bootstrapper-finder",
+			    "$method": "finders-get",
+			    "$id": "abc123",
+			    "$timestamp": 439439493,
+
+			    "finders": {
+			      "finderBundle": [
+			        {
+			          "finder": {
+			            "$id": "4bf7fff50ef9bb07428af6294ae41434da175538",
+			            "transport": "rudp/udp",
+			            "srv": "finders.example.com",
+			    // TODO: Update this according to spec
+	            "wsUri": "ws://localhost:3002",
+			            "key": { "x509Data": "MIIDCCA0+gA...lVN" },
+			            "priority": 1,
+			            "weight": 1,
+			            "region": "1",
+			            "created": 588584945,
+			            "expires": 675754754
+			          },
+			          "signature": {
+			            "reference": "#4bf7fff50ef9bb07428af6294ae41434da175538",
+			            "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+			            "digestValue": "jeirjLr...ta6skoV5/A8Q38Gj4j323=",
+			            "digestSigned": "DE...fGM~C0/Ez=",
+			            "key": {
+			              "$id": "9bdd14dda3f...dd174b5d5bd2",
+			              "domain": "example.org",
+			              "service": "finder"
+			            }
+			          }
+			        },
+			        {
+			          "finder": {
+			            "$id": "a7f0c5df6d118ee2a16309bc8110bce009f7e318",
+			            "transport": "rudp/udp",
+			            "srv": "100.200.100.1:4032,5.6.7.8:4032",
+			    // TODO: Update this according to spec
+	            "wsUri": "ws://localhost:3002",
+			            "key": { "x509Data": "MIID5A0+gA...lVN" },
+			            "priority": 10,
+			            "weight": 0,
+			            "region": 1
+			          },
+			          "signature": {
+			            "reference": "#a7f0c5df6d118ee2a16309bc8110bce009f7e318",
+			            "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+			            "digestValue": "YTdmMGM1ZGY2Z...DExOGVlMmExNjMwJjZTAwOWY3ZTMxOA==",
+			            "digestSigned": "OjY2OjZl...OjZhOjcyOjY2OjcyOjcyIChsZW5ndGg9OSk=",
+			            "key": {
+			              "$id": "9bdd14dda3f...dd174b5d5bd2",
+			              "domain": "example.org",
+			              "service": "finder"
+			            }
+			          }
+			        }
+			      ]
+			    }
+		    }
+		};
+	} else
+	if (handler === "bootstrapper" && method === "services-get") {
+		return {
+		    "result": {
+		        "$domain": "example.com",
+		        "$handler": "bootstrapper",
+		        "$method": "services-get",
+		        "$timestamp": 439439493,
+		        "services": {
+		            "service": [
+		                {
+		                    "$id": "9bdd14ddad8465b6ee3fdd174b5d5bd2",
+		                    "type": "bootstrapper",
+		                    "version": "1.0",
+		                    "methods": {
+		                        "method": {
+		                            "name": "services-get",
+		                            "uri": "https://bootstrapper.example.com/services-get"
+		                        }
+		                    }
+		                },
+		                {
+		                    "$id": "596c4577a4efb2a13ded43a3851b7e51577ad186",
+		                    "type": "bootstrapped-finders",
+		                    "version": "1.0",
+		                    "methods": {
+		                        "method": {
+		                            "name": "finders-get",
+		                            "uri": "https://" + options.host + "/.helpers/bootstrapper-middleware/finders-get"
+		                        }
+		                    }
+		                },
+		                {
+		                    "$id": "596c4577a4efb2a13ded43a3851b7e51577ad186",
+		                    "type": "certificates",
+		                    "version": "1.0",
+		                    "methods": {
+		                        "method": {
+		                            "name": "certificates-get",
+		                            "uri": "https://certificates.example.com/certificates-get"
+		                        }
+		                    }
+		                },
+		                {
+		                    "$id": "0c16f792d6e0727e0acdd9174ae737d0abedef12",
+		                    "type": "identity-lockbox",
+		                    "version": "1.0",
+		                    "methods": {
+		                        "method": [
+		                            {
+		                                "name": "public-peer-files-get",
+		                                "uri": "https://peer-contact.example.com/public-peer-files-get"
+		                            },
+		                            {
+		                                "name": "peer-contact-login",
+		                                "uri": "https://peer-contact.example.com/peer-contact-login"
+		                            },
+		                            {
+		                                "name": "private-peer-file-get",
+		                                "uri": "https://peer-contact.example.com/private-peer-file-get"
+		                            },
+		                            {
+		                                "name": "private-peer-file-set",
+		                                "uri": "https://peer-contact.example.com/private-peer-file-set"
+		                            },
+		                            {
+		                                "name": "peer-contact-identity-associate",
+		                                "uri": "https://peer-contact.example.com/peer-contact-identity-associate"
+		                            },
+		                            {
+		                                "name": "peer-contact-identity-association-update",
+		                                "uri": "https://peer-contact.ex.com/peer-contact-identity-association-update"
+		                            },
+		                            {
+		                                "name": "peer-contact-services-get",
+		                                "uri": "https://peer-contact.example.com/peer-contact-services-get"
+		                            }
+		                        ]
+		                    }
+		                },
+		                {
+		                    "$id": "d0b528b3f8e66455d154b1deac1e357e",
+		                    "type": "identity-lockbox",
+		                    "version": "1.0",
+		                    "methods": {
+		                        "method": [
+		                            {
+		                                "name": "lockbox-access",
+		                                "uri": "https://lockbox.example.com/lockbox-access"
+		                            },
+		                            {
+		                                "name": "lockbox-identities-update",
+		                                "uri": "https://lockbox.example.com/lockbox-identities-update"
+		                            },
+		                            {
+		                                "name": "lockbox-permissions-grant-inner-frame",
+		                                "uri": "https://lockbox.example.com/lockbox-permissions-grant-inner-frame"
+		                            },
+		                            {
+		                                "name": "lockbox-content-get",
+		                                "uri": "https://lockbox.example.com/lockbox-content-get"
+		                            },
+		                            {
+		                                "name": "lockbox-content-set",
+		                                "uri": "https://lockbox.example.com/lockbox-content-set"
+		                            },
+		                            {
+		                                "name": "lockbox-admin-inner-frame",
+		                                "uri": "https://lockbox.example.com/lockbox-admin-inner-frame"
+		                            }
+		                        ]
+		                    }
+		                },
+		                {
+		                    "$id": "d0b528b3f8e66455d154b1deac1e357e",
+		                    "type": "identity-lookup",
+		                    "version": "1.0",
+		                    "methods": {
+		                        "method": [
+		                            {
+		                                "name": "identity-lookup-check",
+		                                "uri": "https://identity-lookup.example.com/identity-check"
+		                            },
+		                            {
+		                                "name": "identity-lookup",
+		                                "uri": "https://identity-lookup.example.com/identity-lookup"
+		                            }
+		                        ]
+		                    }
+		                },
+		                {
+		                    "$id": "f98b4d1ff0f1acf3054fefc560866e61",
+		                    "type": "identity",
+		                    "version": "1.0",
+		                    "methods": {
+		                        "method": [
+		                            {
+		                                "name": "identity-access-inner-frame",
+		                                "uri": "https://identity.example.com/identity-access-inner-frame"
+		                            },
+		                            {
+		                                "name": "identity-access-validate",
+		                                "uri": "https://identity.example.com/identity-access-validate"
+		                            },
+		                            {
+		                                "name": "identity-lookup-update",
+		                                "uri": "https://identity.example.com/identity-lookup-update"
+		                            },
+		                            {
+		                                "name": "identity-sign",
+		                                "uri": "https://identity.example.com/identity-sign"
+		                            }
+		                        ]
+		                    }
+		                },
+		                {
+		                    "$id": "2b24016d58b04f0a3b157a82ddd5f18b44d8912a",
+		                    "type": "peer",
+		                    "version": "1.0",
+		                    "methods": {
+		                        "method": {
+		                            "name": "peer-services-get",
+		                            "uri": "https://peer.example.com/peer-services-get"
+		                        }
+		                    }
+		                },
+		                {
+		                    "$id": "db144bb314f8e018f103033cbba7d52e",
+		                    "type": "salt",
+		                    "version": "1.0",
+		                    "methods": {
+		                        "method": {
+		                            "name": "signed-salt-get",
+		                            "uri": "https://salt.example.com/signed-salt-get"
+		                        }
+		                    }
+		                },
+		                {
+		                    "$id": "db144bb314f8e018f103033cbba7d52e",
+		                    "type": "example",
+		                    "version": "1.0",
+		                    "key": {
+		                        "$id": "8cd14dda3...d5bd2",
+		                        "domain": "example.com",
+		                        "service": "something"
+		                    },
+		                    "methods": {
+		                        "method": {
+		                            "name": "example-method",
+		                            "uri": "peer://example.com/5ff106c7db894b96a1432c35c246f36d8414bbd3"
+		                        }
+		                    }
+		                }
+		            ]
+		        }
+		    }
+		};
+	}
+	return null;
 }

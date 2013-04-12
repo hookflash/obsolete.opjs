@@ -1,9 +1,10 @@
 define([
   'mocks/Stack',
   'opjs/stack/Bootstrapper',
+  'opjs/request',
   'opjs/util',
   'q/q'
-], function (StackMock, Bootstrapper, Util, Q) {
+], function (StackMock, Bootstrapper, Request, Util, Q) {
 
   'use strict';
 
@@ -12,11 +13,26 @@ define([
     suite('Helper', function() {
 
       test('`/.well-known/openpeer-services-get` response', function(done) {
-        $.getJSON("/.well-known/openpeer-services-get", function(data) {
-          assert.isObject(data);
-          assert.isObject(data.services);
+        new Request({
+          dataType: "json",
+          method: "POST",
+          url: "/.well-known/openpeer-services-get",
+          data: JSON.stringify({
+            "request": {
+              "$domain": "example.com",
+              "$appid": "xyz123",
+              "$id": "abc123",
+              "$handler": "bootstrapper",
+              "$method": "services-get"
+            }
+          })
+        }).then(function(response) {
+          assert.isObject(response);
+          assert.isObject(response.body);
+          assert.isObject(response.body.result);
+          assert.isObject(response.body.result.services);
           return done(null);
-        });
+        }).fail(done);
       });
 
     });
@@ -50,11 +66,21 @@ define([
         var bootstrapper = new Bootstrapper(new StackMock(), id);
         var services = bootstrapper.getServices();
         assert.isTrue(Q.isPromise(services));
-        return Q.when(services).then(function(services) {
-          assert.isObject(services);
-          assert.isArray(services.service);
+        return services.then(function(services) {
+          assert.isArray(services);
           return done(null);
-        }, done);
+        }).fail(done);
+      });
+
+      test('`.getFinders()` returns promise that resolves to object', function(done) {
+        var id = "peer://" + Util.getHost() + "/e433a6f9793567217787e33950211453582cadff";
+        var bootstrapper = new Bootstrapper(new StackMock(), id);
+        var finders = bootstrapper.getFinders();
+        assert.isTrue(Q.isPromise(finders));
+        return finders.then(function(finders) {
+          assert.isArray(finders);
+          return done(null);
+        }).fail(done);
       });
 
     });

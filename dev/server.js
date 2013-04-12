@@ -14,7 +14,9 @@ exports.main = function(callback) {
     try {
         var app = EXPRESS();
 
-        require("./helpers/bootstrapper-middleware/app").hook(app);
+        require("./helpers/bootstrapper-middleware/app").hook({
+            host: "localhost:" + PORT
+        }, app);
 
         var extraServers = [];
 
@@ -45,7 +47,7 @@ exports.main = function(callback) {
                         try {
                             res.render(page.split("/")[0], data);
                         } catch(err) {
-                            return next();
+                            return next(err);
                         }
                     });
                 });
