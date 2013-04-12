@@ -13,10 +13,10 @@ define([
   suite("SendMessageToPeer", function() {
 
     var client1 = new Stack({
-      deviceID: Util.randomHex(32)
+      locationID: Util.randomHex(32)
     });
     var client2 = new Stack({
-      deviceID: Util.randomHex(32)
+      locationID: Util.randomHex(32)
     });
 
     test('connected', function(done) {

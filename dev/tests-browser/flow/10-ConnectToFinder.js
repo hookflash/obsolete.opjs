@@ -24,10 +24,10 @@ define([
     test('two clients', function(done) {
 
       var client1 = new Stack({
-        deviceID: Util.randomHex(32)
+        locationID: Util.randomHex(32)
       });
       var client2 = new Stack({
-        deviceID: Util.randomHex(32)
+        locationID: Util.randomHex(32)
       });
 
       client1.ready().then(function() {

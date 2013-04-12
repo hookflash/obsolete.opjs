@@ -12,25 +12,14 @@ define([
 
     suite('Helper', function() {
 
+      Request.setContext({
+        "appid": Util.randomHex(32)
+      });
+
       test('`/.well-known/openpeer-services-get` response', function(done) {
-        new Request({
-          dataType: "json",
-          method: "POST",
-          url: "/.well-known/openpeer-services-get",
-          data: JSON.stringify({
-            "request": {
-              "$domain": "example.com",
-              "$appid": "xyz123",
-              "$id": "abc123",
-              "$handler": "bootstrapper",
-              "$method": "services-get"
-            }
-          })
-        }).then(function(response) {
-          assert.isObject(response);
-          assert.isObject(response.body);
-          assert.isObject(response.body.result);
-          assert.isObject(response.body.result.services);
+        return Request.makeRequestTo("http://" + Util.getHost() + "/.well-known/openpeer-services-get", "bootstrapper", "services-get").then(function(result) {
+          assert.isObject(result);
+          assert.isObject(result.services);
           return done(null);
         }).fail(done);
       });
