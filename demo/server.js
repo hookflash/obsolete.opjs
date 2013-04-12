@@ -19,8 +19,8 @@ var oa = new OAuth(
     "hFNTfDBDxIVFXbiXPgQ3rQ",
     "Ul6nUDIL4fYqEXbtvLCLoa3PYGYzEfsxGMayGB9Log",
     "1.0",
-//    "http://localhost:8080/twitter_auth_callback",
-    "",
+    "http://localhost:8080/twitter_auth_callback",
+//    "",
     "HMAC-SHA1"
 );
 
@@ -193,7 +193,6 @@ function handler(req, res) {
 
           return oa.getOAuthAccessToken(oauth.token,oauth.token_secret,oauth.verifier,
               function(error, oauth_access_token, oauth_access_token_secret, results){
-                  console.log(results);
                   if (error){
                       console.log(error);
                       res.send("yeah something broke.");
