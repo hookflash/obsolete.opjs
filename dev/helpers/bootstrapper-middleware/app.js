@@ -27,8 +27,6 @@ exports.hook = function(options, app) {
 
 				var request = data.request;
 
-				// TODO: Verify `data.request.$domain`?
-
 				var hostname = options.host.split(":")[0];
 				ASSERT.equal(request.$domain, hostname);
 
@@ -53,7 +51,7 @@ exports.hook = function(options, app) {
 					payload.result[key] = response[key];
 				}
 
-				payload = JSON.stringify(payload, null, 4);
+				payload = JSON.stringify(payload);
 				res.writeHead(200, {
 					"Content-Type": "application/json",
 					"Content-Length": payload.length
