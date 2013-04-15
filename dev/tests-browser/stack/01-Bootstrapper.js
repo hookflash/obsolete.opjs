@@ -57,6 +57,7 @@ define([
         assert.isTrue(Q.isPromise(services));
         return services.then(function(services) {
           assert.isArray(services);
+          assert.isObject(services[0]);
           return done(null);
         }).fail(done);
       });
@@ -68,6 +69,8 @@ define([
         assert.isTrue(Q.isPromise(finders));
         return finders.then(function(finders) {
           assert.isArray(finders);
+          assert.isObject(finders[0]);
+          assert.isString(finders[0]["$id"]);
           return done(null);
         }).fail(done);
       });
@@ -79,6 +82,22 @@ define([
         assert.isTrue(Q.isPromise(certificates));
         return certificates.then(function(certificates) {
           assert.isArray(certificates);
+          assert.isObject(certificates[0]);
+          assert.isString(certificates[0]["$id"]);
+          return done(null);
+        }).fail(done);
+      });
+
+      test('`.getSalts(1)` returns promise that resolves to object', function(done) {
+        var id = "peer://" + Util.getHost() + "/e433a6f9793567217787e33950211453582cadff";
+        var bootstrapper = new Bootstrapper(new StackMock(), id);
+        var salts = bootstrapper.getSalts(1);
+        assert.isTrue(Q.isPromise(salts));
+        return salts.then(function(salts) {
+          assert.isArray(salts);
+          assert.isObject(salts[0]);
+          assert.isString(salts[0]["$id"]);
+          assert.isString(salts[0]["#text"]);
           return done(null);
         }).fail(done);
       });

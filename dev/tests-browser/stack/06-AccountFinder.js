@@ -60,14 +60,10 @@ define([
           return Q.resolve([
             // Send one bad url to test connection to multiple finders until one works.
             {
-              finder: {
-                wsUri: "ws://localhost:-3002"
-              }
+              wsUri: "ws://localhost:-3002"
             },
             {
-              finder: {
-                wsUri: "ws://localhost:3002"
-              }
+              wsUri: "ws://localhost:3002"
             }
           ]);
         };
@@ -98,14 +94,10 @@ define([
               return Q.resolve([
                 // Send one bad url to test connection to multiple finders until one works.
                 {
-                  finder: {
-                    wsUri: "ws://localhost:-3002"
-                  }
+                  wsUri: "ws://localhost:-3002"
                 },
                 {
-                  finder: {
-                    wsUri: "ws://localhost:-3002"
-                  }
+                  wsUri: "ws://localhost:-3002"
                 }
               ]);
             };
