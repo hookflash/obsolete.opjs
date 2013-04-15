@@ -48,9 +48,18 @@ define([
         return HELPERS.callServerHelper("finder-server/close-all-connections", {}, function(err) {
           if (err) return done(err);
           // Wait a bit for connection to drop and reconnect.
-          setTimeout(function() {
-            assert.equal(client._account._finder.isConnected(), 2);
-            return done(null);
+          var waitCount = 0;
+          var waitId = setInterval(function() {
+            if (waitCount > 10) {
+              clearInterval(waitId);
+              assert.equal(client._account._finder.isConnected(), 2);
+              return done(null);
+            }
+            waitCount += 1;
+            if (client._account._finder.isConnected() === 2) {
+              clearInterval(waitId);
+              return done(null);
+            }
           }, 100);
         });
       });
@@ -71,9 +80,18 @@ define([
         return HELPERS.callServerHelper("finder-server/close-all-connections", {}, function(err) {
           if (err) return done(err);
           // Wait a bit for connection to drop and reconnect.
-          setTimeout(function() {
-            assert.equal(client._account._finder.isConnected(), 3);
-            return done(null);
+          var waitCount = 0;
+          var waitId = setInterval(function() {
+            if (waitCount > 10) {
+              clearInterval(waitId);
+              assert.equal(client._account._finder.isConnected(), 3);
+              return done(null);
+            }
+            waitCount += 1;
+            if (client._account._finder.isConnected() === 3) {
+              clearInterval(waitId);
+              return done(null);
+            }
           }, 100);
         });
       });
