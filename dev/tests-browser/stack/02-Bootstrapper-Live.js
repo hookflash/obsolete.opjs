@@ -7,12 +7,15 @@ define([
 
   suite('Bootstrapper-Live', function() {
 
-    Request.setContext({
-      "domain": "unstable.hookflash.me",
-      "appid": Util.randomHex(32)
-    });
+    function setContect() {
+      Request.setContext({
+        "domain": "unstable.hookflash.me",
+        "appid": Util.randomHex(32)
+      });
+    }
 
     test('`https://unstable.hookflash.me/.well-known/openpeer-services-get` response', function(done) {
+      setContect();
       return Request.makeRequestTo("https://unstable.hookflash.me/.well-known/openpeer-services-get", "bootstrapper", "services-get").then(function(result) {
         assert.isObject(result);
         assert.isObject(result.services);
@@ -21,6 +24,7 @@ define([
     });
 
     test('`https://unstable.hookflash.me/certificates-get` response', function(done) {
+      setContect();
       return Request.makeRequestTo("https://unstable.hookflash.me/certificates-get", "certificates", "certificates-get").then(function(result) {
         assert.isObject(result);
         assert.isObject(result.certificates);
@@ -29,6 +33,7 @@ define([
     });
 
     test('`https://unstable.hookflash.me/finders-get` response', function(done) {
+      setContect();
 
       console.error("TODO: Must return actual finders!");
       return done(null);
@@ -43,6 +48,7 @@ define([
     });
 
     test('`https://unstable.hookflash.me/signed-salt-get` response', function(done) {
+      setContect();
 
       console.error("TODO: `Access-Control-Allow-Origin` must be set!");
       return done(null);

@@ -12,11 +12,12 @@ define([
 
     suite('Helper', function() {
 
-      Request.setContext({
-        "appid": Util.randomHex(32)
-      });
-
       test('`/.well-known/openpeer-services-get` response', function(done) {
+
+        Request.setContext({
+          "appid": Util.randomHex(32)
+        });
+
         return Request.makeRequestTo("http://" + Util.getHost() + "/.well-known/openpeer-services-get", "bootstrapper", "services-get").then(function(result) {
           assert.isObject(result);
           assert.isObject(result.services);
