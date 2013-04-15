@@ -65,14 +65,16 @@ define([
       });
 
       test('try multiple finders until success', function(done) {
-        client._bootstrapper.getFinders = function() {
+        client._account._bootstrapper.getFinders = function() {
           return Q.resolve([
             // Send one bad url to test connection to multiple finders until one works.
             {
-              wsUri: "ws://localhost:-3002"
+              "$id": Util.randomHex(32),
+              "wsUri": "ws://localhost:-3002"
             },
             {
-              wsUri: "ws://localhost:3002"
+              "$id": Util.randomHex(32),
+              "wsUri": "ws://localhost:3002"
             }
           ]);
         };
@@ -108,14 +110,16 @@ define([
 
           var client = new Stack();
           return client.ready().then(function() {
-            client._bootstrapper.getFinders = function() {
+            client._account._bootstrapper.getFinders = function() {
               return Q.resolve([
                 // Send one bad url to test connection to multiple finders until one works.
                 {
-                  wsUri: "ws://localhost:-3002"
+                  "$id": Util.randomHex(32),
+                  "wsUri": "ws://localhost:-3002"
                 },
                 {
-                  wsUri: "ws://localhost:-3002"
+                  "$id": Util.randomHex(32),
+                  "wsUri": "ws://localhost:-3002"
                 }
               ]);
             };
