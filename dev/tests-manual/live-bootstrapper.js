@@ -1,4 +1,5 @@
 
+const ASSERT = require("assert");
 const REQUEST = require("request");
 
 
@@ -13,7 +14,7 @@ describe("live-bootstrapper", function() {
     		method: "post",
     		url: "https://unstable.hookflash.me/.well-known/openpeer-services-get",
     		body: JSON.stringify({
-				"$domain": "example.com",
+				"$domain": "unstable.hookflash.me",
 				"$appid": "xyz123",
 				"$id": "abc123",
 				"$handler": "bootstrapper",
@@ -21,10 +22,23 @@ describe("live-bootstrapper", function() {
 			})
     	}, function(err, response) {
     		if (err) return done(err);
+            try {
 
-console.log("response", response);
+                var payload = JSON.parse(response.body);
 
-    		return done(null);
+                console.log(response.headers);
+                console.log(JSON.stringify(payload, null, 4));
+
+                ASSERT.equal(typeof payload, "object");
+                ASSERT.equal(typeof payload.result, "object");
+                ASSERT.equal(typeof payload.result.services, "object");
+                ASSERT.equal(Array.isArray(payload.result.services.service), true);
+
+                return done(null);
+
+            } catch(err) {
+                return done(err);
+            }
     	});
 
     });
