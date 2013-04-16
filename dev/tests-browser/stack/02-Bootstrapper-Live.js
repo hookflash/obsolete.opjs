@@ -1,3 +1,4 @@
+/* global define, suite, test, assert */
 define([
   'opjs/request',
   'opjs/util',

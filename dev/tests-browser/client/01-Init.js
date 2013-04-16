@@ -1,4 +1,4 @@
-
+/* global define, suite, test, assert, HELPERS */
 define([
   'opjs/OpenPeer',
   'opjs/Stack',

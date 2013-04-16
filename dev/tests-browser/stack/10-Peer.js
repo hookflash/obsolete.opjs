@@ -1,4 +1,4 @@
-/* global suite, test, assert */
+/* global define, suite, test, assert */
 define([
   'opjs/stack/peer'
 ], function (Peer) {

@@ -5,6 +5,7 @@ Instanciate 2 clients and have them send messages back and forth.
 Test is successful if messages are received and replied to.
 
 */
+/* global define, suite, test, assert, HELPERS */
 define([
   'opjs/util',
   'opjs/Stack'

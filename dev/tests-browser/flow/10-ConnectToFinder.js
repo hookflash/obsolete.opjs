@@ -5,6 +5,7 @@ Instanciate 1+ clients and have them connect to finder service.
 Test is successful if clients are deemed to be connected to finder service.
 
 */
+/* global define, suite, test, assert, HELPERS */
 define([
   'opjs/util',
   'opjs/Stack',

@@ -1,4 +1,4 @@
-/* global suite, test, assert, beforeEach */
+/* global define, suite, test, assert, HELPERS */
 define([
   'opjs/Stack',
   'q/q',
