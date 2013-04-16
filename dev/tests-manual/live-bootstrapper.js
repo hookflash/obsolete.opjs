@@ -47,7 +47,6 @@ describe("live-bootstrapper", function() {
     	});
     });
 
-/*
     // @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#BootstrappedFinderServiceRequests-FindersGetRequest
     it("should call `https://unstable.hookflash.me/finders-get`", function(done) {
 
@@ -64,7 +63,7 @@ describe("live-bootstrapper", function() {
                 "$id": "abc123",
                 "$handler": "bootstrapper-finder",
                 "$method": "finders-get",
-                "servers": 2
+                "servers": 1
             })
         }, function(err, response) {
             if (err) return done(err);
@@ -78,8 +77,7 @@ describe("live-bootstrapper", function() {
                 ASSERT.equal(typeof payload, "object");
                 ASSERT.equal(typeof payload.result, "object");
                 ASSERT.equal(typeof payload.result.finders, "object");
-                ASSERT.equal(Array.isArray(payload.result.finders.finderBundle), true);
-                ASSERT.equal(payload.result.finders.finderBundle.length > 0, true);
+                ASSERT.equal(typeof payload.result.finders.finderBundle, "object");
 
                 return done(null);
 
@@ -88,7 +86,6 @@ describe("live-bootstrapper", function() {
             }
         });
     });
-*/
 
     // @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#CertificatesServiceRequests-CertificatesGetRequest
     it("should call `https://unstable.hookflash.me/certificates-get`", function(done) {
