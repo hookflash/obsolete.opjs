@@ -93,7 +93,6 @@ exports.main = function(options, callback) {
     hook: function(app) {
       app.post(/^\/\.helpers\/finder-server\/close-all-connections$/, function(req, res, next) {
         try {
-          console.log("[finder-server] close all connections");          
           connections.forEach(function(socket) {
             socket.close();
           });
@@ -103,8 +102,16 @@ exports.main = function(options, callback) {
           res.end(err.stack);
           return;
         }
-        res.writeHead(200);
+        res.writeHead(200, {
+          "Content-Type": "text/plain"
+        });
         res.end("ok");
+      });
+      app.post(/^\/\.helpers\/finder-server\/connection-count$/, function(req, res, next) {
+        res.writeHead(200, {
+          "Content-Type": "text/plain"
+        });
+        res.end("" + connections.length);
       });
     }
   });

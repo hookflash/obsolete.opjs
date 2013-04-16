@@ -7,8 +7,9 @@ Test is successful if clients are deemed to be connected to finder service.
 */
 define([
   'opjs/util',
-  'opjs/Stack'
-], function(Util, Stack) {
+  'opjs/Stack',
+  'opjs/assert'
+], function(Util, Stack, Assert) {
 
   suite("ConnectToFinder", function() {
 
@@ -20,7 +21,7 @@ define([
       });
       return client.ready().then(function() {
         return client.destroy().then(function() {
-          return done(null);
+          return HELPERS.ensureNoConnections(done);
         });
       }).fail(done);
     });
@@ -50,8 +51,7 @@ define([
 
           return client1.destroy().then(function() {
             return client2.destroy().then(function() {
-
-              return done(null);
+              return HELPERS.ensureNoConnections(done);
             });
           });
         });

@@ -64,7 +64,7 @@ define([
     test('destroy', function(done) {
       return client1.destroy().then(function() {
         return client2.destroy().then(function() {
-          return done(null);
+          return HELPERS.ensureNoConnections(done);
         });
       }).fail(done);
     });

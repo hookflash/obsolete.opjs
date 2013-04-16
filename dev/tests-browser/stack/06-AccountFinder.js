@@ -101,7 +101,7 @@ define([
 
       test('destroy', function(done) {
         return client.destroy().then(function() {
-          return done(null);
+          return HELPERS.ensureNoConnections(done);
         }).fail(done);
       });
 
@@ -135,7 +135,7 @@ define([
             if (err) return done(err);
             function destroy() {
               return client.destroy().then(function() {
-                return done(null);
+                return HELPERS.ensureNoConnections(done);
               }).fail(done);
             }
             // Wait a bit for connection to drop.

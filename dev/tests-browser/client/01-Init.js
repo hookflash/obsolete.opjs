@@ -1,8 +1,9 @@
 
 define([
   'opjs/OpenPeer',
-  'opjs/Stack'
-], function(OpenPeer, Stack) {
+  'opjs/Stack',
+  'opjs/assert'
+], function(OpenPeer, Stack, Assert) {
 
 	'use strict';
 
@@ -25,11 +26,10 @@ define([
 					assert.isObject(op);
 					return op.ready().then(function() {
 				        return op.destroy().then(function() {
-				          	return done(null);
+				          	return HELPERS.ensureNoConnections(done);
 				        });
 			        }).fail(done);
   				});
-
 			});
 
 		});
@@ -51,15 +51,13 @@ define([
 					assert.isObject(stack);
 					return stack.ready().then(function() {
 				        return stack.destroy().then(function() {
-				          	return done(null);
+				          	return HELPERS.ensureNoConnections(done);
 				        });
 			        }).fail(done);
 				});
-
 			});
 
 		});
-
 	});
 
 });
