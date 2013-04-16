@@ -31,10 +31,6 @@ define([
     });
 
     test('`https://unstable.hookflash.me/finders-get` response', function(done) {
-
-      console.error("TODO: Must return actual finders!");
-      return done(null);
-
       return Request.makeRequestTo(new Context({}, {
         "domain": "unstable.hookflash.me",
         "appid": Util.randomHex(32)
@@ -48,10 +44,6 @@ define([
     });
 
     test('`https://unstable.hookflash.me/signed-salt-get` response', function(done) {
-
-      console.error("TODO: `Access-Control-Allow-Origin` must be set!");
-      return done(null);
-
       return Request.makeRequestTo(new Context({}, {
         "domain": "unstable.hookflash.me",
         "appid": Util.randomHex(32)
