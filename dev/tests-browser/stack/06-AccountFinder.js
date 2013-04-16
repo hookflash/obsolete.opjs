@@ -18,7 +18,13 @@ define([
           return ws.makeRequestTo("peer-finder", "session-create").then(function(result) {
             assert.isObject(result);
             assert.isNumber(result.expires);
-            return ws.makeRequestTo("peer-finder", "session-delete").then(function(result) {
+            return ws.makeRequestTo("peer-finder", "session-delete", {
+              "locations": {
+                "location": {
+                  "$id": Util.randomHex(32)
+                }
+              }
+            }).then(function(result) {
               assert.isObject(result);
               assert.isObject(result.locations);
               return done(null);
@@ -96,6 +102,38 @@ define([
               return done(null);
             }
           }, 100);
+        });
+      });
+
+      test('destroy', function(done) {
+        return client.destroy().then(function() {
+          return HELPERS.ensureNoConnections(done);
+        }).fail(done);
+      });
+
+    });
+
+    suite('Session Keepalive', function() {
+
+      var client = null;
+
+      test('connect', function(done) {
+        client = new Stack({
+          _logPrefix: "AccountFinder - Session Keepalive"
+        });
+        return client.ready().then(function() {
+          return done(null);
+        }).fail(done);
+      });
+
+      test('keepalive', function(done) {
+        this.timeout(5 * 1000);
+        var count = 0;
+        client._account._finder.on("keepalive", function() {
+          count += 1;
+          if (count >= 2) {
+            return done(null);
+          }
         });
       });
 

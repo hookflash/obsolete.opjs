@@ -131,7 +131,7 @@
     }
     var message = {
       $id: request.$id,
-      $timestamp: Date.now() / 1000,
+      $timestamp: Math.floor(Date.now() / 1000),
       $reason: reason
     };
     message = {fail: message};
@@ -144,7 +144,7 @@
     var message = {
       $id: request.$id,
       $method: request.$method,
-      $timestamp: Date.now() / 1000
+      $timestamp: Math.floor(Date.now() / 1000)
     };
     for (var key in result) {
       if (key[0] !== '$') {

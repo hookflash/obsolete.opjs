@@ -49,7 +49,7 @@ exports.main = function(options, callback) {
                 "$id": request.$id,
                 "$handler": request.$handler,
                 "$method": request.$method,
-                "$timestamp": (Date.now() / 1000)
+                "$timestamp": Math.floor(Date.now() / 1000)
             }
           };
           for (var key in response) {
@@ -68,19 +68,29 @@ exports.main = function(options, callback) {
   }
 
   function getPayload(request, options) {
+    // @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#PeerFinderProtocol-SessionCreateRequest
     if (request.$handler === "peer-finder" && request.$method === "session-create") {
       return {
         "server": "hooflash/1.0 (centos)",
-        "expires": 483949923
+        "expires": Math.floor(Date.now()/1000) + 1
       };
     } else
+    // @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#PeerFinderProtocol-SessionKeepAliveRequest
+    if (request.$handler === "peer-finder" && request.$method === "session-keep-alive") {
+      return {
+        "expires": Math.floor(Date.now()/1000) + 1
+      };
+    } else
+    // @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#PeerFinderProtocol-SessionDeleteRequest
     if (request.$handler === "peer-finder" && request.$method === "session-delete") {
+      ASSERT.equal(typeof request.locations, "object");
+      ASSERT.equal(typeof request.locations.location, "object");
+      ASSERT.equal(typeof request.locations.location.$id, "string");
       return {
         "locations": {
-          "location": [
-            { "$id": "99609d8b1eb4c413813cbeb7c15137837d4037e9" },
-            { "$id": "c8062df29e62d42a3dad60e57d9e84ba38e5ba47" }
-          ]
+          "location": {
+            "$id": request.locations.location.$id
+          }
         }
       };
     }
