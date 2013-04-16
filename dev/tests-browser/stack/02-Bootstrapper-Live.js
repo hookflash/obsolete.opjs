@@ -10,7 +10,7 @@ define([
   suite('Bootstrapper-Live', function() {
 
     test('`https://unstable.hookflash.me/.well-known/openpeer-services-get` response', function(done) {
-      return Request.makeRequestTo(new Context({}, {
+      return Request.makeRequestTo(new Context({
         "domain": "unstable.hookflash.me",
         "appid": Util.randomHex(32)
       }), "https://unstable.hookflash.me/.well-known/openpeer-services-get", "bootstrapper", "services-get").then(function(result) {
@@ -21,7 +21,7 @@ define([
     });
 
     test('`https://unstable.hookflash.me/certificates-get` response', function(done) {
-      return Request.makeRequestTo(new Context({}, {
+      return Request.makeRequestTo(new Context({
         "domain": "unstable.hookflash.me",
         "appid": Util.randomHex(32)
       }), "https://unstable.hookflash.me/certificates-get", "certificates", "certificates-get").then(function(result) {
@@ -32,7 +32,7 @@ define([
     });
 
     test('`https://unstable.hookflash.me/finders-get` response', function(done) {
-      return Request.makeRequestTo(new Context({}, {
+      return Request.makeRequestTo(new Context({
         "domain": "unstable.hookflash.me",
         "appid": Util.randomHex(32)
       }), "https://unstable.hookflash.me/finders-get", "bootstrapper-finder", "finders-get", {
@@ -45,7 +45,7 @@ define([
     });
 
     test('`https://unstable.hookflash.me/signed-salt-get` response', function(done) {
-      return Request.makeRequestTo(new Context({}, {
+      return Request.makeRequestTo(new Context({
         "domain": "unstable.hookflash.me",
         "appid": Util.randomHex(32)
       }), "https://unstable.hookflash.me/signed-salt-get", "peer-salt", "signed-salt-get", {

@@ -9,9 +9,7 @@ define([
 /*
     test('connect', function(done) {
       var client = new Stack({
-        context: {
-          logPrefix: "AccountFinder-Live - connect"
-        },
+        _logPrefix: "AccountFinder-Live - connect",
         "domain": "unstable.hookflash.me"
       });
       return client.ready().then(function() {

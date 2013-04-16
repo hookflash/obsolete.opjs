@@ -19,15 +19,11 @@ define([
     test('connect', function() {
 
       client1 = new Stack({
-        context: {
-          logPrefix: "SendMessageToPeer (1)"
-        },
+        _logPrefix: "SendMessageToPeer (1)",
         locationID: Util.randomHex(32)
       });
       client2 = new Stack({
-        context: {
-          logPrefix: "SendMessageToPeer (2)"
-        },
+        _logPrefix: "SendMessageToPeer (2)",
         locationID: Util.randomHex(32)
       });
     });

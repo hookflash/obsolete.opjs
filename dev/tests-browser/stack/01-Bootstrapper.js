@@ -27,19 +27,19 @@ define([
     suite('Instance', function() {
 
       test('`.getUrl()` for peer contact id', function() {
-        var id = "peer://" + Util.getHost() + "/e433a6f9793567217787e33950211453582cadff";
+        var id = "peer://" + Util.getHostname() + "/e433a6f9793567217787e33950211453582cadff";
         var bootstrapper = new Bootstrapper(new Context(), new AccountMock(), id);
         assert.equal(bootstrapper.getUrl(), "https://" + Util.getHost() + "/.well-known/openpeer-services-get");
       });
 
       test('`.getUrl()` for identity id', function() {
-        var id = "identity://" + Util.getHost() + "/alice";
+        var id = "identity://" + Util.getHostname() + "/alice";
         var bootstrapper = new Bootstrapper(new Context(), new AccountMock(), id);
         assert.equal(bootstrapper.getUrl(), "https://" + Util.getHost() + "/.well-known/openpeer-services-get");
       });
 
       test('`.ready()` returns promise that resolves', function(done) {
-        var id = "peer://" + Util.getHost() + "/e433a6f9793567217787e33950211453582cadff";
+        var id = "peer://" + Util.getHostname() + "/e433a6f9793567217787e33950211453582cadff";
         var bootstrapper = new Bootstrapper(new Context(), new AccountMock(), id);
         var ready = bootstrapper.ready();
         assert.isTrue(Q.isPromise(ready));
@@ -49,7 +49,7 @@ define([
       });
 
       test('`.getServices()` returns promise that resolves to object', function(done) {
-        var id = "peer://" + Util.getHost() + "/e433a6f9793567217787e33950211453582cadff";
+        var id = "peer://" + Util.getHostname() + "/e433a6f9793567217787e33950211453582cadff";
         var bootstrapper = new Bootstrapper(new Context(), new AccountMock(), id);
         var services = bootstrapper.getServices();
         assert.isTrue(Q.isPromise(services));
@@ -61,7 +61,7 @@ define([
       });
 
       test('`.getFinders()` returns promise that resolves to object', function(done) {
-        var id = "peer://" + Util.getHost() + "/e433a6f9793567217787e33950211453582cadff";
+        var id = "peer://" + Util.getHostname() + "/e433a6f9793567217787e33950211453582cadff";
         var bootstrapper = new Bootstrapper(new Context(), new AccountMock(), id);
         var finders = bootstrapper.getFinders();
         assert.isTrue(Q.isPromise(finders));
@@ -74,7 +74,7 @@ define([
       });
 
       test('`.getCertificates()` returns promise that resolves to object', function(done) {
-        var id = "peer://" + Util.getHost() + "/e433a6f9793567217787e33950211453582cadff";
+        var id = "peer://" + Util.getHostname() + "/e433a6f9793567217787e33950211453582cadff";
         var bootstrapper = new Bootstrapper(new Context(), new AccountMock(), id);
         var certificates = bootstrapper.getCertificates();
         assert.isTrue(Q.isPromise(certificates));
@@ -87,7 +87,7 @@ define([
       });
 
       test('`.getSalts(1)` returns promise that resolves to object', function(done) {
-        var id = "peer://" + Util.getHost() + "/e433a6f9793567217787e33950211453582cadff";
+        var id = "peer://" + Util.getHostname() + "/e433a6f9793567217787e33950211453582cadff";
         var bootstrapper = new Bootstrapper(new Context(), new AccountMock(), id);
         var salts = bootstrapper.getSalts(1);
         assert.isTrue(Q.isPromise(salts));

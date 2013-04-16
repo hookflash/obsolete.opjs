@@ -35,9 +35,7 @@ define([
 
       test('connect', function(done) {
         client = new Stack({
-          context: {
-            logPrefix: "AccountFinder - Session"
-          }
+          _logPrefix: "AccountFinder - Session"
         });
         return client.ready().then(function() {
           return done(null);
@@ -114,9 +112,7 @@ define([
       test('all finders down', function(done) {
 
         var client = new Stack({
-          context: {
-            logPrefix: "AccountFinder - failures"
-          }
+          _logPrefix: "AccountFinder - failures"
         });
         return client.ready().then(function() {
           client._account._bootstrapper.getFinders = function() {

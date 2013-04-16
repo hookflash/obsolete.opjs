@@ -19,9 +19,7 @@ define([
 
 				test("should give us an object", function(done) {
 					var op = new OpenPeer({
-						context: {
-							logPrefix: "Init - OpenPeer"
-						}
+						_logPrefix: "Init - OpenPeer"
 					});
 					assert.isObject(op);
 					return op.ready().then(function() {
@@ -44,9 +42,7 @@ define([
 
 				test("should give us an object", function(done) {
 					var stack = new Stack({
-						context: {
-							logPrefix: "Init - Stack"
-						}
+						_logPrefix: "Init - Stack"
 					});
 					assert.isObject(stack);
 					return stack.ready().then(function() {

@@ -16,9 +16,7 @@ define([
 
     test('one client', function(done) {
       var client = new Stack({
-        context: {
-          logPrefix: "ConnectToFinder - one client"
-        }
+        _logPrefix: "ConnectToFinder - one client"
       });
       return client.ready().then(function() {
         return client.destroy().then(function() {
@@ -30,15 +28,11 @@ define([
     test('two clients', function(done) {
 
       var client1 = new Stack({
-        context: {
-          logPrefix: "ConnectToFinder - two clients (1)"
-        },
+        _logPrefix: "ConnectToFinder - two clients (1)",
         locationID: Util.randomHex(32)
       });
       var client2 = new Stack({
-        context: {
-          logPrefix: "ConnectToFinder - two clients (2)"
-        },
+        _logPrefix: "ConnectToFinder - two clients (2)",
         locationID: Util.randomHex(32)
       });
 
