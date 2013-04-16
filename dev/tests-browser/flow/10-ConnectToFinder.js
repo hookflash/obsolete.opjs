@@ -13,40 +13,49 @@ define([
   suite("ConnectToFinder", function() {
 
     test('one client', function(done) {
-      var client = new Stack();
+      var client = new Stack({
+        context: {
+          logPrefix: "ConnectToFinder - one client"
+        }
+      });
       return client.ready().then(function() {
         return client.destroy().then(function() {
           return done(null);
-        }, done);
-      }, done);
+        });
+      }).fail(done);
     });
 
     test('two clients', function(done) {
 
       var client1 = new Stack({
+        context: {
+          logPrefix: "ConnectToFinder - two clients (1)"
+        },
         locationID: Util.randomHex(32)
       });
       var client2 = new Stack({
+        context: {
+          logPrefix: "ConnectToFinder - two clients (2)"
+        },
         locationID: Util.randomHex(32)
       });
 
-      client1.ready().then(function() {
+      return client1.ready().then(function() {
 
         assert.equal(client1._account._finder.isConnected(), 1);
 
-        client2.ready().then(function() {
+        return client2.ready().then(function() {
 
           assert.equal(client2._account._finder.isConnected(), 1);
 
-          client1.destroy().then(function() {
-            client2.destroy().then(function() {
+          return client1.destroy().then(function() {
+            return client2.destroy().then(function() {
 
-              done(null);
-
-            }, done);
-          }, done);
-        }, done);
-      }, done);
+              return done(null);
+            });
+          });
+        });
+      }).fail(done);
     });
    
   });

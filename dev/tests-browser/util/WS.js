@@ -1,7 +1,8 @@
 /* global suite, test, assert */
 define([
-  'opjs/ws'
-], function (WS) {
+  'opjs/ws',
+  'opjs/context'
+], function (WS, Context) {
 
   'use strict';
 
@@ -14,7 +15,7 @@ define([
     var ws = null;
 
     test('can connect', function (done) {
-      ws = new WS("ws://localhost:3001");
+      ws = new WS(new Context(), "ws://localhost:3001");
       ws.on("open", function() {
         return done(null);
       });
@@ -38,17 +39,20 @@ define([
     suite('#connectTo()', function() {
 
       test('returns promise and eventually resolves', function (done) {
-        return WS.connectTo('ws://localhost:3001').then(function(ws) {
+        return WS.connectTo(new Context(), 'ws://localhost:3001').then(function(ws) {
           ws.on('message', function(message) {
             assert.equal(message, 'echo:message1');
-            return done(null);
+            ws.once('close', function() {
+              return done(null);
+            });
+            ws.close();
           });
           ws.send('message1');
         }).fail(done);
       });
 
       test('returns promise and eventually rejects on connect fail', function (done) {
-        return WS.connectTo('ws://localhost:-3001').then(function(ws) {
+        return WS.connectTo(new Context(), 'ws://localhost:-3001').then(function(ws) {
           throw new Error("should never resolve");
         }, function(err) {
             return done(null);

@@ -3,8 +3,9 @@ define([
   'opjs/stack/Bootstrapper',
   'opjs/request',
   'opjs/util',
-  'q/q'
-], function (AccountMock, Bootstrapper, Request, Util, Q) {
+  'q/q',
+  'opjs/context'
+], function (AccountMock, Bootstrapper, Request, Util, Q, Context) {
 
   'use strict';
 
@@ -13,12 +14,7 @@ define([
     suite('Helper', function() {
 
       test('`/.well-known/openpeer-services-get` response', function(done) {
-
-        Request.setContext({
-          "appid": Util.randomHex(32)
-        });
-
-        return Request.makeRequestTo("http://" + Util.getHost() + "/.well-known/openpeer-services-get", "bootstrapper", "services-get").then(function(result) {
+        return Request.makeRequestTo(new Context(), "http://" + Util.getHost() + "/.well-known/openpeer-services-get", "bootstrapper", "services-get").then(function(result) {
           assert.isObject(result);
           assert.isObject(result.services);
           return done(null);
@@ -31,19 +27,19 @@ define([
 
       test('`.getUrl()` for peer contact id', function() {
         var id = "peer://" + Util.getHost() + "/e433a6f9793567217787e33950211453582cadff";
-        var bootstrapper = new Bootstrapper(new AccountMock(), id);
+        var bootstrapper = new Bootstrapper(new Context(), new AccountMock(), id);
         assert.equal(bootstrapper.getUrl(), "https://" + Util.getHost() + "/.well-known/openpeer-services-get");
       });
 
       test('`.getUrl()` for identity id', function() {
         var id = "identity://" + Util.getHost() + "/alice";
-        var bootstrapper = new Bootstrapper(new AccountMock(), id);
+        var bootstrapper = new Bootstrapper(new Context(), new AccountMock(), id);
         assert.equal(bootstrapper.getUrl(), "https://" + Util.getHost() + "/.well-known/openpeer-services-get");
       });
 
       test('`.ready()` returns promise that resolves', function(done) {
         var id = "peer://" + Util.getHost() + "/e433a6f9793567217787e33950211453582cadff";
-        var bootstrapper = new Bootstrapper(new AccountMock(), id);
+        var bootstrapper = new Bootstrapper(new Context(), new AccountMock(), id);
         var ready = bootstrapper.ready();
         assert.isTrue(Q.isPromise(ready));
         return Q.when(ready).then(function() {
@@ -53,7 +49,7 @@ define([
 
       test('`.getServices()` returns promise that resolves to object', function(done) {
         var id = "peer://" + Util.getHost() + "/e433a6f9793567217787e33950211453582cadff";
-        var bootstrapper = new Bootstrapper(new AccountMock(), id);
+        var bootstrapper = new Bootstrapper(new Context(), new AccountMock(), id);
         var services = bootstrapper.getServices();
         assert.isTrue(Q.isPromise(services));
         return services.then(function(services) {
@@ -65,7 +61,7 @@ define([
 
       test('`.getFinders()` returns promise that resolves to object', function(done) {
         var id = "peer://" + Util.getHost() + "/e433a6f9793567217787e33950211453582cadff";
-        var bootstrapper = new Bootstrapper(new AccountMock(), id);
+        var bootstrapper = new Bootstrapper(new Context(), new AccountMock(), id);
         var finders = bootstrapper.getFinders();
         assert.isTrue(Q.isPromise(finders));
         return finders.then(function(finders) {
@@ -78,7 +74,7 @@ define([
 
       test('`.getCertificates()` returns promise that resolves to object', function(done) {
         var id = "peer://" + Util.getHost() + "/e433a6f9793567217787e33950211453582cadff";
-        var bootstrapper = new Bootstrapper(new AccountMock(), id);
+        var bootstrapper = new Bootstrapper(new Context(), new AccountMock(), id);
         var certificates = bootstrapper.getCertificates();
         assert.isTrue(Q.isPromise(certificates));
         return certificates.then(function(certificates) {
@@ -91,7 +87,7 @@ define([
 
       test('`.getSalts(1)` returns promise that resolves to object', function(done) {
         var id = "peer://" + Util.getHost() + "/e433a6f9793567217787e33950211453582cadff";
-        var bootstrapper = new Bootstrapper(new AccountMock(), id);
+        var bootstrapper = new Bootstrapper(new Context(), new AccountMock(), id);
         var salts = bootstrapper.getSalts(1);
         assert.isTrue(Q.isPromise(salts));
         return salts.then(function(salts) {

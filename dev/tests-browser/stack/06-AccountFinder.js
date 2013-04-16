@@ -3,8 +3,9 @@ define([
   'opjs/Stack',
   'q/q',
   'opjs/util',
-  'opjs/ws'
-], function (Stack, Q, Util, WS) {
+  'opjs/ws',
+  'opjs/context'
+], function (Stack, Q, Util, WS, Context) {
 
   'use strict';
 
@@ -12,12 +13,8 @@ define([
 
     suite('Helper', function() {
 
-      WS.setContext({
-        "appid": Util.randomHex(32)
-      });
-
       test('`ws://localhost:3002/session-create` and `ws://localhost:3002/session-delete`', function(done) {
-        return WS.connectTo('ws://localhost:3002').then(function(ws) {
+        return WS.connectTo(new Context(), 'ws://localhost:3002').then(function(ws) {
           return ws.makeRequestTo("peer-finder", "session-create").then(function(result) {
             assert.isObject(result);
             assert.isNumber(result.expires);
@@ -37,7 +34,11 @@ define([
       var client = null;
 
       test('connect', function(done) {
-        client = new Stack();
+        client = new Stack({
+          context: {
+            logPrefix: "AccountFinder - Session"
+          }
+        });
         return client.ready().then(function() {
           return done(null);
         }).fail(done);
@@ -104,41 +105,55 @@ define([
         }).fail(done);
       });
 
-      suite('failures', function () {
+    });
 
-        test('all finders down', function(done) {
+    suite('failures', function () {
 
-          var client = new Stack();
-          return client.ready().then(function() {
-            client._account._bootstrapper.getFinders = function() {
-              return Q.resolve([
-                // Send one bad url to test connection to multiple finders until one works.
-                {
-                  "$id": Util.randomHex(32),
-                  "wsUri": "ws://localhost:-3002"
-                },
-                {
-                  "$id": Util.randomHex(32),
-                  "wsUri": "ws://localhost:-3002"
-                }
-              ]);
-            };
-            assert.equal(client._account._finder.isConnected(), 1);
-            return HELPERS.callServerHelper("finder-server/close-all-connections", {}, function(err) {
-              if (err) return done(err);
-              // Wait a bit for connection to drop and reconnect.
-              setTimeout(function() {
-                assert.equal(client._account._finder.isConnected(), false);
+      test('all finders down', function(done) {
 
-                return client.destroy().then(function() {
-                  return done(null);
-                }).fail(done);
-              }, 100);
-            });
-
-          }).fail(done);
+        var client = new Stack({
+          context: {
+            logPrefix: "AccountFinder - failures"
+          }
         });
-
+        return client.ready().then(function() {
+          client._account._bootstrapper.getFinders = function() {
+            return Q.resolve([
+              // Send one bad url to test connection to multiple finders until one works.
+              {
+                "$id": Util.randomHex(32),
+                "wsUri": "ws://localhost:-3002"
+              },
+              {
+                "$id": Util.randomHex(32),
+                "wsUri": "ws://localhost:-3002"
+              }
+            ]);
+          };
+          assert.equal(client._account._finder.isConnected(), 1);
+          return HELPERS.callServerHelper("finder-server/close-all-connections", {}, function(err) {
+            if (err) return done(err);
+            function destroy() {
+              return client.destroy().then(function() {
+                return done(null);
+              }).fail(done);
+            }
+            // Wait a bit for connection to drop.
+            var waitCount = 0;
+            var waitId = setInterval(function() {
+              if (waitCount > 10) {
+                clearInterval(waitId);
+                assert.equal(client._account._finder.isConnected(), false);
+                return destroy();
+              }
+              waitCount += 1;
+              if (client._account._finder.isConnected() === false) {
+                clearInterval(waitId);
+                return destroy();
+              }
+            }, 100);
+          });
+        }).fail(done);
       });
 
     });

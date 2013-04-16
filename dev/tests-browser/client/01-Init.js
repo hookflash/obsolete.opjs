@@ -16,9 +16,19 @@ define([
 
 			suite('when instanciated', function() {
 
-				test("should give us an object", function() {
-					assert.isObject(new OpenPeer());
-				});
+				test("should give us an object", function(done) {
+					var op = new OpenPeer({
+						context: {
+							logPrefix: "Init - OpenPeer"
+						}
+					});
+					assert.isObject(op);
+					return op.ready().then(function() {
+				        return op.destroy().then(function() {
+				          	return done(null);
+				        });
+			        }).fail(done);
+  				});
 
 			});
 
@@ -32,8 +42,18 @@ define([
 
 			suite('when instanciated', function() {
 
-				test("should give us an object", function() {
-					assert.isObject(new Stack());
+				test("should give us an object", function(done) {
+					var stack = new Stack({
+						context: {
+							logPrefix: "Init - Stack"
+						}
+					});
+					assert.isObject(stack);
+					return stack.ready().then(function() {
+				        return stack.destroy().then(function() {
+				          	return done(null);
+				        });
+			        }).fail(done);
 				});
 
 			});
