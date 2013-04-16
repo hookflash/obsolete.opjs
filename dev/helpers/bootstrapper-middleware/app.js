@@ -282,58 +282,32 @@ function getPayload(request, options) {
 	if (request.$handler === "bootstrapper-finder" && request.$method === "finders-get") {
 		return {
 		    "finders": {
-		      "finderBundle": [
-		        {
-		          "finder": {
-		            "$id": "4bf7fff50ef9bb07428af6294ae41434da175538",
-		            "transport": "rudp/udp",
-		            "srv": "finders.example.com",
-		    // TODO: Update this according to spec
-            "wsUri": "ws://localhost:3002",
-		            "key": { "x509Data": "MIIDCCA0+gA...lVN" },
-		            "priority": 1,
-		            "weight": 1,
-		            "region": "1",
-		            "created": 588584945,
-		            "expires": 675754754
-		          },
-		          "signature": {
-		            "reference": "#4bf7fff50ef9bb07428af6294ae41434da175538",
-		            "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
-		            "digestValue": "jeirjLr...ta6skoV5/A8Q38Gj4j323=",
-		            "digestSigned": "DE...fGM~C0/Ez=",
-		            "key": {
-		              "$id": "9bdd14dda3f...dd174b5d5bd2",
-		              "domain": "example.org",
-		              "service": "finder"
+		        "finderBundle": {
+		            "finder": {
+		                "$id": "c14de2cad95b5b9ce000933d74b20cc6a2c0e275",
+		                "transport": "webSocket",
+		                "srv": "localhost:3002",
+		                "key": {
+		                    "x509Data": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwIw4uEJG3QAeL/sq7hFfqVhCMyOPOM8TwsN0qZ/AxyJ6DbCl8fY27hSqcnzbDvotMBnGzZRLcQ9n/6/9CREIutTqgC11MWTLBr1AZPz4TliWy3RIhJGYw7ddKkmuIiYfkShBV1k2paXoX4wWdEtUgzT73Ts4RrSmN0rG1fw7ttzHtYdmP6Un3SdGixHUsXdeh4/GE18zTkq7uzV3OrmaFYat8XL9mBz2SAGOl8Bn8lpRZ2rXDju4NNy18mHmaUQ34lnetk3DoVEBvaIVEJzqhzAJ4xj9s2HZ14lgtK38W/2mKjZ0RRtTtFoPFW8c3qp+o74tGnkObSZPD2KiMvoDsQIDAQAB"
+		                },
+		                "priority": 0,
+		                "weight": 10,
+		                "region": "1",
+		                "created": 1366113803,
+		                "expires": 1397649803
+		            },
+		            "signature": {
+		                "reference": "#c14de2cad95b5b9ce000933d74b20cc6a2c0e275",
+		                "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+		                "digestValue": "781d2cf7b5d1211646e3d74b404967e672337313",
+		                "digestSigned": "VKpocgPlI08sj565cgTBtfc6Giw+x5jclQFgm+hbLg8q7X1oumKAbTBVuybZkCvI6FDZ3BsCIHAUxUvIMW5BgluwdGGzmliiIQ/ers/O/ozBSOWdcnj4vSgsU9k9bC4OFM8Hk7F7bVg6edmNAq8H3IVrrAEZr8spx5HCKAuXhJ+FurRsLXTpdCk2EGH06/qEb+H4zSert3P/GgSY07diOWkqqePLqi8GbkXFf8V+r06RVN2vL1WPX2FGELnUWTrmADIsGOJ1iDjtH86xWZjEmoVaZyLv3pfulqbsqGWLerktNlBo0aJ2knzESqKRXIE0GuTzRxmQ3qoj0BAqEMh7pg==",
+		                "key": {
+		                    "$id": "8d6062d23e84e9cd5f18134ba9531a48bd45fbab",
+		                    "domain": "unstable.hookflash.me",
+		                    "service": "bootstrapped-finders"
+		                }
 		            }
-		          }
-		        },
-		        {
-		          "finder": {
-		            "$id": "a7f0c5df6d118ee2a16309bc8110bce009f7e318",
-		            "transport": "rudp/udp",
-		            "srv": "100.200.100.1:4032,5.6.7.8:4032",
-		    // TODO: Update this according to spec
-            "wsUri": "ws://localhost:3002",
-		            "key": { "x509Data": "MIID5A0+gA...lVN" },
-		            "priority": 10,
-		            "weight": 0,
-		            "region": 1
-		          },
-		          "signature": {
-		            "reference": "#a7f0c5df6d118ee2a16309bc8110bce009f7e318",
-		            "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
-		            "digestValue": "YTdmMGM1ZGY2Z...DExOGVlMmExNjMwJjZTAwOWY3ZTMxOA==",
-		            "digestSigned": "OjY2OjZl...OjZhOjcyOjY2OjcyOjcyIChsZW5ndGg9OSk=",
-		            "key": {
-		              "$id": "9bdd14dda3f...dd174b5d5bd2",
-		              "domain": "example.org",
-		              "service": "finder"
-		            }
-		          }
 		        }
-		      ]
 		    }
 		};
 	} else

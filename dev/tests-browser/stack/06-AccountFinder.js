@@ -71,11 +71,13 @@ define([
             // Send one bad url to test connection to multiple finders until one works.
             {
               "$id": Util.randomHex(32),
-              "wsUri": "ws://localhost:-3002"
+              "transport": "webSocket",
+              "srv": "localhost:-3002"
             },
             {
               "$id": Util.randomHex(32),
-              "wsUri": "ws://localhost:3002"
+              "transport": "webSocket",
+              "srv": "localhost:3002"
             }
           ]);
         };
@@ -122,11 +124,13 @@ define([
               // Send one bad url to test connection to multiple finders until one works.
               {
                 "$id": Util.randomHex(32),
-                "wsUri": "ws://localhost:-3002"
+                "transport": "webSocket",
+                "srv": "localhost:-3002"
               },
               {
                 "$id": Util.randomHex(32),
-                "wsUri": "ws://localhost:-3002"
+                "transport": "webSocket",
+                "srv": "localhost:-3002"
               }
             ]);
           };

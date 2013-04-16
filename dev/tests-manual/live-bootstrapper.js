@@ -77,7 +77,7 @@ describe("live-bootstrapper", function() {
                 ASSERT.equal(typeof payload, "object");
                 ASSERT.equal(typeof payload.result, "object");
                 ASSERT.equal(typeof payload.result.finders, "object");
-                ASSERT.equal(typeof payload.result.finders.finderBundle, "object");
+                ASSERT.notEqual(typeof payload.result.finders.finderBundle, "undefined");
 
                 return done(null);
 
