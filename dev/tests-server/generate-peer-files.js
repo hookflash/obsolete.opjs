@@ -16,7 +16,12 @@ const UTILS = require('cifre/utils');
 
 describe("generate-peer-files", function() {
 
+    var secret = null;
+    var contact = null;
+
     it("generate 1028 bit", function(done) {
+
+        secret = randomID();
 
         var size = 1028;
         var domain = "example.com";
@@ -32,7 +37,6 @@ describe("generate-peer-files", function() {
             "here"
         ];
         var salt = randomID();
-        var secret = randomID();
         var findSecret = 'YjAwOWE2YmU4OWNlOTdkY2QxNzY1NDA5MGYy';
         var message = "Happiness is the object and design of your existence " +
                       "and will be the end thereof, if you pursue the path " +
@@ -58,10 +62,12 @@ describe("generate-peer-files", function() {
           domain: domain
         });
 
+        contact = publicPeerFile.contact;
+
 //        console.log(JSON.stringify(publicPeerFile, null, 4));
 
         var privatePeerFile = generatePrivatePeerFile({
-          contact: publicPeerFile.contact,
+          contact: contact,
           salt: salt,
           secret: secret,
           privateKey: pair.privateKey,
@@ -75,24 +81,40 @@ describe("generate-peer-files", function() {
             secret: secret
         });
 
-        ASSERT.equal(privatePeerInfo.contact, publicPeerFile.contact);
+        ASSERT.equal(privatePeerInfo.contact, contact);
         ASSERT.equal(privatePeerInfo.salt, salt);
         ASSERT.equal(PKI.privateKeyToPem(privatePeerInfo.privateKey), PKI.privateKeyToPem(pair.privateKey));
         ASSERT.equal(privatePeerInfo.data, message);
         ASSERT.equal(privatePeerInfo.publicPeerFile, JSON.stringify(publicPeerFile));
 
+        FS.writeFileSync(PATH.join(__dirname, "assets/public-from-JS.json"), JSON.stringify(publicPeerFile));
+        FS.writeFileSync(PATH.join(__dirname, "assets/private-from-JS.json"), JSON.stringify(privatePeerFile));
+
         return done(null);
     });
 
-    it("compare generated private from outside public against outside private", function(done) {
+    it("parse private from JS", function(done) {
 
-        var secret = "dTOA5xBEm60qkCqhlNDnibRaGUhMWUCzEXXePWftuUx5eanK9pWveyuAr1Oxqg64";
+        var publicPeerFile = JSON.parse(FS.readFileSync(PATH.join(__dirname, "assets/public-from-JS.json")));
+        var privatePeerFile = JSON.parse(FS.readFileSync(PATH.join(__dirname, "assets/private-from-JS.json")));
+
+        var privatePeerInfo = parsePrivatePeerFile(privatePeerFile, {
+            secret: secret
+        });
+
+        ASSERT.equal(privatePeerInfo.contact, contact);
+        ASSERT.equal(privatePeerInfo.publicPeerFile, JSON.stringify(publicPeerFile));
+
+        return done(null);
+    });
+
+    it("parse private from C", function(done) {
 
         var publicPeerFile = JSON.parse(FS.readFileSync(PATH.join(__dirname, "assets/public-from-C.json")));
         var privatePeerFile = JSON.parse(FS.readFileSync(PATH.join(__dirname, "assets/private-from-C.json")));
 
         var privatePeerInfo = parsePrivatePeerFile(privatePeerFile, {
-            secret: secret
+            secret: "dTOA5xBEm60qkCqhlNDnibRaGUhMWUCzEXXePWftuUx5eanK9pWveyuAr1Oxqg64"
         });
 
         ASSERT.equal(privatePeerInfo.contact, publicPeerFile.contact);
