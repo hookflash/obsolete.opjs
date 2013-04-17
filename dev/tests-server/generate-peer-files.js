@@ -89,6 +89,7 @@ describe("generate-peer-files", function() {
 
         FS.writeFileSync(PATH.join(__dirname, "assets/public-from-JS.json"), JSON.stringify(publicPeerFile));
         FS.writeFileSync(PATH.join(__dirname, "assets/private-from-JS.json"), JSON.stringify(privatePeerFile));
+        FS.writeFileSync(PATH.join(__dirname, "assets/private-from-JS.secret"), secret);
 
         return done(null);
     });
