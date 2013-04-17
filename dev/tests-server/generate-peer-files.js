@@ -93,8 +93,10 @@ describe("generate-peer-files", function() {
  * @param keyData extra data to put in the signature object.
  *
  * @return a new JSON object representing the signed bundle.
+ *
+ * @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#GeneralRequestReplyNotifyAndResultFormationRules
  */ 
-function bundle(name, message, key, keyData) {
+function formatBundle(name, message, key, keyData) {
   // Insert $id if none is found
   if (!message.$id) {
     message = merge({$id: randomID()}, message);
@@ -196,14 +198,14 @@ function formatPublicPeerFile(args) {
     expires: now + args.lifetime,
     saltBundle: args.saltBundle
   };
-  var sectionBundle = [bundle('section', A, args.privateKey, {
+  var sectionBundle = [formatBundle('section', A, args.privateKey, {
     x509Data: binaryToBase64(ASN1.toDer(PKI.publicKeyToAsn1(args.publicKey)).getBytes())
   })];
 
   var contact = getContactUri(A, args.domain);
   
   if (args.findSecret) {
-    sectionBundle.push(bundle('section', {
+    sectionBundle.push(formatBundle('section', {
       $id: 'B',
       contact: contact,
       findSecret: args.findSecret
@@ -213,7 +215,7 @@ function formatPublicPeerFile(args) {
   }
 
   if (args.identityBundle) {
-    sectionBundle.push(bundle('section', {
+    sectionBundle.push(formatBundle('section', {
       $id: 'C',
       contact: contact,
       identities: {
@@ -262,7 +264,7 @@ function formatPrivatePeerFile(args) {
   if (!args.privateKey) throw new Error("privateKey is required");
   if (!args.publicPeerFile) throw new Error("publicPeerFile is required");
   
-  var sectionBundle = [bundle('section', {
+  var sectionBundle = [formatBundle('section', {
     $id: 'A',
     contact: args.contact,
     cipher: 'sha256/aes256',
@@ -282,7 +284,7 @@ function formatPrivatePeerFile(args) {
   if (args.data) {
     B.encryptedPrivateData = encrypt('data:', args.data);
   }
-  sectionBundle.push(bundle('section', B, args.privateKey, {
+  sectionBundle.push(formatBundle('section', B, args.privateKey, {
     uri: args.contact
   }));
 
