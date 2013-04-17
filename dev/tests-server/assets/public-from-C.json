@@ -1,0 +1,72 @@
+{
+    "peer": {
+        "$version": "1",
+        "sectionBundle": [
+            {
+                "section": {
+                    "$id": "A",
+                    "cipher": "sha256/aes256",
+                    "created": 1365699714,
+                    "expires": 1428771714,
+                    "saltBundle": {
+                        "salt": {
+                            "$id": "c5f568521a24c5baf618d1ada3b8e300fdc963e0",
+                            "#text": "432d09beaed2b7bd392a73c8c3dddf86098981bc"
+                        },
+                        "signature": {
+                            "reference": "#c5f568521a24c5baf618d1ada3b8e300fdc963e0",
+                            "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+                            "digestValue": "0a0f158931d9e6abe2e3d99a7841242762a86feb",
+                            "digestSigned": "by5doZ5jRK12qi4lIFUdeHpYR7ta3AUesWQX0Odr9nUL9MsdJTyccLeZMXFt2dcQKtfIyzOwFkpUbQuH7IFB4JLgPnGkJW/WfEggGxisTSDr+CYi3NU0hStWDvC+m6OLXjQAOc0PeI3ketUSXcEiNukkOvxuBlflbE0Zf7/zXejG+9L6Ve/0z3eKsJ487gyjhPhGxgLoGb1G6+3jWNvBubUqVhYac3hVMvI95zIkZg44T25gnuEwKfXpkfKRZRptbuk1Dq6StA52ZBKn1xQM8z3akPj9CPLcSTW3Rb+CiG3tgyRxBl7nYBaJeGDWNxtF0B9ttBY46AV69ugrdJlRbA==",
+                            "key": {
+                                "$id": "5d4e02f0800c0f354a72b2983914ca409ce6cf0c",
+                                "domain": "unstable.hookflash.me",
+                                "service": "salt"
+                            }
+                        }
+                    }
+                },
+                "signature": {
+                    "reference": "#A",
+                    "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+                    "digestValue": "daZLFfYh0ZZcir9VZPBWeeGVGzs=",
+                    "digestSigned": "MfoKLbCeJGi1bjr9mgqDUotQevju+xUJzZrpRHW7Cyf2IxXWgka8/GDbmxj0ylHA+Tw1Ge5wAyDTE4VRnqJOBXD54bJO66YW+SQDrPNOOwBN8pZ425FsozFYH2pe2beBzddWjerpjz0qoxuGuuupgH6jMGYS/bD+ilg0o65YG+8PhLxmPKLnexAuTurrWXcYpe7k089zVLhMMCtLP5vtQpubV0iETWOAuVqJuKFCLKFrP0hM/BOzcRolHs6EMNLQfqsts3P29VqTct/1x5OD7gXuSgy2RG/NbA4Co0sTsZKm/c2XSUeTIhe3lqD91vImSV2Gm8SgvGIyKBuW+yRAPg==",
+                    "key": {
+                        "x509Data": "MIIBIDANBgkqhkiG9w0BAQEFAAOCAQ0AMIIBCAKCAQEAudy9eKIK6AxVqe1iFCzZmAqnYLoRUWQ3jDQwfgdNIvRHOPBmkL4QjoRjZCtv0YJoctqVW7BErQnozM/ik2j8uUvs3wM/hjWHUI18Wativ3unY9w7Sg78taKQr5EZY5smQPEPX78mWQ6HguAKEylfT0GfbDzasnsLMn08DrgIZyslcOExoibCz1SYn5GJITX2NR5lTV0cK+Ac9AkZz2VRYRkWVtV5zJ8/32iwfQu3BLLjAJ3MWAEepvPCFDlt57cZDKk9V5YLojhAhPVw2sSXXydAfXStsVXps8NMzQyoeKh6u3A3GFe3XSVIZ+OVuHqbbzVwaXg8SlyZSzRRc2qTswIBEQ=="
+                    }
+                }
+            },
+            {
+                "section": {
+                    "$id": "B",
+                    "contact": "peer://unstable.hookflash.me/d82d6f216a1db12a101a93fa91629089d10231c292b8643e6504b039fdd55b72",
+                    "findSecret": "ts6Bitat6X0kV0j6KGNsHdPLMp7ZQNzq"
+                },
+                "signature": {
+                    "reference": "#B",
+                    "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+                    "digestValue": "MhSXSzxBPK0+IaGUlUnCCkkNWRQ=",
+                    "digestSigned": "NXYRs/tkD3wkuPJcnFfyADmQW8msIzP29Up8W+s7hFYjAQcjLO/rxg+W/3rZUJRVm8tPbhb1fp/0A+b4L6TuLE77Qi8r8p/kf+pXOa7rS8uHHVaAlwkI4SJhHBc0hf3CP+QGNIBzgC/UQHBUGfHrHvGyb5AwdNohVpI2vTzLL5Vss6aLRSH8qYu2quuhgmRhGv132U28rMsG8rrxMJ0IPZ0/QOrZk6olrZlmwlDEDfrC+FEVDYapp3zLJQ/KioowLmgtzEWdYTwYxsrXTDjsxkDqfmOe0bDGqbN/7l6SAbJGim5R8qLzJmf5B3qpUIHGHx+72/A85hgJNIMdkKIIeg==",
+                    "key": {
+                        "uri": "peer://unstable.hookflash.me/d82d6f216a1db12a101a93fa91629089d10231c292b8643e6504b039fdd55b72"
+                    }
+                }
+            },
+            {
+                "section": {
+                    "$id": "C",
+                    "contact": "peer://unstable.hookflash.me/d82d6f216a1db12a101a93fa91629089d10231c292b8643e6504b039fdd55b72"
+                },
+                "signature": {
+                    "reference": "#C",
+                    "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+                    "digestValue": "Vc0cWnK7E9qgysHAxHJTd5rqPpE=",
+                    "digestSigned": "LMEg89IjHxJ0joNUoXpxkkoS7mKu9v3g7C7pBgrXoeyzY+f67q/g6WKE82DCRDd6/GWVSzieTzS9zLIOIEC8nU8b88h0e5hYZybRcbXTbCTpjNiKJrunkUBtEX1g3giz7jhnyK651EDBIVwW4zGO5uL9TCdQ+J1Wub1avfimlibeuoKGK/+n39CgaEKgoteGsdZWOU8edH9k8XOWgt+U44HDYB7OuaYsvqkbx6sXnzeJma0TvJTCh2QXh66pGaUFzsiMwWtHBdH9bQVNfuPaswu9A2IlPZhw3R2LU9yLDbF23Mo8+ppjA3HYwpkyEtZbMCe8QmcHOlobjUyb4/+RfQ==",
+                    "key": {
+                        "uri": "peer://unstable.hookflash.me/d82d6f216a1db12a101a93fa91629089d10231c292b8643e6504b039fdd55b72"
+                    }
+                }
+            }
+        ]
+    }
+}

@@ -1,19 +1,22 @@
 
-var PKI = require('cifre/forge/pki');
-var SHA1 = require('cifre/forge/sha1');
-var RSA = require('cifre/forge/rsa');
-var ASN1 = require('cifre/forge/asn1');
-var HMAC = require('cifre/forge/hmac');
-var AES = require('cifre/aes');
-var MD5 = require('cifre/md5');
-var UTILS = require('cifre/utils');
+const PATH = require('path');
+const FS = require('fs');
+const ASSERT = require('assert');
+
+const PKI = require('cifre/forge/pki');
+const SHA1 = require('cifre/forge/sha1');
+const RSA = require('cifre/forge/rsa');
+const ASN1 = require('cifre/forge/asn1');
+const HMAC = require('cifre/forge/hmac');
+const FORGE_UTIL = require('cifre/forge/util');
+const AES = require('cifre/aes');
+const MD5 = require('cifre/md5');
+const UTILS = require('cifre/utils');
 
 
 describe("generate-peer-files", function() {
 
     it("generate 1028 bit", function(done) {
-
-        this.timeout(10 * 1000);
 
         var size = 1028;
         var domain = "example.com";
@@ -28,27 +31,24 @@ describe("generate-peer-files", function() {
             "go",
             "here"
         ];
+        var salt = randomID();
+        var secret = randomID();
         var findSecret = 'YjAwOWE2YmU4OWNlOTdkY2QxNzY1NDA5MGYy';
         var message = "Happiness is the object and design of your existence " +
                       "and will be the end thereof, if you pursue the path " +
                       "that leads to it.";
 
-
-        console.log("Generating " + size + "bit RSA key...");
-
         var pair = RSA.generateKeyPair(size, 0x10001);
 
-        console.log(PKI.privateKeyToPem(pair.privateKey));
-        console.log(PKI.publicKeyToPem(pair.publicKey));
-
-        console.log("Message:", message);
+//        console.log(PKI.privateKeyToPem(pair.privateKey));
+//        console.log(PKI.publicKeyToPem(pair.publicKey));
 
         var signature = new Buffer(pair.privateKey.sign(calcSHA1(message)), 'binary');
 
-        console.log("Signature:", signature.toString('base64'));
+//        console.log("Signature:", signature.toString('base64'));
 
         var now = Math.floor(Date.now() / 1000);
-        var publicPeerFile = formatPublicPeerFile({
+        var publicPeerFile = generatePublicPeerFile({
           lifetime: 10845400, // Number of seconds till the file expires
           saltBundle: saltBundle,
           findSecret: findSecret,
@@ -58,22 +58,102 @@ describe("generate-peer-files", function() {
           domain: domain
         });
 
-        console.log(JSON.stringify(publicPeerFile, null, 4));
+//        console.log(JSON.stringify(publicPeerFile, null, 4));
 
-        var privatePeerFile = formatPrivatePeerFile({
+        var privatePeerFile = generatePrivatePeerFile({
           contact: publicPeerFile.contact,
-          salt: randomID(),
-          secret: randomID(),
+          salt: salt,
+          secret: secret,
           privateKey: pair.privateKey,
-          publicPeerFile: publicPeerFile
+          publicPeerFile: publicPeerFile,
+          data: message
         });
 
-        console.log(JSON.stringify(privatePeerFile, null, 4));
+//        console.log(JSON.stringify(privatePeerFile, null, 4));
+
+        var privatePeerInfo = parsePrivatePeerFile(privatePeerFile, {
+            secret: secret
+        });
+
+        ASSERT.equal(privatePeerInfo.contact, publicPeerFile.contact);
+        ASSERT.equal(privatePeerInfo.salt, salt);
+        ASSERT.equal(PKI.privateKeyToPem(privatePeerInfo.privateKey), PKI.privateKeyToPem(pair.privateKey));
+        ASSERT.equal(privatePeerInfo.data, message);
+        ASSERT.equal(privatePeerInfo.publicPeerFile, JSON.stringify(publicPeerFile));
+
+        return done(null);
+    });
+
+    it("compare generated private from outside public against outside private", function(done) {
+
+        var secret = "dTOA5xBEm60qkCqhlNDnibRaGUhMWUCzEXXePWftuUx5eanK9pWveyuAr1Oxqg64";
+
+        var publicPeerFile = JSON.parse(FS.readFileSync(PATH.join(__dirname, "assets/public-from-C.json")));
+        var privatePeerFile = JSON.parse(FS.readFileSync(PATH.join(__dirname, "assets/private-from-C.json")));
+
+        var privatePeerInfo = parsePrivatePeerFile(privatePeerFile, {
+            secret: secret
+        });
+
+        ASSERT.equal(privatePeerInfo.contact, publicPeerFile.contact);
+        ASSERT.equal(privatePeerInfo.publicPeerFile, JSON.stringify(publicPeerFile));
 
         return done(null);
     });
 
 });
+
+
+function parsePrivatePeerFile(privatePeerFile, args) {
+
+    var info = {
+        contact: null,
+        salt: null,
+        secretProof: null,
+        privateKey: null,
+        publicPeerFile: null,
+        data: null
+    };
+
+    function decrypt(prefix, data) {
+        var key = UTILS.fromhex(calcHmac(prefix + info.salt).toHex());
+        var iv = MD5(prefix + info.salt);
+        var state = base64ToArray(data);
+        AES.cfb.decrypt(state, key, iv);
+        return state.map(function(code) {
+            return String.fromCharCode(code);
+        }).join('');
+    }
+
+    function calcHmac(string) {
+        var hm = HMAC.create();
+        hm.start('sha256', args.secret);
+        hm.update(string);
+        return hm.getMac();
+    }
+
+    var A = privatePeerFile.privatePeer.sectionBundle[0].section;
+    // TODO: Verify signature of section.
+
+    info.salt = A.salt;
+
+    var B = privatePeerFile.privatePeer.sectionBundle[1].section;
+    // TODO: Verify signature of section.
+
+    info.contact =  decrypt('contact:', B.encryptedContact);
+    info.secretProof = binaryToBase64(calcHmac('proof:' + info.contact).getBytes());
+    if (info.secretProof !== A.secretProof) {
+        throw new Error("`secretProof` from `secret` (" + info.secretProof + ") does not match `secretProof` from file (" + A.secretProof + ")");
+    }
+    info.privateKey =  PKI.privateKeyFromAsn1(ASN1.fromDer(decrypt('privatekey:', B.encryptedPrivateKey)));
+    info.publicPeerFile =  decrypt('peer:', B.encryptedPeer);
+    if (B.encryptedPrivateData) {
+        info.data =  decrypt('data:', B.encryptedPrivateData);
+    }
+
+    return info;
+}
+
 
 
 /**
@@ -131,6 +211,16 @@ function arrayToBase64(array) {
   // TODO: Implement a non-node version of this
   return (new Buffer(array)).toString('base64');
 }
+function base64ToArray(base64) {
+    // TODO: Implement a non-node version of this
+    var data = new Buffer(base64, 'base64').toString('binary');
+    var length = data.length;
+    var state = new Array(length);
+    for (var i = 0; i < length; i++) {
+      state[i] = data.charCodeAt(i);
+    }
+    return state;
+}
 
 function randomID() {
   var id = '';
@@ -182,7 +272,7 @@ function merge(a, b) {
  *
  * @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#TheMakeupOfThePublicPeerFile
  */
-function formatPublicPeerFile(args) {
+function generatePublicPeerFile(args) {
   if (!args.privateKey) throw new Error("privateKey is required");
   if (!args.publicKey) throw new Error("publicKey is required");
   if (!args.domain) throw new Error("domain is required");
@@ -256,7 +346,7 @@ function getContactUri(A, domain) {
  *
  * @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#TheMakeupOfThePrivatePeerFile
  */
-function formatPrivatePeerFile(args) {
+function generatePrivatePeerFile(args) {
   if (!args.contact) throw new Error("contact is required");
   if (!args.salt) throw new Error("salt is required");
   if (!args.secret) throw new Error("secret is required");
@@ -268,7 +358,7 @@ function formatPrivatePeerFile(args) {
     contact: args.contact,
     cipher: 'sha256/aes256',
     salt: args.salt,
-    secretProof: binaryToBase64(calcHmac('proof:', args.contact).getBytes())
+    secretProof: binaryToBase64(calcHmac('proof:' + args.contact).getBytes())
   }, args.privateKey, {
     uri: args.contact
   })];
@@ -297,14 +387,14 @@ function formatPrivatePeerFile(args) {
   function encrypt(prefix, data) {
     var key = UTILS.fromhex(calcHmac(prefix + args.salt).toHex());
     var iv = MD5(prefix + args.salt);
-
     var length = data.length;
     var state = new Array(length);
     for (var i = 0; i < length; i++) {
       state[i] = data.charCodeAt(i);
     }
     AES.cfb.encrypt(state, key, iv);
-    return arrayToBase64(state);
+    var out = arrayToBase64(state);
+    return out;
   }
 
   return {
