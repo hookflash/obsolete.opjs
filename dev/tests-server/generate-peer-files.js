@@ -34,29 +34,21 @@ describe("generate-peer-files", function() {
                       "that leads to it.";
 
 
-        process.stdout.write("Generating " + size + "bit RSA key...");
+        console.log("Generating " + size + "bit RSA key...");
 
-        var before = Date.now();
         var pair = RSA.generateKeyPair(size, 0x10001);
-
-        console.log(" (%sms)", Date.now() - before);
-
 
         console.log(PKI.privateKeyToPem(pair.privateKey));
         console.log(PKI.publicKeyToPem(pair.publicKey));
 
         console.log("Message:", message);
 
-        var md = SHA1.create();
-        md.start();
-        md.update(message);
-
-        var signature = new Buffer(pair.privateKey.sign(md), 'binary');
+        var signature = new Buffer(pair.privateKey.sign(calcSHA1(message)), 'binary');
 
         console.log("Signature:", signature.toString('base64'));
 
         var now = Math.floor(Date.now() / 1000);
-        var pub = formatPublicPeerFile({
+        var publicPeerFile = formatPublicPeerFile({
           lifetime: 10845400, // Number of seconds till the file expires
           saltBundle: saltBundle,
           findSecret: findSecret,
@@ -66,17 +58,17 @@ describe("generate-peer-files", function() {
           domain: domain
         });
 
-        console.log(require('util').inspect(pub, {depth: null, colors: true}));
+        console.log(JSON.stringify(publicPeerFile, null, 4));
 
-        var priv = formatPrivatePeerFile({
-          contact: pub.contact,
+        var privatePeerFile = formatPrivatePeerFile({
+          contact: publicPeerFile.contact,
           salt: randomID(),
           secret: randomID(),
           privateKey: pair.privateKey,
-          publicPeerFile: pub
+          publicPeerFile: publicPeerFile
         });
 
-        console.log(require('util').inspect(priv, {depth: null, colors: true}));
+        console.log(JSON.stringify(privatePeerFile, null, 4));
 
         return done(null);
     });
@@ -121,6 +113,13 @@ function formatBundle(name, message, key, keyData) {
   };
 
   return bundle;
+}
+
+function calcSHA1(message) {
+    var md = SHA1.create();
+    md.start();
+    md.update(message);
+    return md;
 }
 
 function binaryToBase64(binary) {
