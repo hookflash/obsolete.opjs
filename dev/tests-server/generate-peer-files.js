@@ -1,37 +1,87 @@
-"use strict";
 
-var pki = require('cifre/forge/pki');
-var sha1 = require('cifre/forge/sha1');
-var rsa = require('cifre/forge/rsa');
-var asn1 = require('cifre/forge/asn1');
-var hmac = require('cifre/forge/hmac');
-var aes = require('cifre/aes');
-var md5 = require('cifre/md5');
-var utils = require('cifre/utils');
-
-var size = parseInt(process.argv[2]);
-if (size !== size) throw new Error("Invalid key size");
-
-process.stdout.write("Generating " + size + "bit RSA key...");
-var before = Date.now();
-var pair = rsa.generateKeyPair(size, 0x10001);
-console.log(" (%sms)", Date.now() - before);
+var PKI = require('cifre/forge/pki');
+var SHA1 = require('cifre/forge/sha1');
+var RSA = require('cifre/forge/rsa');
+var ASN1 = require('cifre/forge/asn1');
+var HMAC = require('cifre/forge/hmac');
+var AES = require('cifre/aes');
+var MD5 = require('cifre/md5');
+var UTILS = require('cifre/utils');
 
 
-console.log(pki.privateKeyToPem(pair.privateKey));
-console.log(pki.publicKeyToPem(pair.publicKey));
+describe("generate-peer-files", function() {
 
-var message = "Happiness is the object and design of your existence " +
-              "and will be the end thereof, if you pursue the path " +
-              "that leads to it.";
-console.log("Message:", message);
+    it("generate 1028 bit", function(done) {
 
-var md = sha1.create();
-md.start();
-md.update(message);
+        this.timeout(10 * 1000);
 
-var signature = new Buffer(pair.privateKey.sign(md), 'binary');
-console.log("Signature:", signature.toString('base64'));
+        var size = 1028;
+        var domain = "example.com";
+        var saltBundle = {
+            real: 'salt',
+            data: 'goes',
+            here: true
+        };
+        var identityBundle = [
+            "real",
+            "identities",
+            "go",
+            "here"
+        ];
+        var findSecret = 'YjAwOWE2YmU4OWNlOTdkY2QxNzY1NDA5MGYy';
+        var message = "Happiness is the object and design of your existence " +
+                      "and will be the end thereof, if you pursue the path " +
+                      "that leads to it.";
+
+
+        process.stdout.write("Generating " + size + "bit RSA key...");
+
+        var before = Date.now();
+        var pair = RSA.generateKeyPair(size, 0x10001);
+
+        console.log(" (%sms)", Date.now() - before);
+
+
+        console.log(PKI.privateKeyToPem(pair.privateKey));
+        console.log(PKI.publicKeyToPem(pair.publicKey));
+
+        console.log("Message:", message);
+
+        var md = SHA1.create();
+        md.start();
+        md.update(message);
+
+        var signature = new Buffer(pair.privateKey.sign(md), 'binary');
+
+        console.log("Signature:", signature.toString('base64'));
+
+        var now = Math.floor(Date.now() / 1000);
+        var pub = formatPublicPeerFile({
+          lifetime: 10845400, // Number of seconds till the file expires
+          saltBundle: saltBundle,
+          findSecret: findSecret,
+          identityBundle: identityBundle,
+          privateKey: pair.privateKey,
+          publicKey: pair.publicKey,
+          domain: domain
+        });
+
+        console.log(require('util').inspect(pub, {depth: null, colors: true}));
+
+        var priv = formatPrivatePeerFile({
+          contact: pub.contact,
+          salt: randomID(),
+          secret: randomID(),
+          privateKey: pair.privateKey,
+          publicPeerFile: pub
+        });
+
+        console.log(require('util').inspect(priv, {depth: null, colors: true}));
+
+        return done(null);
+    });
+
+});
 
 
 /**
@@ -53,8 +103,8 @@ function bundle(name, message, key, keyData) {
 
   // Sort the keys while encoding as json.
   var json = sortedStringify(message);
-  // And digest the message using SHA1
-  var md = sha1.create();
+  // And digest the message using sha1
+  var md = SHA1.create();
   md.start();
   md.update(json);
 
@@ -128,8 +178,10 @@ function merge(a, b) {
  *   "saltBundle" - the actual saltBundle
  *   "findSecret" - Optional parameter that creates a section B
  *   "identityBundle" - Optional list of identity bundles
+ *
+ * @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#TheMakeupOfThePublicPeerFile
  */
-function publicPeerFile(args) {
+function formatPublicPeerFile(args) {
   if (!args.privateKey) throw new Error("privateKey is required");
   if (!args.publicKey) throw new Error("publicKey is required");
   if (!args.domain) throw new Error("domain is required");
@@ -145,7 +197,7 @@ function publicPeerFile(args) {
     saltBundle: args.saltBundle
   };
   var sectionBundle = [bundle('section', A, args.privateKey, {
-    x509Data: binaryToBase64(asn1.toDer(pki.publicKeyToAsn1(args.publicKey)).getBytes())
+    x509Data: binaryToBase64(ASN1.toDer(PKI.publicKeyToAsn1(args.publicKey)).getBytes())
   })];
 
   var contact = getContactUri(A, args.domain);
@@ -185,7 +237,7 @@ function publicPeerFile(args) {
 }
 
 function getContactUri(A, domain) {
-  var md = sha1.create();
+  var md = SHA1.create();
   md.start();
   md.update(sortedStringify(A));
   return 'peer://' + domain + '/' + md.digest().toHex();
@@ -200,8 +252,10 @@ function getContactUri(A, domain) {
  *   "privateKey" the RSA private key
  *   "publicPeerFile" the public peer file
  *   "data" Optional extra data
+ *
+ * @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#TheMakeupOfThePrivatePeerFile
  */
-function privatePeerFile(args) {
+function formatPrivatePeerFile(args) {
   if (!args.contact) throw new Error("contact is required");
   if (!args.salt) throw new Error("salt is required");
   if (!args.secret) throw new Error("secret is required");
@@ -218,7 +272,7 @@ function privatePeerFile(args) {
     uri: args.contact
   })];
 
-  var pkcs = asn1.toDer(pki.privateKeyToAsn1(args.privateKey)).getBytes()
+  var pkcs = ASN1.toDer(PKI.privateKeyToAsn1(args.privateKey)).getBytes()
   var B = {
     $id: 'B',
     encryptedContact: encrypt('contact:', args.contact),
@@ -233,22 +287,22 @@ function privatePeerFile(args) {
   }));
 
   function calcHmac(string) {
-    var hm = hmac.create();
+    var hm = HMAC.create();
     hm.start('sha256', args.secret);
     hm.update(string);
     return hm.getMac();
   }
   
   function encrypt(prefix, data) {
-    var key = utils.fromhex(calcHmac(prefix + args.salt).toHex());
-    var iv = md5(prefix + args.salt);
+    var key = UTILS.fromhex(calcHmac(prefix + args.salt).toHex());
+    var iv = MD5(prefix + args.salt);
 
     var length = data.length;
     var state = new Array(length);
     for (var i = 0; i < length; i++) {
       state[i] = data.charCodeAt(i);
     }
-    aes.cfb.encrypt(state, key, iv);
+    AES.cfb.encrypt(state, key, iv);
     return arrayToBase64(state);
   }
 
@@ -260,27 +314,4 @@ function privatePeerFile(args) {
   };
 }
 
-
-var now = Math.floor(Date.now() / 1000);
-var pub = publicPeerFile({
-  lifetime: 10845400, // Number of seconds till the file expires
-  saltBundle: { real: 'salt', data: 'goes', here: true },
-  findSecret: 'YjAwOWE2YmU4OWNlOTdkY2QxNzY1NDA5MGYy',
-  identityBundle: [ "real", "identities", "go", "here" ],
-  privateKey: pair.privateKey,
-  publicKey: pair.publicKey,
-  domain: "example.com"
-});
-
-console.log(require('util').inspect(pub, {depth: null, colors: true}));
-
-var priv = privatePeerFile({
-  contact: pub.contact,
-  salt: randomID(),
-  secret: randomID(),
-  privateKey: pair.privateKey,
-  publicPeerFile: pub
-});
-
-console.log(require('util').inspect(priv, {depth: null, colors: true}));
 
