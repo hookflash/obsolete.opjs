@@ -13,6 +13,8 @@ define([
 
   suite("SendMessageToPeer", function() {
 
+    this.timeout(10 * 1000);
+
     var client1 = null;
     var client2 = null;
 
@@ -29,7 +31,6 @@ define([
     });
 
     test('connected', function(done) {
-
       return client1.ready().then(function() {
         return client2.ready().then(function() {
 

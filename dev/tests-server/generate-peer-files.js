@@ -18,15 +18,43 @@ describe("generate-peer-files", function() {
         var size = 1028;
         var domain = "example.com";
         var saltBundle = {
-            real: 'salt',
-            data: 'goes',
-            here: true
+            "salt": {
+                "$id": "c5f568521a24c5baf618d1ada3b8e300fdc963e0",
+                "#text": "432d09beaed2b7bd392a73c8c3dddf86098981bc"
+            },
+            "signature": {
+                "reference": "#c5f568521a24c5baf618d1ada3b8e300fdc963e0",
+                "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+                "digestValue": "0a0f158931d9e6abe2e3d99a7841242762a86feb",
+                "digestSigned": "by5doZ5jRK12qi4lIFUdeHpYR7ta3AUesWQX0Odr9nUL9MsdJTyccLeZMXFt2dcQKtfIyzOwFkpUbQuH7IFB4JLgPnGkJW/WfEggGxisTSDr+CYi3NU0hStWDvC+m6OLXjQAOc0PeI3ketUSXcEiNukkOvxuBlflbE0Zf7/zXejG+9L6Ve/0z3eKsJ487gyjhPhGxgLoGb1G6+3jWNvBubUqVhYac3hVMvI95zIkZg44T25gnuEwKfXpkfKRZRptbuk1Dq6StA52ZBKn1xQM8z3akPj9CPLcSTW3Rb+CiG3tgyRxBl7nYBaJeGDWNxtF0B9ttBY46AV69ugrdJlRbA==",
+                "key": {
+                    "$id": "5d4e02f0800c0f354a72b2983914ca409ce6cf0c",
+                    "domain": "unstable.hookflash.me",
+                    "service": "salt"
+                }
+            }
         };
         var identityBundle = [
-            "real",
-            "identities",
-            "go",
-            "here"
+            {
+                "identity": {
+                    "$id": "b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
+                    "contact": "peer://example.com/ab43bd44390dabc329192a392bef1",
+                    "uri": "identity://facebook.com/id48483",
+                    "created": 54593943,
+                    "expires": 65439343
+                },
+                "signature": {
+                    "reference": "#b5dfaf2d00ca5ef3ed1a2aa7ec23c2db",
+                    "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+                    "digestValue": "IUe324koV5/A8Q38Gj45i4jddX=",
+                    "digestSigned": "MDAwMDAwMGJ5dGVzLiBQbGVhc2UsIGQ=",
+                    "key": {
+                        "$id": "b7ef37...4a0d58628d3",
+                        "domain": "hookflash.org",
+                        "service": "identity"
+                    }
+                }
+            }
         ];
         var salt = Util.randomHex(32);
         var findSecret = 'YjAwOWE2YmU4OWNlOTdkY2QxNzY1NDA5MGYy';
@@ -75,8 +103,8 @@ describe("generate-peer-files", function() {
         ASSERT.equal(privatePeerInfo.data, message);
         ASSERT.equal(privatePeerInfo.publicPeerFile, JSON.stringify(publicPeerFile));
 
-        FS.writeFileSync(PATH.join(__dirname, "assets/public-from-JS.json"), JSON.stringify(publicPeerFile));
-        FS.writeFileSync(PATH.join(__dirname, "assets/private-from-JS.json"), JSON.stringify(privatePeerFile));
+        FS.writeFileSync(PATH.join(__dirname, "assets/public-from-JS.json"), JSON.stringify(publicPeerFile, null, 4));
+        FS.writeFileSync(PATH.join(__dirname, "assets/private-from-JS.json"), JSON.stringify(privatePeerFile, null, 4));
         FS.writeFileSync(PATH.join(__dirname, "assets/private-from-JS.secret"), secret);
 
         return done(null);

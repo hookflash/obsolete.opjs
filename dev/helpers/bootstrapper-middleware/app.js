@@ -1,5 +1,6 @@
 
 const ASSERT = require("assert");
+const Util = require("../../../lib/util");
 
 
 function parseRequest(req, callback) {
@@ -83,46 +84,40 @@ exports.hook = function(options, app) {
 function getPayload(request, options) {
 
 	if (request.$handler === "peer-salt" && request.$method === "signed-salt-get") {
-		return {
-			"salts": {
-	            "saltBundle": [
-	                {
-	                    "salt": {
-	                        "$id": "f43173fa6aa774563751f8ae950d8b867cae0715",
-	                        "#text": "d53732ef6399b1744c5cb812b286a90c021e91c3"
-	                    },
-	                    "signature": {
-	                        "reference": "#f43173fa6aa774563751f8ae950d8b867cae0715",
-	                        "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
-	                        "digestValue": "60b802d1799988f0b6553ad649d4039571b2d1d9",
-	                        "digestSigned": "PmKWWgkQaMLL4uju1z6NT0xUCd0piVo0Z7pjI4xwUS2mZXrq/invmR4lSGwF0HqHV7A+kySXbXYFXSqZUO9TRFvVNwQxMtMntSFPel226r80X2rzcEwk1Ydky+Xey3/Yq1AQnPjcTHPBrRu8RHaUOOrrmNViLZWpPEs141DPlAPSjeiNjz6A7GgvGCpayU3stph7TQaPjbW1aVvX0o0VsoXZwWl8Uf3Cxvq9C555OzivPGmnXGy+SGFie752NgKkWYDUc8xz0Mriv5gbN4UceXcVT74B+6xO2Pv9X00nE4qeeUObeo5i2vcNZzTCMStngMv75ub2pCDxqzPni+jzgA==",
-	                        "key": {
-	                            "$id": "ce833a6a40ceab77d288643ec9c2a81df9f0db12",
-	                            "domain": "unstable.hookflash.me",
-	                            "service": "salt"
-	                        }
-	                    }
-	                },
-	                {
-	                    "salt": {
-	                        "$id": "38dd66032914a8cae2b2e9ff8a9f322adaa4e7c0",
-	                        "#text": "7a25a5f6289add6e283fdf6f59ca8922362bee06"
-	                    },
-	                    "signature": {
-	                        "reference": "#38dd66032914a8cae2b2e9ff8a9f322adaa4e7c0",
-	                        "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
-	                        "digestValue": "e6fcb951f149f1174a4239a5a257ab296e3a7c87",
-	                        "digestSigned": "TqWjA+UAo9jWo+BCdW0J5mkxwmr5wa8d57etzju0unv9MwGQYcEbCGN58o44TvxXyYI+TSNrtiDkDicxROnHsfzqEDpj7e/R602T5Aul2o9SkIQJ/wN6HIukh3Tl2OykfxdWIuhFbSpGAN/YL7iQmfOIq1Tm8+6YWrZkYp2kUL8OIPTTPK9gpmIkjEp0lY1nuBabMr1PkKoRW+hbLNVXmeb/guV0T2uDLs3NYD5sRavWQmB853lF63JijqyGy4LFrOfuO6NXV+21jiYTVXqncDr357JhP+wa0h9K/yE+C0R0nu/Sb8zdl8tNDcyITKMTF0lGdmMMdS2+B2iaeyyUbw==",
-	                        "key": {
-	                            "$id": "ce833a6a40ceab77d288643ec9c2a81df9f0db12",
-	                            "domain": "unstable.hookflash.me",
-	                            "service": "salt"
-	                        }
-	                    }
-	                }
-	            ]
-	        }
-		};
+		ASSERT(typeof request.salts === "number");
+		var bundles = [];
+		for (var i=0 ; i<request.salts ; i++) {
+			bundles.push({
+                "salt": {
+                    "$id": Util.randomHex(32),
+                    "#text": Util.randomHex(32)
+                },
+                "signature": {
+                    "reference": "#f43173fa6aa774563751f8ae950d8b867cae0715",
+                    "algorithm": "http://openpeer.org/2012/12/14/jsonsig#rsa-sha1",
+                    "digestValue": "60b802d1799988f0b6553ad649d4039571b2d1d9",
+                    "digestSigned": "PmKWWgkQaMLL4uju1z6NT0xUCd0piVo0Z7pjI4xwUS2mZXrq/invmR4lSGwF0HqHV7A+kySXbXYFXSqZUO9TRFvVNwQxMtMntSFPel226r80X2rzcEwk1Ydky+Xey3/Yq1AQnPjcTHPBrRu8RHaUOOrrmNViLZWpPEs141DPlAPSjeiNjz6A7GgvGCpayU3stph7TQaPjbW1aVvX0o0VsoXZwWl8Uf3Cxvq9C555OzivPGmnXGy+SGFie752NgKkWYDUc8xz0Mriv5gbN4UceXcVT74B+6xO2Pv9X00nE4qeeUObeo5i2vcNZzTCMStngMv75ub2pCDxqzPni+jzgA==",
+                    "key": {
+                        "$id": "ce833a6a40ceab77d288643ec9c2a81df9f0db12",
+                        "domain": "unstable.hookflash.me",
+                        "service": "salt"
+                    }
+                }
+            });
+		}
+		if (bundles.length === 1) {
+			return {
+				"salts": {
+		            "saltBundle": bundles[0]
+		        }
+			};
+		} else {
+			return {
+				"salts": {
+		            "saltBundle": bundles
+		        }
+			};
+		}
 	} else
 	if (request.$handler === "certificates" && request.$method === "certificates-get") {
 		return {

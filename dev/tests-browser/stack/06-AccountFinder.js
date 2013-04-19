@@ -11,6 +11,8 @@ define([
 
   suite('AccountFinder', function () {
 
+    this.timeout(10 * 1000);
+
     suite('Helper', function() {
 
       test('`ws://localhost:3002/session-create` and `ws://localhost:3002/session-delete`', function(done) {

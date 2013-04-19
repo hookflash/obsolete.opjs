@@ -14,6 +14,8 @@ define([
 
   suite("ConnectToFinder", function() {
 
+    this.timeout(10 * 1000);
+
     test('one client', function(done) {
       var client = new Stack({
         _logPrefix: "ConnectToFinder - one client"

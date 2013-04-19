@@ -9,6 +9,8 @@ define([
 
 	suite('Init', function() {
 
+		this.timeout(10 * 1000);
+
 		suite('OpenPeer', function() {
 
 			test('should be a function', function() {
