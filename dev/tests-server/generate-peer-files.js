@@ -38,7 +38,7 @@ describe("generate-peer-files", function() {
 
         var signature = Crypto.sign(pair.privateKey, message);
 
-        //console.log("Signature:", signature.toString('base64'));
+        //console.log("Signature:", signature);
 
         var publicPeerFile = Crypto.generatePublicPeerFile({
           lifetime: 10845400, // Number of seconds till the file expires
