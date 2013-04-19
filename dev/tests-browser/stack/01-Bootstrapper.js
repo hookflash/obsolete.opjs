@@ -27,12 +27,12 @@ define([
     suite('Instance', function() {
 
       test('`.getUrl()`', function() {
-        var bootstrapper = new Bootstrapper(new Context(), new AccountMock(), Util.getHost());
+        var bootstrapper = new Bootstrapper(new Context(), new AccountMock());
         assert.equal(bootstrapper.getUrl(), "https://" + Util.getHost() + "/.well-known/openpeer-services-get");
       });
 
       test('`.ready()` returns promise that resolves', function(done) {
-        var bootstrapper = new Bootstrapper(new Context(), new AccountMock(), Util.getHost());
+        var bootstrapper = new Bootstrapper(new Context(), new AccountMock());
         var ready = bootstrapper.ready();
         assert.isTrue(Q.isPromise(ready));
         return Q.when(ready).then(function() {
@@ -41,7 +41,7 @@ define([
       });
 
       test('`.getServices()` returns promise that resolves to object', function(done) {
-        var bootstrapper = new Bootstrapper(new Context(), new AccountMock(), Util.getHost());
+        var bootstrapper = new Bootstrapper(new Context(), new AccountMock());
         var services = bootstrapper.getServices();
         assert.isTrue(Q.isPromise(services));
         return services.then(function(services) {
@@ -52,7 +52,7 @@ define([
       });
 
       test('`.getFinders()` returns promise that resolves to object', function(done) {
-        var bootstrapper = new Bootstrapper(new Context(), new AccountMock(), Util.getHost());
+        var bootstrapper = new Bootstrapper(new Context(), new AccountMock());
         var finders = bootstrapper.getFinders();
         assert.isTrue(Q.isPromise(finders));
         return finders.then(function(finders) {
@@ -64,7 +64,7 @@ define([
       });
 
       test('`.getCertificates()` returns promise that resolves to object', function(done) {
-        var bootstrapper = new Bootstrapper(new Context(), new AccountMock(), Util.getHost());
+        var bootstrapper = new Bootstrapper(new Context(), new AccountMock());
         var certificates = bootstrapper.getCertificates();
         assert.isTrue(Q.isPromise(certificates));
         return certificates.then(function(certificates) {
@@ -76,7 +76,7 @@ define([
       });
 
       test('`.getSalts(1)` returns promise that resolves to object', function(done) {
-        var bootstrapper = new Bootstrapper(new Context(), new AccountMock(), Util.getHost());
+        var bootstrapper = new Bootstrapper(new Context(), new AccountMock());
         var salts = bootstrapper.getSalts(1);
         assert.isTrue(Q.isPromise(salts));
         return salts.then(function(salts) {

@@ -17,7 +17,7 @@ return done(null);
         _dev: false,
         _debug: true,
         _logPrefix: "AccountFinder-Live - connect",
-        "domain": "unstable.hookflash.me"
+        domain: "unstable.hookflash.me"
       });
       return client.ready().then(function() {
         return client.destroy().then(function() {
