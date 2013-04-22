@@ -8,11 +8,12 @@ define([
   'use strict';
 
   suite('Bootstrapper-Live', function() {
-
+return;
     test('`https://unstable.hookflash.me/.well-known/openpeer-services-get` response', function(done) {
       return Request.makeRequestTo(new Context({
         "domain": "unstable.hookflash.me",
-        "appid": Util.randomHex(32)
+        "appid": Util.randomHex(32),
+        _dev: false
       }), "https://unstable.hookflash.me/.well-known/openpeer-services-get", "bootstrapper", "services-get").then(function(result) {
         assert.isObject(result);
         assert.isObject(result.services);
@@ -23,7 +24,8 @@ define([
     test('`https://unstable.hookflash.me/certificates-get` response', function(done) {
       return Request.makeRequestTo(new Context({
         "domain": "unstable.hookflash.me",
-        "appid": Util.randomHex(32)
+        "appid": Util.randomHex(32),
+        _dev: false
       }), "https://unstable.hookflash.me/certificates-get", "certificates", "certificates-get").then(function(result) {
         assert.isObject(result);
         assert.isObject(result.certificates);
@@ -34,7 +36,8 @@ define([
     test('`https://unstable.hookflash.me/finders-get` response', function(done) {
       return Request.makeRequestTo(new Context({
         "domain": "unstable.hookflash.me",
-        "appid": Util.randomHex(32)
+        "appid": Util.randomHex(32),
+        _dev: false
       }), "https://unstable.hookflash.me/finders-get", "bootstrapper-finder", "finders-get", {
         "servers": 2
       }).then(function(result) {
@@ -47,7 +50,8 @@ define([
     test('`https://unstable.hookflash.me/signed-salt-get` response', function(done) {
       return Request.makeRequestTo(new Context({
         "domain": "unstable.hookflash.me",
-        "appid": Util.randomHex(32)
+        "appid": Util.randomHex(32),
+        _dev: false
       }), "https://unstable.hookflash.me/signed-salt-get", "peer-salt", "signed-salt-get", {
         "salts": 2
       }).then(function(result) {

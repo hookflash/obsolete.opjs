@@ -21,6 +21,18 @@ define([
 
     });
 
+
+    suite('parseIdentity', function () {
+
+      test('Parses `identity://domain.com/alice`', function () {
+        var identityParts = util.parseIdentity('identity://domain.com/alice');
+        assert.equal(identityParts.domain, 'domain.com');
+        assert.equal(identityParts.identity, 'alice');
+      });
+
+    });
+
+
     suite('forEach', function () {
 
       test('Iterates over arrays with the supplied context', function () {

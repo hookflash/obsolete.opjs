@@ -54,6 +54,13 @@
 						}
 					});
 				}, 100);
+			},
+			ensureIdentity: function(identity, callback) {
+				$.post("/.helpers/identity/ensure", {
+					identity: identity
+				}).done(function(data) {
+				 	return callback(null, data);
+				}).fail(callback);
 			}
 		}
 

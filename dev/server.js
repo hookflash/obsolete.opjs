@@ -14,7 +14,12 @@ exports.main = function(callback) {
     try {
         var app = EXPRESS();
 
+        app.use(EXPRESS.bodyParser());
+
         require("./helpers/bootstrapper-middleware/app").hook({
+            host: "localhost:" + PORT
+        }, app);
+        require("./helpers/identity").hook({
             host: "localhost:" + PORT
         }, app);
 

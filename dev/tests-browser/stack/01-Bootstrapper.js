@@ -88,6 +88,16 @@ define([
         }).fail(done);
       });
 
+      test('`.getIdentityLookupService()` returns promise that resolves to object', function(done) {
+        var bootstrapper = new Bootstrapper(new Context(), new AccountMock());
+        var url = bootstrapper.getIdentityLookupService();
+        assert.isTrue(Q.isPromise(url));
+        return url.then(function(url) {
+          assert.equal(url, "http://" + Util.getHost() + "/.helpers/identity");
+          return done(null);
+        }).fail(done);
+      });
+
     });
 
   });
