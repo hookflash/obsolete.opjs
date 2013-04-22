@@ -1,7 +1,7 @@
 
 const ASSERT = require("assert");
-const SERVICE = require("../service");
-const Util = require("../../../lib/util");
+const SERVICE = require("./service");
+const Util = require("../../lib/util");
 
 
 exports.hook = function(options, app) {
@@ -13,13 +13,13 @@ exports.hook = function(options, app) {
 	app.post(/^\/\.well-known\/openpeer-services-get$/, responder);
 
 	// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#BootstrappedFinderServiceRequests-FindersGetRequest
-	app.post(/^\/.helpers\/bootstrapper-middleware\/finders-get$/, responder);
+	app.post(/^\/.helpers\/bootstrapper\/finders-get$/, responder);
 
 	// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#CertificatesServiceRequests-CertificatesGetRequest
-	app.post(/^\/.helpers\/bootstrapper-middleware\/certificates-get$/, responder);
+	app.post(/^\/.helpers\/bootstrapper\/certificates-get$/, responder);
 
 	// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#PeerSaltServiceProtocol-SignedSaltGetRequest
-	app.post(/^\/.helpers\/bootstrapper-middleware\/signed-salt-get$/, responder);
+	app.post(/^\/.helpers\/bootstrapper\/signed-salt-get$/, responder);
 }
 
 function getPayload(request, options, callback) {
@@ -247,7 +247,7 @@ function getPayload(request, options, callback) {
                 "methods": {
                     "method": {
                         "name": "certificates-get",
-                        "uri": "http://" + options.host + "/.helpers/bootstrapper-middleware/certificates-get"
+                        "uri": "http://" + options.host + "/.helpers/bootstrapper/certificates-get"
                     }
                 }
             },
@@ -258,7 +258,7 @@ function getPayload(request, options, callback) {
                 "methods": {
                     "method": {
                         "name": "finders-get",
-                        "uri": "http://" + options.host + "/.helpers/bootstrapper-middleware/finders-get"
+                        "uri": "http://" + options.host + "/.helpers/bootstrapper/finders-get"
                     }
                 }
             },
@@ -269,7 +269,7 @@ function getPayload(request, options, callback) {
                 "methods": {
                     "method": {
                         "name": "signed-salt-get",
-                        "uri": "http://" + options.host + "/.helpers/bootstrapper-middleware/signed-salt-get"
+                        "uri": "http://" + options.host + "/.helpers/bootstrapper/signed-salt-get"
                     }
                 }
             },
@@ -281,23 +281,23 @@ function getPayload(request, options, callback) {
                     "method": [
                         {
                             "name": "identity-associate",
-                            "uri": "http://" + options.host + "/.helpers/bootstrapper-middleware/identity"
+                            "uri": "http://" + options.host + "/.helpers/bootstrapper/identity"
                         },
                         {
                             "name": "identity-login-start",
-                            "uri": "http://" + options.host + "/.helpers/bootstrapper-middleware/identity"
+                            "uri": "http://" + options.host + "/.helpers/bootstrapper/identity"
                         },
                         {
                             "name": "identity-login-complete",
-                            "uri": "http://" + options.host + "/.helpers/bootstrapper-middleware/identity"
+                            "uri": "http://" + options.host + "/.helpers/bootstrapper/identity"
                         },
                         {
                             "name": "identity-sign",
-                            "uri": "http://" + options.host + "/.helpers/bootstrapper-middleware/identity"
+                            "uri": "http://" + options.host + "/.helpers/bootstrapper/identity"
                         },
                         {
                             "name": "identity-login-validate",
-                            "uri": "http://" + options.host + "/.helpers/bootstrapper-middleware/identity"
+                            "uri": "http://" + options.host + "/.helpers/bootstrapper/identity"
                         }
                     ]
                 }
