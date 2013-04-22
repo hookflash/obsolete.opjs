@@ -61,6 +61,20 @@
 				}).done(function(data) {
 				 	return callback(null, data);
 				}).fail(callback);
+			},
+			peerFilesForIdentity: function(identity, callback) {
+				var deferred = Q.defer();
+				window.HELPERS.ensureIdentity(identity, function(err, identity) {
+					if (err) return deferred.reject(err);
+					return deferred.resolve({
+						"contact": identity.contact,
+						"publicPeerFile": identity.publicPeerFile,
+						"privatePeerFile": identity.privatePeerFile,
+						"privateKey": identity.privateKey,
+						"publicKey": identity.publicKey
+					});
+				});
+				return deferred.promise;
 			}
 		}
 

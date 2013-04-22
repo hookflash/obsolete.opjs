@@ -22,11 +22,15 @@ define([
 
       client1 = new Stack({
         _logPrefix: "SendMessageToPeer (1)",
-        locationID: Util.randomHex(32)
+        identity: "identity://" + Util.getHostname() + "/test-SendMessageToPeer-1",
+        _peerFilesForIdentity: HELPERS.peerFilesForIdentity
+//        locationID: Util.randomHex(32)
       });
       client2 = new Stack({
         _logPrefix: "SendMessageToPeer (2)",
-        locationID: Util.randomHex(32)
+        identity: "identity://" + Util.getHostname() + "/test-SendMessageToPeer-2",
+        _peerFilesForIdentity: HELPERS.peerFilesForIdentity
+//        locationID: Util.randomHex(32)
       });
     });
 

@@ -13,12 +13,12 @@ exports.hook = function(options, app) {
 	var responder = SERVICE.responder(options, getPayload);
 
 	app.post(/^\/\.helpers\/identity\/ensure$/, function(req, res, next) {
-		return ensureIdentity(req.body.identity, function(err) {
+		return ensureIdentity(req.body.identity, function(err, data) {
 			if (err) return next(err);
 			res.writeHead(200, {
-				"Content-Type": "text/plain"
+				"Content-Type": "application/json"
 			});
-			res.end();
+			res.end(JSON.stringify(data));
 		})
 	});
 
@@ -56,8 +56,8 @@ function ensureIdentity(identity, callback) {
 
 		var pair = Crypto.generateKeyPair(1028);
 
-		info.privatePem = pair.privatePem;
-		info.publicPem = pair.publicPem;
+		info.privateKey = pair.privatePem;
+		info.publicKey = pair.publicPem;
 
 		info.publicPeerFile = Crypto.generatePublicPeerFile({
 			lifetime: 60 * 60 * 24 * 365,	// 1 Year
