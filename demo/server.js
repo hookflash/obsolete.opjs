@@ -13,8 +13,8 @@ var cookie = require('cookie');
 var Q = require('q');
 var OAuth= require('oauth').OAuth;
 
-var CONSUMER_KEY = (process.env.APP_TWETTER_CONSUMER_KEY || "hFNTfDBDxIVFXbiXPgQ3rQ");
-var CONSUMER_SECRET = (process.env.APP_TWETTER_CONSUMER_SECRET || "Ul6nUDIL4fYqEXbtvLCLoa3PYGYzEfsxGMayGB9Log");
+var CONSUMER_KEY = (process.env.APP_TWITTER_CONSUMER_KEY || "hFNTfDBDxIVFXbiXPgQ3rQ");
+var CONSUMER_SECRET = (process.env.APP_TWITTER_CONSUMER_SECRET || "Ul6nUDIL4fYqEXbtvLCLoa3PYGYzEfsxGMayGB9Log");
 
 var oa = new OAuth(
     "https://api.twitter.com/oauth/request_token",
