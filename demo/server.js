@@ -13,14 +13,17 @@ var cookie = require('cookie');
 var Q = require('q');
 var OAuth= require('oauth').OAuth;
 
+var CONSUMER_KEY = (process.env.APP_TWETTER_CONSUMER_KEY || "hFNTfDBDxIVFXbiXPgQ3rQ");
+var CONSUMER_SECRET = (process.env.APP_TWETTER_CONSUMER_SECRET || "Ul6nUDIL4fYqEXbtvLCLoa3PYGYzEfsxGMayGB9Log");
+
 var oa = new OAuth(
     "https://api.twitter.com/oauth/request_token",
     "https://api.twitter.com/oauth/access_token",
-    "hFNTfDBDxIVFXbiXPgQ3rQ",
-    "Ul6nUDIL4fYqEXbtvLCLoa3PYGYzEfsxGMayGB9Log",
+    CONSUMER_KEY,
+    CONSUMER_SECRET,
     "1.0",
-    "http://localhost:8080/twitter_auth_callback",
-//    "",
+//    "http://localhost:8080/twitter_auth_callback",
+    "",
     "HMAC-SHA1"
 );
 
