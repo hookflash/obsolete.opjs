@@ -1,4 +1,7 @@
-<div class="controls">
+<div class="controls dark-gradient-box">
+<% if (isPlaying) { %>
+<a class="btn-hang-up red-gradient-box">Hang Up</a>
+<% } %>
 <span class="status"><%
 if (peer && status) {
   if (status.rejected) {
@@ -9,9 +12,6 @@ if (peer && status) {
     print('On call with ' + peer.name + '.');
   }
 } %></span>
-<% if (isPlaying) { %>
-<button class="btn btn-hang-up">Hang Up</button>
-<% } %>
 </div>
 <div class="source"></div>
 <div class="remote"></div>

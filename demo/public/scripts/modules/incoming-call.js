@@ -20,6 +20,7 @@ define([
       this.then = promise.then.bind(promise);
     },
     accept: function(event) {
+
       this._dfd.resolve();
       event.preventDefault();
     },

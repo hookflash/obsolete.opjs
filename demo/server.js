@@ -24,6 +24,9 @@ var oa = new OAuth(
     "HMAC-SHA1"
 );
 
+//APP_TWETTER_CONSUMER_KEY
+//APP_TWETTER_CONSUMER_SECRET
+
 var sessions = {};
 // @see https://github.com/organizations/openpeer/settings/applications/39871
 var client_id = process.env.APP_GITHUB_CLIENT_ID || '2e8c9abbee702e36c03c';
@@ -266,6 +269,7 @@ var api = {
     }).map(function (id) {
       return sessions[id].transport;
     });
+
     var locations = transports.map(function (targetTransport) {
       var socket = targetTransport.socket._socket;
       return {
@@ -278,6 +282,39 @@ var api = {
 
     transports.forEach(function (targetTransport) {
       targetTransport.peerLocationFind(request).then(function (reply) {
+        reply.from = targetTransport.id;
+        transport.result(request, reply, true);
+      }, function (reason) {
+        transport.fail(request, reason);
+      });
+    });
+
+    return {
+      locations: locations
+    };
+  },
+  'send-chat-message': function(request, transport){
+    request.from = transport.id;
+    var username = request.username;
+
+    var transports = Object.keys(sessions).filter(function (id) {
+      return sessions[id].username === username;
+    }).map(function (id) {
+      return sessions[id].transport;
+    });
+
+    var locations = transports.map(function (targetTransport) {
+      var socket = targetTransport.socket._socket;
+      return {
+        localAddress: socket.localAddress,
+        localPort: socket.localPort,
+        remoteAddress: socket.remoteAddress,
+        remotePort: socket.remotePort
+      };
+    });
+
+    transports.forEach(function (targetTransport) {
+      targetTransport.sendChatMessage(request).then(function (reply) {
         reply.from = targetTransport.id;
         transport.result(request, reply, true);
       }, function (reason) {

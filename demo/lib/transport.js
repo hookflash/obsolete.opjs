@@ -215,6 +215,9 @@
     if (!handler && request.$method === 'peer-location-find') {
       handler = this.api.invite;
       isReply = true;
+    } else if (!handler && request.$method === 'send-chat-message') {
+      handler = this.api.getMessage;
+      isReply = true;
     }
     if (!handler) {
       throw new Error('Unknown request method: ' + request.$method);
@@ -245,6 +248,7 @@
   };
 
   Transport.prototype.onReply = function (reply) {
+
     var deferred = this.pending[reply.$id];
     if (!deferred) {
       return;
@@ -264,6 +268,13 @@
   Transport.prototype.peerLocationFind = function (username, blob) {
 
     return this.request('peer-location-find', {
+      username: username,
+      blob: blob
+    });
+  };
+
+  Transport.prototype.sendChatMessage = function (username, blob) {
+    return this.request('send-chat-message', {
       username: username,
       blob: blob
     });

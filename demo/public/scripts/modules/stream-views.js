@@ -61,17 +61,21 @@ define([
       return {
         isPlaying: this.isPlaying()
       };
+    },
+    hide: function(){
+      this.$el.hide();
     }
   });
 
   var LocalStreamView = StreamView.extend({
     template: _.template(localHtml),
     className: StreamView.prototype.className + ' stream-local',
-    requestMedia: function() {
+    requestMedia: function(isVideo) {
+      if(isVideo == undefined) isVideo = true;
       var dfd = Q.defer();
 
       gum.getUserMedia({
-        video: true,
+        video: isVideo,
         audio: true
       }, dfd.resolve.bind(dfd), dfd.reject.bind(dfd));
 

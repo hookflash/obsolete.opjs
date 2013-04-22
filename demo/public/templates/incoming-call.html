@@ -1,8 +1,14 @@
 <div class="screen"></div>
-<div class="dialog">
-  <h1 class="title">Incoming Call from <%= peer.name %></h1>
-  <form>
-    <button class="btn btn-accept">Accept</button>
-    <button class="btn btn-reject">Reject</button>
-  </form>
+<div class="login-dialog light-gradient-box">
+    <h1 class="title">Incoming Call from <span class="blue"><%= peer.name %></span></h1>
+    <form>
+        <ul class="login-form">
+            <li class="inner-box">
+                <a class="btn btn-accept green-gradient-box">Accept</a>
+            </li>
+            <li class="inner-box">
+                <a class="btn btn-reject orange-gradient-box">Reject</a>
+            </li>
+        </ul>
+    </form>
 </div>

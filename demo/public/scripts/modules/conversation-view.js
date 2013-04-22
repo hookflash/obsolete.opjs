@@ -5,7 +5,7 @@ define([
   'use strict';
 
   var ConversationView = Backbone.Layout.extend({
-    className: 'conversation',
+    className: 'video-call conversation',
     template: _.template(html),
     events: {
       'click .btn-hang-up': 'hangUp'
@@ -16,9 +16,9 @@ define([
       this.setView('.source', this.localStreamView);
       this.setView('.remote', this.remoteStreamView);
     },
-    startCall: function(peer) {
+    startCall: function(peer, isVideo) {
       // Ensure that any previous call is ended
-      this.endCall();
+      this.endCall(undefined, true);
 
       // TODO: Re-factor to support multiple remote peers
       this.peer = peer;
@@ -32,13 +32,13 @@ define([
       });
       this.listenTo(this.peer, 'destroy', this.endCall);
 
-      return this.localStreamView.requestMedia().then(function(stream) {
+      return this.localStreamView.requestMedia(isVideo).then(function(stream) {
         peer.addStream(stream);
         this.setStatus({ calling: true });
         return stream;
       }.bind(this));
     },
-    endCall: function(reason) {
+    endCall: function(reason, isManual) {
       if (this.peer) {
         this.stopListening(this.peer);
       }
@@ -46,9 +46,10 @@ define([
       this.stopRemoteStream();
       this.stopLocalStream();
       this.render();
+      if(!isManual) this.trigger('call-ended', this.peer);
     },
     hangUp: function() {
-      this.endCall();
+      this.endCall(undefined, true);
       this.trigger('hangup', this.peer);
     },
     playLocalStream: function(stream) {

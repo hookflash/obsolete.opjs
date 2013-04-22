@@ -14,7 +14,7 @@ define([
   var LoginView = Backbone.Layout.extend({
     className: 'modal login',
     events: {
-      'click .btn[data-provider]': 'requestAuth'
+      'click a[data-provider]': 'requestAuth'
     },
     template: _.template(html),
     initialize: function(options) {
@@ -58,7 +58,6 @@ define([
       var endpoint = endpointTmpl(this.cookies);
 
       this.redirect(endpoint);
-
     },
     serialize: function() {
       return {

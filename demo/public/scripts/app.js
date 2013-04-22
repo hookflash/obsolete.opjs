@@ -25,6 +25,7 @@ require([
     invite: function(request) {
       var blob = request && request.username && request.username.blob;
       var locationID = request && request.username && request.username.from;
+      var isVideo = request && request.username && request.username.blob && request.username.blob.isVideo;
 
       var remoteSession = blob && blob.session;
       var peer, incomingCall;
@@ -52,7 +53,7 @@ require([
       peers[locationID] = peer;
 
       return incomingCall.then(function() {
-          return layout.startCall(peer);
+            return layout.startCall(peer, isVideo);
         })
         .then(function(stream) {
 
@@ -61,6 +62,8 @@ require([
           console.log('Creating remote session description:', remoteSession);
           peer.setRemoteDescription(remoteSession);
           console.log('Sending answer...');
+
+          console.log("create answer");
 
           return peer.createAnswer(mediaConstraints);
         })
@@ -92,23 +95,30 @@ require([
       }
       console.log('ICE: Received candidate:', msg.candidate);
       peer.addIceCandidate(msg.candidate);
+    },
+    getMessage: function(request){
+      var blob = request && request.username && request.username.blob;
+      var locationID = request && request.username && request.username.from;
+      contacts.trigger('on-chat-message', blob, locationID);
     }
   });
   var layout = new Layout({
     el: '#app'
   });
-  layout.on('send-connect-request', function(peer) {
+  layout.on('send-connect-request', function(peer, isVideo) {
     if (transport.state === 'OPEN') {
 
-      layout.startCall(peer)
+      layout.startCall(peer, isVideo)
         .then(function() {
             return peer.createOffer(mediaConstraints);
           })
         .then(function(sessionDescription) {
+            console.log(sessionDescription);
             peer.setLocalDescription(sessionDescription);
             return transport.peerLocationFind(peer.getContactId(), {
               session: sessionDescription,
-              userName: user.getContactId()
+              userName: user.getContactId(),
+              isVideo: isVideo
             });
           })
         .then(function(findReply) {
@@ -125,25 +135,43 @@ require([
       to: peer.get('locationID')
     });
     peer.destroy();
+
+    this.hangOut();
   });
+
+  layout.on('start-chat-conversation', function(peer){
+    layout.startChat(peer);
+  });
+
+  layout.on("chat-message", function(peer, message){
+    transport.sendChatMessage(peer.getContactId(), {
+      userName: user.getContactId(),
+      message: message
+    })
+  });
+
+  var contacts;
 
   var loginView = new Login.View({ cookies: cookies });
   loginView.$el.appendTo('body');
   loginView.render();
-  loginView
-    .then(function(result) {
+  loginView.then(function(result) {
 
         var prefilter = result.prefilter;
+
         var Model = result.PeerCtor;
         var Collection = result.PeersCtor;
+
         user = new Model(null, { transport: transport });
-        var contacts = new Collection(null, { transport: transport });
+        contacts = new Collection(null, { transport: transport });
 
         loginView.setStatus({ fetching: true });
 
         $.ajaxPrefilter(prefilter);
-
         return Q.all([user.fetch(), contacts.fetch()]).then(function() {
+
+          window.$username = user.get('name');
+
           layout.setContacts(contacts);
           layout.render();
         });

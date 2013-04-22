@@ -1,7 +1,6 @@
-<img src="<%= avatarUrl ? avatarUrl : 'MASDFDF.png' %>" class="avatar">
-<span class="identifier">
-  <span class="name"><%= name %></span><span class="domain"><%= domain %></span>
+<span class="inner-box raunded light">
+    <span class="avatar" style="background-image: url(<%= avatarUrl ? avatarUrl : 'MASDFDF.png' %>)"></span>
 </span>
-<ul class="options">
-  <li><button class="option option-call">Call</button></li>
-</ul>
+<span class="name"><%= name %> @<%= domain %></span>
+
+<span class="new-messages" style="display: none"></span>
