@@ -61,6 +61,26 @@ return;
       }).fail(done);
     });
 
+    test('`https://unstable.hookflash.me/identity` response', function(done) {
+      return Request.makeRequestTo(new Context({
+        "domain": "unstable.hookflash.me",
+        "appid": Util.randomHex(32),
+        _dev: false
+      }), "https://unstable.hookflash.me/identity", "identity-lookup", "identity-lookup", {
+        "providers": {
+          "provider": {
+            "base": "identity://unstable.hookflash.me/",
+            "separator": ",",
+            "identities": "user"
+          }
+        }
+      }).then(function(result) {
+        assert.isObject(result);
+        assert.isObject(result.identities);
+        return done(null);
+      }).fail(done);
+    });
+
   });
 
 });
