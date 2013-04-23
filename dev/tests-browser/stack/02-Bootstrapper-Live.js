@@ -8,7 +8,7 @@ define([
   'use strict';
 
   suite('Bootstrapper-Live', function() {
-return;
+
     test('`https://unstable.hookflash.me/.well-known/openpeer-services-get` response', function(done) {
       return Request.makeRequestTo(new Context({
         "domain": "unstable.hookflash.me",

@@ -17,7 +17,8 @@ return done(null);
         _dev: false,
         _debug: true,
         _logPrefix: "AccountFinder-Live - connect",
-        domain: "unstable.hookflash.me"
+        identity: "identity://unstable.hookflash.me/test-AccountFinder-Live",
+        _peerFilesForIdentity: HELPERS.peerFilesForIdentity
       });
       return client.ready().then(function() {
         return client.destroy().then(function() {

@@ -30,7 +30,7 @@ exports.main = function(options, callback) {
       });
 
       socket.on('error', function(err) {
-        console.error("ERROR[websocket-test-server]:", err.stack);
+        console.error("ERROR[finder-server]:", err.stack);
       });
 
       socket.on('message', function(message) {
