@@ -100,6 +100,7 @@ describe("generate-peer-files", function() {
         ASSERT.equal(privatePeerInfo.contact, contact);
         ASSERT.equal(privatePeerInfo.salt, salt);
         ASSERT.equal(Crypto.privateKeyToPem(privatePeerInfo.privateKey), Crypto.privateKeyToPem(pair.privateKey));
+        ASSERT.equal(Crypto.publicKeyToPem(privatePeerInfo.publicKey), Crypto.publicKeyToPem(pair.publicKey));
         ASSERT.equal(privatePeerInfo.data, message);
         ASSERT.equal(privatePeerInfo.publicPeerFile, JSON.stringify(publicPeerFile));
 

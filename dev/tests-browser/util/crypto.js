@@ -81,6 +81,7 @@ define([
       Assert.equal(privatePeerInfo.contact, contact);
       Assert.equal(privatePeerInfo.salt, salt);
       Assert.equal(Crypto.privateKeyToPem(privatePeerInfo.privateKey), Crypto.privateKeyToPem(pair.privateKey));
+      Assert.equal(Crypto.publicKeyToPem(privatePeerInfo.publicKey), Crypto.publicKeyToPem(pair.publicKey));
       Assert.equal(privatePeerInfo.data, message);
       Assert.equal(privatePeerInfo.publicPeerFile, JSON.stringify(publicPeerFile));
 
