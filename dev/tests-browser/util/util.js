@@ -21,17 +21,27 @@ define([
 
     });
 
-
-    suite('parseIdentity', function () {
-
-      test('Parses `identity://domain.com/alice`', function () {
-        var identityParts = util.parseIdentity('identity://domain.com/alice');
-        assert.equal(identityParts.domain, 'domain.com');
-        assert.equal(identityParts.identity, 'alice');
+    test('parseIdentityURI', function () {
+      assert.deepEqual(util.parseIdentityURI('identity://domain.com/alice'), {
+        domain: 'domain.com',
+        identity: 'alice'
       });
-
+      try {
+        util.parseIdentityURI('identit://domain.com/alice');
+        assert.fail();
+      } catch(err) {}
     });
 
+    test('parsePeerURI', function () {
+      assert.deepEqual(util.parsePeerURI('peer://domain.com/abc123'), {
+        domain: 'domain.com',
+        contact: 'abc123'
+      });
+      try {
+        util.parsePeerURI('peer://domain.c/om/abc123');
+        assert.fail();
+      } catch(err) {}
+    });
 
     suite('forEach', function () {
 

@@ -48,12 +48,12 @@ define([
     test('connect to peer', function(done) {
       return client1.connectToPeer(client2.getPeerURI()).then(function(peer) {
 
-      	targetPeer = peer;
+//      	targetPeer = peer;
 
       	return done(null);
       }).fail(done);
     });
-
+/*
     test('send message', function(done) {
       return targetPeer.sendMessage("Hello World").then(function() {
 
@@ -62,7 +62,7 @@ define([
       	return done(null);
   	  }).fail(done);
     });
-
+*/
     test('destroy', function(done) {
       return client1.destroy().then(function() {
         return client2.destroy().then(function() {

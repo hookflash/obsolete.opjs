@@ -30,7 +30,7 @@ exports.hook = function(options, app) {
 function ensureIdentity(identity, callback) {
 	try {
 
-		var identityParts = Util.parseIdentity(identity);
+		var identityParts = Util.parseIdentityURI(identity);
 
 		var identityPath = PATH.join(__dirname, ".identities", "identity-" + identityParts.identity + ".json");
 
