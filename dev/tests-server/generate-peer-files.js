@@ -9,6 +9,7 @@ const Util = require("../../lib/util");
 describe("generate-peer-files", function() {
 
     var secret = null;
+    var findSecret = null;
     var contact = null;
 
     it("generate 1028 bit", function(done) {
@@ -57,7 +58,7 @@ describe("generate-peer-files", function() {
             }
         ];
         var salt = Util.randomHex(32);
-        var findSecret = 'YjAwOWE2YmU4OWNlOTdkY2QxNzY1NDA5MGYy';
+        findSecret = 'YjAwOWE2YmU4OWNlOTdkY2QxNzY1NDA5MGYy';
         var message = "Happiness is the object and design of your existence " +
                       "and will be the end thereof, if you pursue the path " +
                       "that leads to it.";
@@ -104,6 +105,13 @@ describe("generate-peer-files", function() {
         ASSERT.equal(privatePeerInfo.data, message);
         ASSERT.equal(privatePeerInfo.publicPeerFile, JSON.stringify(publicPeerFile));
 
+        var publicPeerInfo = Crypto.parsePublicPeerFile(publicPeerFile);
+
+        ASSERT.equal(publicPeerInfo.saltBundle, saltBundle);
+        ASSERT.equal(publicPeerInfo.contact, contact);
+        ASSERT.equal(publicPeerInfo.findSecret, findSecret);
+        ASSERT.equal(publicPeerInfo.identityBundle, identityBundle);
+
         FS.writeFileSync(PATH.join(__dirname, "assets/public-from-JS.json"), JSON.stringify(publicPeerFile, null, 4));
         FS.writeFileSync(PATH.join(__dirname, "assets/private-from-JS.json"), JSON.stringify(privatePeerFile, null, 4));
         FS.writeFileSync(PATH.join(__dirname, "assets/private-from-JS.secret"), secret);
@@ -111,7 +119,7 @@ describe("generate-peer-files", function() {
         return done(null);
     });
 
-    it("parse private from JS", function(done) {
+    it("parse from JS", function(done) {
 
         var publicPeerFile = JSON.parse(FS.readFileSync(PATH.join(__dirname, "assets/public-from-JS.json")));
         var privatePeerFile = JSON.parse(FS.readFileSync(PATH.join(__dirname, "assets/private-from-JS.json")));
@@ -123,10 +131,15 @@ describe("generate-peer-files", function() {
         ASSERT.equal(privatePeerInfo.contact, contact);
         ASSERT.equal(privatePeerInfo.publicPeerFile, JSON.stringify(publicPeerFile));
 
+        var publicPeerInfo = Crypto.parsePublicPeerFile(publicPeerFile);
+
+        ASSERT.equal(publicPeerInfo.contact, contact);
+        ASSERT.equal(publicPeerInfo.findSecret, findSecret);
+
         return done(null);
     });
 
-    it("parse private from C", function(done) {
+    it("parse from C", function(done) {
 return done(null);
 
         var publicPeerFile = JSON.parse(FS.readFileSync(PATH.join(__dirname, "assets/public-from-C.json")));
