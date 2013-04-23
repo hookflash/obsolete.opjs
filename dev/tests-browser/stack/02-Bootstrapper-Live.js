@@ -13,7 +13,8 @@ return;
       return Request.makeRequestTo(new Context({
         "domain": "unstable.hookflash.me",
         "appid": Util.randomHex(32),
-        _dev: false
+        _dev: false,
+        _debug: true
       }), "https://unstable.hookflash.me/.well-known/openpeer-services-get", "bootstrapper", "services-get").then(function(result) {
         assert.isObject(result);
         assert.isObject(result.services);

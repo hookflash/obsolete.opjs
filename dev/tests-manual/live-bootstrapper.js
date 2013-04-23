@@ -23,7 +23,10 @@ describe("live-bootstrapper", function() {
 				"$id": "abc123",
 				"$handler": "bootstrapper",
 				"$method": "services-get"
-			})
+			}),
+            headers: {
+                "Content-Type": "application/json"
+            }
     	}, function(err, response) {
     		if (err) return done(err);
             try {
