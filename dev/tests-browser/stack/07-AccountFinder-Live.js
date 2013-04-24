@@ -11,8 +11,6 @@ define([
 
     test('connect', function(done) {
 
-return done(null);
-
       var client = new Stack({
         _dev: false,
         _debug: true,
