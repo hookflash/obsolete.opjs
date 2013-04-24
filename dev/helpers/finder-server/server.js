@@ -93,6 +93,28 @@ exports.main = function(options, callback) {
           }
         }
       };
+    } else
+    // @see http://docs.openpeer.org/OpenPeerProtocolSpecification#PeerFinderProtocol-PeerLocationFindRequestSinglePointToSinglePoint
+    if (request.$handler === "peer-finder" && request.$method === "peer-location-find") {
+
+// TODO: Look at connection to find peer we are trying to reach.
+
+      return {
+        "locations": {
+          "location": {
+            "$id": "170f5d7f6ad2293bb339e788c8f2ff6c",
+            "contact": "peer://domain.com/900c9cb1aeb816da4bdf58a972693fce20e",
+            "details": {
+              "device": { "$id": "e31fcab6582823b862b646980e2b5f4efad75c69" },
+              "ip": "28.123.121.12",
+              "userAgent": "hookflash/1.0.1001a (iOS/iPad)",
+              "os": "iOS v4.3.5",
+              "system": "iPad v2",
+              "host": "foobar"
+            }
+          }
+        }
+      };
     }
     return null;
   }
