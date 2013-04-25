@@ -76,4 +76,3 @@ Initial [dotCloud](http://dotcloud.com) application setup:
 Deployments:
 
   * Staging: http://opjsdemostage-hookflash.dotcloud.com/
-  * Production: http://webrtc.hookflash.me/
