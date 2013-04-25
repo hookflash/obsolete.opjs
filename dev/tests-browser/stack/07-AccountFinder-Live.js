@@ -6,7 +6,7 @@ define([
   'use strict';
 
   suite('AccountFinder-Live', function () {
-
+return;
     this.timeout(10 * 1000);
 
     test('connect', function(done) {

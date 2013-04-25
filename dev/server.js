@@ -42,7 +42,6 @@ exports.main = function(callback) {
                 
                 app.set("view engine", "hbs");
 
-                app.engine("html", hbs.__express);
                 app.engine("hbs", hbs.__express);
                 app.set("views", PATH.join(__dirname, "views"));
                 app.get(/^\/($|test$|test\/.*$)/, function(req, res, next) {
@@ -57,6 +56,7 @@ exports.main = function(callback) {
                     });
                 });
 
+                mountStaticDir(app, /^\/tests-browser-standalone\/(.*)$/, PATH.join(__dirname, "tests-browser-standalone"));
                 mountStaticDir(app, /^\/ui\/(.*)$/, PATH.join(__dirname, "ui"));
                 mountStaticDir(app, /^\/tests\/(.*)$/, PATH.join(__dirname, "tests-browser"));
                 mountStaticDir(app, /^\/mocks\/(.*)$/, PATH.join(__dirname, "mocks"));

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    	<script>
+try {
+
+	var wsUri = "ws://localhost:3002";
+
+	var socket = new WebSocket(wsUri);
+
+	socket.onopen = function(evt) {
+		console.log("[ws] Socket open");
+		sendAfterOpen();
+	};
+	socket.onclose = function(evt) {
+		console.log("[ws] Socket closed");
+	};
+	socket.onmessage = function(evt) {
+		console.log("[ws] Received message:", evt.data);
+	};
+	socket.onerror = function(evt) {
+		console.error("[ws] ERROR", evt);
+	};
+
+	function send(message) {
+		message = JSON.stringify(message);
+		console.log("[ws] Sending message:", message);
+		socket.send(message);
+	}
+
+	function sendAfterOpen() {
+
+		send({
+			"Hello": "World"
+		});
+
+	}
+
+} catch(err) {
+	console.error(err);
+}
+    	</script>
+    </head>
+    <body>
+    </body>
+</html>

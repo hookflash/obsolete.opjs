@@ -13,30 +13,6 @@ define([
 
     this.timeout(10 * 1000);
 
-    suite('Helper', function() {
-
-      test('`ws://localhost:3002/session-create` and `ws://localhost:3002/session-delete`', function(done) {
-        return WS.connectTo(new Context(), 'ws://localhost:3002').then(function(ws) {
-          return ws.makeRequestTo("peer-finder", "session-create").then(function(result) {
-            assert.isObject(result);
-            assert.isNumber(result.expires);
-            return ws.makeRequestTo("peer-finder", "session-delete", {
-              "locations": {
-                "location": {
-                  "$id": Util.randomHex(32)
-                }
-              }
-            }).then(function(result) {
-              assert.isObject(result);
-              assert.isObject(result.locations);
-              return done(null);
-            });
-          });
-        }).fail(done);
-      });
-
-    });
-
     suite('Session', function() {
 
       var client = null;

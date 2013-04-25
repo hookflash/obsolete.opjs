@@ -22,14 +22,16 @@ define([
         _logPrefix: "FindPeer (1)",
         identity: "identity://" + Util.getHostname() + "/test-FindPeer-1",
         _peerFilesForIdentity: HELPERS.peerFilesForIdentity,
-        _debug: false
+        _debug: false,
+        _verbose: true
 //        locationID: Util.randomHex(32)
       });
       client2 = new Stack({
         _logPrefix: "FindPeer (2)",
         identity: "identity://" + Util.getHostname() + "/test-FindPeer-2",
         _peerFilesForIdentity: HELPERS.peerFilesForIdentity,
-        _debug: false
+        _debug: false,
+        _verbose: true        
 //        locationID: Util.randomHex(32)
       });
     });
@@ -49,8 +51,7 @@ define([
 
       return client1._account._finder.findPeer(client2._account._peerFiles.getContactID()).then(function(peer) {
 
-console.log("PEER", peer);
-
+        // TODO: Run test on `peer` to verify that peer is connected.
 
         return done(null);
       }).fail(done);

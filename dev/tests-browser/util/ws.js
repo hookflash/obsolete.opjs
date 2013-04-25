@@ -26,7 +26,7 @@ define([
         assert.equal(message, 'echo:message1');
         return done(null);
       });
-      ws.send('message1');
+      ws.send(JSON.stringify('message1'));
     });
 
     test('can close', function (done) {
@@ -47,7 +47,7 @@ define([
             });
             ws.close();
           });
-          ws.send('message1');
+          ws.send(JSON.stringify('message1'));
         }).fail(done);
       });
 

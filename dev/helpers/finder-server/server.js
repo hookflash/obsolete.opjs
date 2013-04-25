@@ -14,6 +14,7 @@ exports.main = function(options, callback) {
     var hostname = "localhost";
 
     var connections = [];
+    var sessions = {};
 
     var wsServer = new WebSocketServer({
         port: options.port
@@ -36,26 +37,41 @@ exports.main = function(options, callback) {
       socket.on('message', function(message) {
         try {
           var data = JSON.parse(message);
-          var request = data.request;
+          var request = null;
+          if (data.request) {
+            request = data.request;
+            request._type = "request";
+          } else
+          if (data.reply) {
+            request = data.reply;
+            request._type = "reply";
+          }
           ASSERT.equal(request.$domain, hostname);
-          var response = getPayload(request, options);
-          if (!response) {
-            throw new Error("Could not determine response for: " + message);
+
+          function getPayloadHeader() {
+            return {
+              "$domain": hostname,
+              "$appid": request.$appid,
+              "$id": request.$id,
+              "$handler": request.$handler,
+              "$method": request.$method,
+              "$timestamp": Math.floor(Date.now() / 1000)
+            };
           }
-          var payload = {
-            "result": {
-                "$domain": hostname,
-                "$appid": request.$appid,
-                "$id": request.$id,
-                "$handler": request.$handler,
-                "$method": request.$method,
-                "$timestamp": Math.floor(Date.now() / 1000)
+
+          var response = getPayload(socket, request, options, getPayloadHeader);
+          if (request._type === "request") {
+            if (!response) {
+              throw new Error("Could not determine response for: " + message);
             }
-          };
-          for (var key in response) {
-            payload.result[key] = response[key];
+            var payload = {
+              "result": getPayloadHeader()
+            };
+            for (var key in response) {
+              payload.result[key] = response[key];
+            }
+            socket.send(JSON.stringify(payload));
           }
-          socket.send(JSON.stringify(payload));
         } catch(err) {
           console.error(err.stack);
         }
@@ -67,25 +83,65 @@ exports.main = function(options, callback) {
     return callback(err);
   }
 
-  function getPayload(request, options) {
+  function sessionForLocation(locationId) {
+    for (var sessionId in sessions) {
+      if (sessions[sessionId].location.$id === locationId) {
+        return sessions[sessionId];
+      }
+    }
+    return false;
+  }
+
+  function sessionForContact(contactId) {
+    for (var sessionId in sessions) {
+      if (sessions[sessionId].location.contact === contactId) {
+        return sessions[sessionId];
+      }
+    }
+    return false;
+  }
+
+  function sessionForId(sessionId) {
+    if (!sessions[sessionId]) {
+      return false;
+    }
+    if (connections.indexOf(sessions[sessionId].socket) === -1) {
+      console.log("[finder-server]", "WARNING: Removed session '" + sessionId + "' after connection gone without session-delete.");
+      delete sessions[sessionId];
+      return false;
+    }
+    return sessions[sessionId];
+  }
+
+  function getPayload(socket, request, options, getPayloadHeader) {
     // @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#PeerFinderProtocol-SessionCreateRequest
-    if (request.$handler === "peer-finder" && request.$method === "session-create") {
+    if (request._type === "request" && request.$handler === "peer-finder" && request.$method === "session-create") {
+      sessions[request.sessionProofBundle.sessionProof.$id] = {
+        id: request.sessionProofBundle.sessionProof.$id,
+        socket: socket,
+        location: request.sessionProofBundle.sessionProof.location
+      };
       return {
         "server": "hooflash/1.0 (centos)",
         "expires": Math.floor(Date.now()/1000) + 1
       };
     } else
     // @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#PeerFinderProtocol-SessionKeepAliveRequest
-    if (request.$handler === "peer-finder" && request.$method === "session-keep-alive") {
+    if (request._type === "request" && request.$handler === "peer-finder" && request.$method === "session-keep-alive") {
       return {
         "expires": Math.floor(Date.now()/1000) + 1
       };
     } else
     // @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#PeerFinderProtocol-SessionDeleteRequest
-    if (request.$handler === "peer-finder" && request.$method === "session-delete") {
+    if (request._type === "request" && request.$handler === "peer-finder" && request.$method === "session-delete") {
       ASSERT.equal(typeof request.locations, "object");
       ASSERT.equal(typeof request.locations.location, "object");
       ASSERT.equal(typeof request.locations.location.$id, "string");
+      var session = sessionForLocation(request.locations.location.$id);
+      if (!session) {
+        console.log("[finder-server]", "WARNING: Could not find session for location '" + request.locations.location.$id + "'.");
+      }
+      delete sessions[session.id];
       return {
         "locations": {
           "location": {
@@ -94,27 +150,69 @@ exports.main = function(options, callback) {
         }
       };
     } else
-    // @see http://docs.openpeer.org/OpenPeerProtocolSpecification#PeerFinderProtocol-PeerLocationFindRequestSinglePointToSinglePoint
-    if (request.$handler === "peer-finder" && request.$method === "peer-location-find") {
+    // @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#PeerFinderProtocol-PeerLocationFindRequestA
+    if (request._type === "request" && request.$handler === "peer-finder" && request.$method === "peer-location-find") {
+      ASSERT.equal(typeof request.findProofBundle, "object");
+      ASSERT.equal(typeof request.findProofBundle.findProof, "object");      
+      ASSERT.equal(typeof request.findProofBundle.findProof.find, "string");
+      ASSERT.equal(typeof request.findProofBundle.findProof.location, "object");
+      ASSERT.equal(typeof request.findProofBundle.findProof.location.$id, "string");
 
-// TODO: Look at connection to find peer we are trying to reach.
+      var ownSession = sessionForLocation(request.findProofBundle.findProof.location.$id);
+      var peerSession = sessionForContact(request.findProofBundle.findProof.find);
+
+      // @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#PeerFinderProtocol-PeerLocationFindResultB
+      if (!peerSession) {
+        return {
+          "locations": {
+            "location": {}
+          }
+        };
+      }
+
+      // @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#PeerFinderProtocol-PeerLocationFindRequestD
+      var payload = {
+        "request": getPayloadHeader()
+      };
+      payload.request.findProofBundle = request.findProofBundle;
+      payload.request.routes = {
+        route: {
+          $id: ownSession.id
+        }
+      };
+      try {
+        peerSession.socket.send(JSON.stringify(payload));
+      } catch(err) {
+        console.error("[finder-server] Error sending message to session: " + peerSession.id);
+        throw err;
+      }
 
       return {
         "locations": {
-          "location": {
-            "$id": "170f5d7f6ad2293bb339e788c8f2ff6c",
-            "contact": "peer://domain.com/900c9cb1aeb816da4bdf58a972693fce20e",
-            "details": {
-              "device": { "$id": "e31fcab6582823b862b646980e2b5f4efad75c69" },
-              "ip": "28.123.121.12",
-              "userAgent": "hookflash/1.0.1001a (iOS/iPad)",
-              "os": "iOS v4.3.5",
-              "system": "iPad v2",
-              "host": "foobar"
-            }
-          }
+          "location": peerSession.location
         }
       };
+    } else
+    // @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#PeerFinderProtocol-PeerLocationFindReplyE
+    if (request._type === "reply" && request.$handler === "peer-finder" && request.$method === "peer-location-find") {
+
+      ASSERT.equal(typeof request.findProofBundle, "object");
+      ASSERT.equal(typeof request.findProofBundle.findProof, "object");
+      ASSERT.equal(typeof request.routes, "object");
+      ASSERT.equal(typeof request.routes.route, "object");
+      ASSERT.equal(typeof request.routes.route.$id, "string");
+
+      var session = sessionForId(request.routes.route.$id);
+      if (!session) {
+        console.log("[finder-server]", "WARNING: Could not find session for id '" + request.routes.route.$id + "'.");
+      }
+
+      // @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#PeerFinderProtocol-PeerLocationFindReplyG
+      var payload = {
+        "reply": getPayloadHeader()
+      };
+      payload.reply.findProofBundle = request.findProofBundle;
+      session.socket.send(JSON.stringify(payload));
     }
     return null;
   }
@@ -143,6 +241,9 @@ exports.main = function(options, callback) {
         res.writeHead(200, {
           "Content-Type": "text/plain"
         });
+        if (Object.keys(sessions).length !== connections.length) {
+          console.log("[finder-server]", "WARNING: Session count '" + Object.keys(sessions).length + "' != connection count '" + connections.length + "'.");
+        }
         res.end("" + connections.length);
       });
     }

@@ -43,6 +43,16 @@ define([
       } catch(err) {}
     });
 
+    test('arrayForPayloadObject', function () {
+      assert.deepEqual(util.arrayForPayloadObject(null), []);
+      assert.deepEqual(util.arrayForPayloadObject(false), []);
+      assert.deepEqual(util.arrayForPayloadObject(true), []);
+      assert.deepEqual(util.arrayForPayloadObject({}), []);
+      assert.deepEqual(util.arrayForPayloadObject([]), []);
+      assert.deepEqual(util.arrayForPayloadObject({"key": "val"}), [{"key":"val"}]);
+      assert.deepEqual(util.arrayForPayloadObject([{"key": "val"}]), [{"key":"val"}]);
+    });
+
     suite('forEach', function () {
 
       test('Iterates over arrays with the supplied context', function () {
