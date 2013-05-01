@@ -101,6 +101,15 @@ exports.main = function(options, callback) {
     return false;
   }
 
+  function sessionForSocket(socket) {
+    for (var sessionId in sessions) {
+      if (sessions[sessionId].socket === socket) {
+        return sessions[sessionId];
+      }
+    }
+    return false;
+  }
+
   function sessionForId(sessionId) {
     if (!sessions[sessionId]) {
       return false;
@@ -224,6 +233,10 @@ exports.main = function(options, callback) {
       app.post(/^\/\.helpers\/finder-server\/close-all-connections$/, function(req, res, next) {
         try {
           connections.forEach(function(socket) {
+            var session = sessionForSocket(socket);
+            if (session) {
+              delete sessions[session.id];
+            }
             socket.close();
           });
         } catch(err) {
