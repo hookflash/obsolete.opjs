@@ -6,6 +6,8 @@ define([
   'cifre/forge/pki'
 ], function (Util, Assert, Crypto, PKI) {
 
+  PKI = PKI();
+
   'use strict';
 
   suite('crypto', function() {
