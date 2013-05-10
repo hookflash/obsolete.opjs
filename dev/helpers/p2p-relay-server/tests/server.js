@@ -2,8 +2,8 @@
 const PATH = require("path");
 const ASSERT = require("assert");
 const SERVER = require("../server");
-const CLIENT_TCP = require("../client-tcp");
-const CLIENT_WS = require("../client-ws");
+const CLIENT_TCP = require("./client-tcp");
+const CLIENT_WS = require("./client-ws");
 
 /*
 
