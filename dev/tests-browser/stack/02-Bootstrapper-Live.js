@@ -7,39 +7,43 @@ define([
 
   'use strict';
 
+//  var HOSTNAME = "unstable.hookflash.me";
+  var HOSTNAME = "provisioning-stable-dev.hookflash.me";
+
   suite('Bootstrapper-Live', function() {
 
-    test('`https://unstable.hookflash.me/.well-known/openpeer-services-get` response', function(done) {
+    test('`https://' + HOSTNAME + '/.well-known/openpeer-services-get` response', function(done) {
       return Request.makeRequestTo(new Context({
         "domain": "unstable.hookflash.me",
         "appid": Util.randomHex(32),
         _dev: false,
         _debug: true
-      }), "https://unstable.hookflash.me/.well-known/openpeer-services-get", "bootstrapper", "services-get").then(function(result) {
+      }), "https://" + HOSTNAME + "/.well-known/openpeer-services-get", "bootstrapper", "services-get").then(function(result) {
         assert.isObject(result);
         assert.isObject(result.services);
         return done(null);
       }).fail(done);
     });
 
-    test('`https://unstable.hookflash.me/certificates-get` response', function(done) {
+    test('`https://' + HOSTNAME + '/certificates-get` response', function(done) {
       return Request.makeRequestTo(new Context({
         "domain": "unstable.hookflash.me",
         "appid": Util.randomHex(32),
         _dev: false
-      }), "https://unstable.hookflash.me/certificates-get", "certificates", "certificates-get").then(function(result) {
+      }), "https://" + HOSTNAME + "/certificates-get", "certificates", "certificates-get").then(function(result) {
         assert.isObject(result);
         assert.isObject(result.certificates);
         return done(null);
       }).fail(done);
     });
 
-    test('`https://unstable.hookflash.me/finders-get` response', function(done) {
+    test('`https://' + HOSTNAME + '/finders-get` response', function(done) {
       return Request.makeRequestTo(new Context({
         "domain": "unstable.hookflash.me",
         "appid": Util.randomHex(32),
-        _dev: false
-      }), "https://unstable.hookflash.me/finders-get", "bootstrapper-finder", "finders-get", {
+        _dev: false,
+        _debug: true
+      }), "https://" + HOSTNAME + "/finders-get", "bootstrapped-finders", "finders-get", {
         "servers": 2
       }).then(function(result) {
         assert.isObject(result);
@@ -48,12 +52,12 @@ define([
       }).fail(done);
     });
 
-    test('`https://unstable.hookflash.me/signed-salt-get` response', function(done) {
+    test('`https://' + HOSTNAME + '/signed-salt-get` response', function(done) {
       return Request.makeRequestTo(new Context({
         "domain": "unstable.hookflash.me",
         "appid": Util.randomHex(32),
         _dev: false
-      }), "https://unstable.hookflash.me/signed-salt-get", "peer-salt", "signed-salt-get", {
+      }), "https://" + HOSTNAME + "/signed-salt-get", "peer-salt", "signed-salt-get", {
         "salts": 2
       }).then(function(result) {
         assert.isObject(result);
@@ -62,12 +66,12 @@ define([
       }).fail(done);
     });
 
-    test('`https://unstable.hookflash.me/identity` response', function(done) {
+    test('`https://' + HOSTNAME + '/identity` response', function(done) {
       return Request.makeRequestTo(new Context({
         "domain": "unstable.hookflash.me",
         "appid": Util.randomHex(32),
         _dev: false
-      }), "https://unstable.hookflash.me/identity", "identity-lookup", "identity-lookup", {
+      }), "https://" + HOSTNAME + "/identity", "identity-lookup", "identity-lookup", {
         "providers": {
           "provider": {
             "base": "identity://unstable.hookflash.me/",

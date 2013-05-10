@@ -199,7 +199,7 @@ function getPayload(request, options, callback) {
             }
         ]));
 	} else
-	if (request.$handler === "bootstrapper-finder" && request.$method === "finders-get") {
+	if (request.$handler === "bootstrapped-finders" && request.$method === "finders-get") {
 		return callback(null, SERVICE.nestResponse(["finders", "finderBundle"], {
             "finder": {
                 "$id": "c14de2cad95b5b9ce000933d74b20cc6a2c0e275",
