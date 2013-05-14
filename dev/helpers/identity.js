@@ -26,9 +26,24 @@ exports.hook = function(options, app) {
 	app.post(/^\/.helpers\/identity$/, responder);
 }
 
+function identityForContact(contact) {
+	var identity = null;
+	FS.readdirSync(PATH.join(__dirname, ".identities")).forEach(function(filename) {
+		if (identity) return;
+		var info = JSON.parse(FS.readFileSync(PATH.join(__dirname, ".identities", filename)));
+		if (info.contact === contact) {
+			identity = info.id;
+		}
+	});
+	return identity;
+}
 
 function ensureIdentity(identity, callback) {
 	try {
+
+		if (/^peer:\/\//.test(identity)) {
+			identity = identityForContact(identity);
+		}
 
 		var identityParts = Util.parseIdentityURI(identity);
 

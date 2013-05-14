@@ -24,15 +24,13 @@ define([
         _peerFilesForIdentity: HELPERS.peerFilesForIdentity,
         _debug: false,
         _verbose: true
-//        locationID: Util.randomHex(32)
       });
       client2 = new Stack({
         _logPrefix: "FindPeer (2)",
         identity: "identity://" + Util.getHostname() + "/test-FindPeer-2",
         _peerFilesForIdentity: HELPERS.peerFilesForIdentity,
         _debug: false,
-        _verbose: true        
-//        locationID: Util.randomHex(32)
+        _verbose: true
       });
     });
 
