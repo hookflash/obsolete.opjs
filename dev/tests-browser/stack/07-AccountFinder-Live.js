@@ -9,23 +9,26 @@ define([
 
     this.timeout(10 * 1000);
 
-    test('connect', function(done) {
+    suite('Session', function() {
 
-      var client = new Stack({
-        _dev: false,
-        _debug: true,
-        _logPrefix: "AccountFinder-Live - connect",
-        identity: "identity://unstable.hookflash.me/test-AccountFinder-Live",
-        identityHost: "provisioning-stable-dev.hookflash.me",
-        domain: "unstable.hookflash.me",
-        finderHost: "localhost:3092",
-        _peerFilesForIdentity: HELPERS.peerFilesForIdentity
-      });
-      return client.ready().then(function() {
-        return client.destroy().then(function() {
-          return done(null);
+      test('connect', function(done) {
+
+        var client = new Stack({
+          _dev: false,
+          _debug: true,
+          _logPrefix: "AccountFinder-Live - connect",
+          identity: "identity://unstable.hookflash.me/test-AccountFinder-Live",
+          identityHost: "provisioning-stable-dev.hookflash.me",
+          domain: "unstable.hookflash.me",
+          finderHost: "localhost:3092",
+          _peerFilesForIdentity: HELPERS.peerFilesForIdentity
         });
-      }).fail(done);
+        return client.ready().then(function() {
+          return client.destroy().then(function() {
+            return done(null);
+          });
+        }).fail(done);
+      });
     });
 
     suite('Session Keepalive', function() {
