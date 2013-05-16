@@ -43,14 +43,8 @@ define([
       }).fail(done);
     });
 
-    var targetPeer = null;
-
     test('find peer', function(done) {
-
       return client1._account._finder.findPeer(client2._account._peerFiles.getContactID()).then(function(peer) {
-
-        // TODO: Run test on `peer` to verify that peer is connected.
-
         return done(null);
       }).fail(done);
     });
