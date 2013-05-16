@@ -14,8 +14,8 @@ define([
 
     test('`https://' + HOSTNAME + '/.well-known/openpeer-services-get` response', function(done) {
       return Request.makeRequestTo(new Context({
-        "domain": "unstable.hookflash.me",
-        "appid": Util.randomHex(32),
+        domain: "unstable.hookflash.me",
+        appid: Util.randomHex(32),
         _dev: false,
         _debug: true
       }), "https://" + HOSTNAME + "/.well-known/openpeer-services-get", "bootstrapper", "services-get").then(function(result) {
@@ -27,8 +27,8 @@ define([
 
     test('`https://' + HOSTNAME + '/certificates-get` response', function(done) {
       return Request.makeRequestTo(new Context({
-        "domain": "unstable.hookflash.me",
-        "appid": Util.randomHex(32),
+        domain: "unstable.hookflash.me",
+        appid: Util.randomHex(32),
         _dev: false
       }), "https://" + HOSTNAME + "/certificates-get", "certificates", "certificates-get").then(function(result) {
         assert.isObject(result);
@@ -39,8 +39,8 @@ define([
 
     test('`https://' + HOSTNAME + '/finders-get` response', function(done) {
       return Request.makeRequestTo(new Context({
-        "domain": "unstable.hookflash.me",
-        "appid": Util.randomHex(32),
+        domain: "unstable.hookflash.me",
+        appid: Util.randomHex(32),
         _dev: false,
         _debug: true
       }), "https://" + HOSTNAME + "/finders-get", "bootstrapped-finders", "finders-get", {
@@ -54,8 +54,8 @@ define([
 
     test('`https://' + HOSTNAME + '/signed-salt-get` response', function(done) {
       return Request.makeRequestTo(new Context({
-        "domain": "unstable.hookflash.me",
-        "appid": Util.randomHex(32),
+        domain: "unstable.hookflash.me",
+        appid: Util.randomHex(32),
         _dev: false
       }), "https://" + HOSTNAME + "/signed-salt-get", "peer-salt", "signed-salt-get", {
         "salts": 2
@@ -68,8 +68,8 @@ define([
 
     test('`https://' + HOSTNAME + '/identity` response', function(done) {
       return Request.makeRequestTo(new Context({
-        "domain": "unstable.hookflash.me",
-        "appid": Util.randomHex(32),
+        domain: "unstable.hookflash.me",
+        appid: Util.randomHex(32),
         _dev: false
       }), "https://" + HOSTNAME + "/identity", "identity-lookup", "identity-lookup", {
         "providers": {

@@ -23,6 +23,7 @@ define([
         client1 = new Stack({
           _logPrefix: "FindPeer (1)",
           identity: "identity://" + Util.getHostname() + "/test-FindPeer-1",
+          _p2pRelayHost: "localhost:3000",
           _peerFilesForIdentity: HELPERS.peerFilesForIdentity,
           _debug: false,
           _verbose: true
@@ -30,6 +31,7 @@ define([
         client2 = new Stack({
           _logPrefix: "FindPeer (2)",
           identity: "identity://" + Util.getHostname() + "/test-FindPeer-2",
+          _p2pRelayHost: "localhost:3000",
           _peerFilesForIdentity: HELPERS.peerFilesForIdentity,
           _debug: false,
           _verbose: true

@@ -35,13 +35,11 @@ define([
         _logPrefix: "ConnectToFinder - two clients (1)",
         identity: "identity://" + Util.getHostname() + "/test-ConnectToFinder-two-1",
         _peerFilesForIdentity: HELPERS.peerFilesForIdentity
-//        locationID: Util.randomHex(32)
       });
       var client2 = new Stack({
         _logPrefix: "ConnectToFinder - two clients (2)",
         identity: "identity://" + Util.getHostname() + "/test-ConnectToFinder-two-2",
         _peerFilesForIdentity: HELPERS.peerFilesForIdentity
-//        locationID: Util.randomHex(32)
       });
 
       return client1.ready().then(function() {

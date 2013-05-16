@@ -20,7 +20,7 @@ define([
           identity: "identity://unstable.hookflash.me/test-AccountFinder-Live",
           identityHost: "provisioning-stable-dev.hookflash.me",
           domain: "unstable.hookflash.me",
-          finderHost: "localhost:3092",
+          _finderHost: "localhost:3092",
           _peerFilesForIdentity: HELPERS.peerFilesForIdentity
         });
         return client.ready().then(function() {
@@ -43,8 +43,8 @@ define([
           identity: "identity://unstable.hookflash.me/test-AccountFinder-Live-SessionKeepalive",
           identityHost: "provisioning-stable-dev.hookflash.me",
           domain: "unstable.hookflash.me",
-          finderHost: "localhost:3092",
-          finderKeepalive: 1,  // 1 second.
+          _finderHost: "localhost:3092",
+          _finderKeepalive: 1,  // 1 second.
           _peerFilesForIdentity: HELPERS.peerFilesForIdentity
         });
         return client.ready().then(function() {
