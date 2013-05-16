@@ -13,63 +13,78 @@ define([
 
   suite("SendMessageToPeer", function() {
 
-    this.timeout(10 * 1000);
+    suite("two clients with one location each", function() {
 
-    var client1 = null;
-    var client2 = null;
+      this.timeout(10 * 1000);
 
-    test('connect', function() {
+      var client1 = null;
+      var client2 = null;
 
-      client1 = new Stack({
-        _logPrefix: "SendMessageToPeer (1)",
-        identity: "identity://" + Util.getHostname() + "/test-SendMessageToPeer-1",
-        _peerFilesForIdentity: HELPERS.peerFilesForIdentity
-//        locationID: Util.randomHex(32)
-      });
-      client2 = new Stack({
-        _logPrefix: "SendMessageToPeer (2)",
-        identity: "identity://" + Util.getHostname() + "/test-SendMessageToPeer-2",
-        _peerFilesForIdentity: HELPERS.peerFilesForIdentity
-//        locationID: Util.randomHex(32)
-      });
-    });
+      test('connect', function() {
 
-    test('connected', function(done) {
-      return client1.ready().then(function() {
-        return client2.ready().then(function() {
-
-          return done(null);
+        client1 = new Stack({
+          _logPrefix: "FindPeer (1)",
+          identity: "identity://" + Util.getHostname() + "/test-SendMessageToPeer-1",
+          _peerFilesForIdentity: HELPERS.peerFilesForIdentity,
+          _debug: false,
+          _verbose: true
         });
-      }).fail(done);
-    });
-
-    var targetPeer = null;
-
-    test('connect to peer', function(done) {
-        return done(null);
-//      return client1.connectToPeer(client2.getPeerURI()).then(function(peer) {
-
-//      	targetPeer = peer;
-
-//      	return done(null);
-//      }).fail(done);
-    });
-/*
-    test('send message', function(done) {
-      return targetPeer.sendMessage("Hello World").then(function() {
-
-		    // TODO: Wait for `client2.on("message", function() {})`
-
-      	return done(null);
-  	  }).fail(done);
-    });
-*/
-    test('destroy', function(done) {
-      return client1.destroy().then(function() {
-        return client2.destroy().then(function() {
-          return HELPERS.ensureNoConnections(done);
+        client2 = new Stack({
+          _logPrefix: "FindPeer (2)",
+          identity: "identity://" + Util.getHostname() + "/test-SendMessageToPeer-2",
+          _peerFilesForIdentity: HELPERS.peerFilesForIdentity,
+          _debug: false,
+          _verbose: true
         });
-      }).fail(done);
+      });
+
+      test('connected', function(done) {
+        return client1.ready().then(function() {
+          return client2.ready().then(function() {
+
+            return done(null);
+          });
+        }).fail(done);
+      });
+
+      test('find peer', function(done) {
+        var peer2 = null;
+        client2._account.on("peer.new", function(peer) {
+          peer2 = peer;
+        });
+        return client1._account._finder.findPeer(client2._account._peerFiles.getContactID()).then(function(peer1) {
+          peer2.on("message", function(location, message) {
+            assert.deepEqual(message, {
+              from: "client1",
+              message: "Hello World"
+            });
+            peer2.sendMessage({
+              from: "client2",
+              message: "Hello World"
+            });
+          });
+          peer1.on("message", function(location, message) {
+            assert.deepEqual(message, {
+              from: "client2",
+              message: "Hello World"
+            });
+            return done(null);
+          });
+          peer1.sendMessage({
+            from: "client1",
+            message: "Hello World"
+          });
+        }).fail(done);
+      });
+
+      test('destroy', function(done) {
+        return client1.destroy().then(function() {
+          return client2.destroy().then(function() {
+            return HELPERS.ensureNoConnections(done);
+          });
+        }).fail(done);
+      });
+
     });
 
   });
