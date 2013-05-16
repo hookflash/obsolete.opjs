@@ -19,7 +19,6 @@ define([
           _logPrefix: "AccountFinder-Live - connect",
           identity: "identity://unstable.hookflash.me/test-AccountFinder-Live",
           identityHost: "provisioning-stable-dev.hookflash.me",
-          domain: "unstable.hookflash.me",
           _finderHost: "localhost:3092",
           _peerFilesForIdentity: HELPERS.peerFilesForIdentity
         });
@@ -42,7 +41,6 @@ define([
           _logPrefix: "AccountFinder-Live - Session Keepalive",
           identity: "identity://unstable.hookflash.me/test-AccountFinder-Live-SessionKeepalive",
           identityHost: "provisioning-stable-dev.hookflash.me",
-          domain: "unstable.hookflash.me",
           _finderHost: "localhost:3092",
           _finderKeepalive: 1,  // 1 second.
           _peerFilesForIdentity: HELPERS.peerFilesForIdentity
