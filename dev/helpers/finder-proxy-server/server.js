@@ -21,7 +21,7 @@ exports.main = function(options, callback) {
     VERBOSE = options.verbose || VERBOSE;
 
     options.hostname = options.hostname || "localhost";
-    options.port = options.port || 3001;
+    options.port = options.port || 3092;
     options.finderHostname = options.finderHostname || "127.0.0.1";
     options.finderPort = options.finderPort || 9292;
 

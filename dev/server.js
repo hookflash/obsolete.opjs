@@ -44,50 +44,64 @@ exports.main = function(callback) {
                     extraServers.push(info.wsServer);
                     extraServers.push(info.tcpServer);
 
+                    return require("./helpers/finder-proxy-server/tests/client").getFinderServer(function(err, finderInfo) {
+                        if (err) return callback(err);
 
-                    var hbs = HBS.create();
-                    
-                    app.set("view engine", "hbs");
-
-                    app.engine("hbs", hbs.__express);
-                    app.set("views", PATH.join(__dirname, "views"));
-                    app.get(/^\/($|test$|test\/.*$)/, function(req, res, next) {
-                        var page = req.params[0] || "index";
-                        return getTemplateData(page, function(err, data) {
-                            if (err) return next(err);
-                            try {
-                                res.render(page.split("/")[0], data);
-                            } catch(err) {
-                                return next(err);
-                            }
-                        });
-                    });
-
-                    mountStaticDir(app, /^\/tests-browser-standalone\/(.*)$/, PATH.join(__dirname, "tests-browser-standalone"));
-                    mountStaticDir(app, /^\/ui\/(.*)$/, PATH.join(__dirname, "ui"));
-                    mountStaticDir(app, /^\/tests\/(.*)$/, PATH.join(__dirname, "tests-browser"));
-                    mountStaticDir(app, /^\/mocks\/(.*)$/, PATH.join(__dirname, "mocks"));
-                    mountStaticDir(app, /^\/lib\/opjs\/(.*)$/, PATH.join(__dirname, "../lib"));
-                    mountStaticDir(app, /^\/lib\/cifre\/(.*)$/, PATH.join(__dirname, "../node_modules/cifre"));
-                    mountStaticDir(app, /^\/lib\/q\/(.*)$/, PATH.join(__dirname, "node_modules/q"));
-
-                    var server = app.listen(PORT);
-                    var origClose = server.close;
-                    server.close = function(callback) {
-                        var waitfor = WAITFOR.serial(function(err) {
+                        return require("./helpers/finder-proxy-server/server").main({
+                            finderHostname: finderInfo.hostname,
+                            finderPort: finderInfo.port,
+                        }, function(err, info) {
                             if (err) return callback(err);
-                            return origClose(callback);
-                        });
-                        extraServers.forEach(function(server) {
-                            waitfor(server.close);
-                        });
-                    }
 
-                    console.log("open http://localhost:" + PORT + "/");
+                            console.log('[finder-proxy-server] server started on port ' + info.port);
+                            extraServers.push(info.server);
 
-                    return callback(null, {
-                        server: server,
-                        port: PORT
+
+                            var hbs = HBS.create();
+                            
+                            app.set("view engine", "hbs");
+
+                            app.engine("hbs", hbs.__express);
+                            app.set("views", PATH.join(__dirname, "views"));
+                            app.get(/^\/($|test$|test\/.*$)/, function(req, res, next) {
+                                var page = req.params[0] || "index";
+                                return getTemplateData(page, function(err, data) {
+                                    if (err) return next(err);
+                                    try {
+                                        res.render(page.split("/")[0], data);
+                                    } catch(err) {
+                                        return next(err);
+                                    }
+                                });
+                            });
+
+                            mountStaticDir(app, /^\/tests-browser-standalone\/(.*)$/, PATH.join(__dirname, "tests-browser-standalone"));
+                            mountStaticDir(app, /^\/ui\/(.*)$/, PATH.join(__dirname, "ui"));
+                            mountStaticDir(app, /^\/tests\/(.*)$/, PATH.join(__dirname, "tests-browser"));
+                            mountStaticDir(app, /^\/mocks\/(.*)$/, PATH.join(__dirname, "mocks"));
+                            mountStaticDir(app, /^\/lib\/opjs\/(.*)$/, PATH.join(__dirname, "../lib"));
+                            mountStaticDir(app, /^\/lib\/cifre\/(.*)$/, PATH.join(__dirname, "../node_modules/cifre"));
+                            mountStaticDir(app, /^\/lib\/q\/(.*)$/, PATH.join(__dirname, "node_modules/q"));
+
+                            var server = app.listen(PORT);
+                            var origClose = server.close;
+                            server.close = function(callback) {
+                                var waitfor = WAITFOR.serial(function(err) {
+                                    if (err) return callback(err);
+                                    return origClose(callback);
+                                });
+                                extraServers.forEach(function(server) {
+                                    waitfor(server.close);
+                                });
+                            }
+
+                            console.log("open http://localhost:" + PORT + "/");
+
+                            return callback(null, {
+                                server: server,
+                                port: PORT
+                            });
+                        });
                     });
                 });
             });

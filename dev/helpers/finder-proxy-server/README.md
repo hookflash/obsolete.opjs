@@ -1,7 +1,7 @@
 Open Peer Finder Proxy
 ======================
 
-This proxy takes incoming websocket connections on port `3001` and connects to a finder
+This proxy takes incoming websocket connections on port `3092` and connects to a finder
 at `127.0.0.1:9292` using a TCP connection.
 
 Websocket messages are framed using 64-bit big-endian unsigned integers length headers

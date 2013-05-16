@@ -77,6 +77,8 @@ exports.main = function(options, callback) {
         }
       });
 
+      socket.send("ready");
+
     });
 
   } catch(err) {
