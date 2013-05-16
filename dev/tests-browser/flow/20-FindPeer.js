@@ -46,15 +46,41 @@ define([
       });
 
       test('find peer', function(done) {
+        var count = 0;
+        function checkCount() {
+          count += 1;
+          if (count === 3) {
+            return done(null);
+          }
+        }
+        client1._account.on("peer.new", function(peer) {
+          return checkCount();
+        });
+        client2._account.on("peer.new", function(peer) {
+          return checkCount();
+        });
         return client1._account._finder.findPeer(client2._account._peerFiles.getContactID()).then(function(peer) {
-          return done(null);
+          return checkCount();
         }).fail(done);
       });
 
       test('destroy', function(done) {
+        var count = 0;
+        function checkCount() {
+          count += 1;
+          if (count === 3) {
+            return HELPERS.ensureNoConnections(done);
+          }
+        }
+        client1._account.on("peer.destroyed", function(peer) {
+          checkCount();
+        });
+        client2._account.on("peer.destroyed", function(peer) {
+          checkCount();
+        });
         return client1.destroy().then(function() {
           return client2.destroy().then(function() {
-            return HELPERS.ensureNoConnections(done);
+            return checkCount();
           });
         }).fail(done);
       });
