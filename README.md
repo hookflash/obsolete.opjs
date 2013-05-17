@@ -76,4 +76,9 @@ Initial [dotCloud](http://dotcloud.com) application setup:
 Deployments:
 
   * Staging: http://opjsdemostage-hookflash.dotcloud.com/
-  * Production: http://webrtc.hookflash.me/
+
+
+License
+=======
+
+[BSD-2-Clause](http://opensource.org/licenses/BSD-2-Clause)

@@ -6,13 +6,15 @@ define([
   'cifre/forge/pki'
 ], function (Util, Assert, Crypto, PKI) {
 
+  PKI = PKI();
+
   'use strict';
 
   suite('crypto', function() {
 
-    test('generate 1028 bit key pair', function(done) {
+    test('generate 128 bit key pair', function(done) {
 
-  	  var pair = Crypto.generateKeyPair(1028);
+  	  var pair = Crypto.generateKeyPair(128);
 
   	  Assert.equal(PKI.privateKeyToPem(pair.privateKey).indexOf("-----BEGIN RSA PRIVATE KEY-----"), 0);
   	  Assert.equal(PKI.publicKeyToPem(pair.publicKey).indexOf("-----BEGIN PUBLIC KEY-----"), 0);
@@ -81,6 +83,7 @@ define([
       Assert.equal(privatePeerInfo.contact, contact);
       Assert.equal(privatePeerInfo.salt, salt);
       Assert.equal(Crypto.privateKeyToPem(privatePeerInfo.privateKey), Crypto.privateKeyToPem(pair.privateKey));
+      Assert.equal(Crypto.publicKeyToPem(privatePeerInfo.publicKey), Crypto.publicKeyToPem(pair.publicKey));
       Assert.equal(privatePeerInfo.data, message);
       Assert.equal(privatePeerInfo.publicPeerFile, JSON.stringify(publicPeerFile));
 

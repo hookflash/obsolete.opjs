@@ -13,37 +13,15 @@ define([
 
     this.timeout(10 * 1000);
 
-    suite('Helper', function() {
-
-      test('`ws://localhost:3002/session-create` and `ws://localhost:3002/session-delete`', function(done) {
-        return WS.connectTo(new Context(), 'ws://localhost:3002').then(function(ws) {
-          return ws.makeRequestTo("peer-finder", "session-create").then(function(result) {
-            assert.isObject(result);
-            assert.isNumber(result.expires);
-            return ws.makeRequestTo("peer-finder", "session-delete", {
-              "locations": {
-                "location": {
-                  "$id": Util.randomHex(32)
-                }
-              }
-            }).then(function(result) {
-              assert.isObject(result);
-              assert.isObject(result.locations);
-              return done(null);
-            });
-          });
-        }).fail(done);
-      });
-
-    });
-
     suite('Session', function() {
 
       var client = null;
 
       test('connect', function(done) {
         client = new Stack({
-          _logPrefix: "AccountFinder - Session"
+          _logPrefix: "AccountFinder - Session",
+          identity: "identity://" + Util.getHostname() + "/test-AccountFinder-Session",
+          _peerFilesForIdentity: HELPERS.peerFilesForIdentity
         });
         return client.ready().then(function() {
           return done(null);
@@ -121,7 +99,9 @@ define([
 
       test('connect', function(done) {
         client = new Stack({
-          _logPrefix: "AccountFinder - Session Keepalive"
+          _logPrefix: "AccountFinder - Session Keepalive",
+          identity: "identity://" + Util.getHostname() + "/test-AccountFinder-SessionKeepalive",
+          _peerFilesForIdentity: HELPERS.peerFilesForIdentity
         });
         return client.ready().then(function() {
           return done(null);
@@ -147,12 +127,14 @@ define([
 
     });
 
-    suite('failures', function () {
+    suite('Failures', function () {
 
       test('all finders down', function(done) {
 
         var client = new Stack({
-          _logPrefix: "AccountFinder - failures"
+          _logPrefix: "AccountFinder - failures",
+          identity: "identity://" + Util.getHostname() + "/test-AccountFinder-Failures",
+          _peerFilesForIdentity: HELPERS.peerFilesForIdentity
         });
         return client.ready().then(function() {
           client._account._bootstrapper.getFinders = function() {

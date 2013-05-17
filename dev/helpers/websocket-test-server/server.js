@@ -25,7 +25,7 @@ exports.main = function(options, callback) {
 
       // Echo messages from client back to client
       socket.on('message', function (message) {
-        socket.send('echo:' + message);
+        socket.send(JSON.stringify('echo:' + JSON.parse(message)));
       });
 
     });

@@ -2,8 +2,9 @@
 define([
   'opjs/OpenPeer',
   'opjs/Stack',
-  'opjs/assert'
-], function(OpenPeer, Stack, Assert) {
+  'opjs/assert',
+  'opjs/util'
+], function(OpenPeer, Stack, Assert, Util) {
 
 	'use strict';
 
@@ -21,7 +22,9 @@ define([
 
 				test("should give us an object", function(done) {
 					var op = new OpenPeer({
-						_logPrefix: "Init - OpenPeer"
+						_logPrefix: "Init - OpenPeer",
+						identity: "identity://" + Util.getHostname() + "/test-Init-OpenPeer",
+						_peerFilesForIdentity: HELPERS.peerFilesForIdentity
 					});
 					assert.isObject(op);
 					return op.ready().then(function() {
@@ -44,7 +47,9 @@ define([
 
 				test("should give us an object", function(done) {
 					var stack = new Stack({
-						_logPrefix: "Init - Stack"
+						_logPrefix: "Init - Stack",
+						identity: "identity://" + Util.getHostname() + "/test-Init-Stack",
+						_peerFilesForIdentity: HELPERS.peerFilesForIdentity
 					});
 					assert.isObject(stack);
 					return stack.ready().then(function() {

@@ -21,6 +21,38 @@ define([
 
     });
 
+    test('parseIdentityURI', function () {
+      assert.deepEqual(util.parseIdentityURI('identity://domain.com/alice'), {
+        domain: 'domain.com',
+        identity: 'alice'
+      });
+      try {
+        util.parseIdentityURI('identit://domain.com/alice');
+        assert.fail();
+      } catch(err) {}
+    });
+
+    test('parsePeerURI', function () {
+      assert.deepEqual(util.parsePeerURI('peer://domain.com/abc123'), {
+        domain: 'domain.com',
+        contact: 'abc123'
+      });
+      try {
+        util.parsePeerURI('peer://domain.c/om/abc123');
+        assert.fail();
+      } catch(err) {}
+    });
+
+    test('arrayForPayloadObject', function () {
+      assert.deepEqual(util.arrayForPayloadObject(null), []);
+      assert.deepEqual(util.arrayForPayloadObject(false), []);
+      assert.deepEqual(util.arrayForPayloadObject(true), []);
+      assert.deepEqual(util.arrayForPayloadObject({}), []);
+      assert.deepEqual(util.arrayForPayloadObject([]), []);
+      assert.deepEqual(util.arrayForPayloadObject({"key": "val"}), [{"key":"val"}]);
+      assert.deepEqual(util.arrayForPayloadObject([{"key": "val"}]), [{"key":"val"}]);
+    });
+
     suite('forEach', function () {
 
       test('Iterates over arrays with the supplied context', function () {

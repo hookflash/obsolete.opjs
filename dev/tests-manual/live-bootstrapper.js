@@ -7,23 +7,30 @@ const VERBOSE = false;
 
 describe("live-bootstrapper", function() {
 
+//  var HOSTNAME = "unstable.hookflash.me";
+    var HOSTNAME = "provisioning-stable-dev.hookflash.me";
+
+
 	// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#BootstrapperServiceRequests-LocatingTheBootstrapper
-    it("should call `https://unstable.hookflash.me/.well-known/openpeer-services-get`", function(done) {
+    it("should call `https://" + HOSTNAME + "/.well-known/openpeer-services-get`", function(done) {
 
     	this.timeout(10 * 1000);
 
-        if (VERBOSE) console.log("https://unstable.hookflash.me/.well-known/openpeer-services-get");
+        if (VERBOSE) console.log("https://" + HOSTNAME + "/.well-known/openpeer-services-get");
 
     	return REQUEST({
     		method: "POST",
-    		url: "https://unstable.hookflash.me/.well-known/openpeer-services-get",
+    		url: "https://" + HOSTNAME + "/.well-known/openpeer-services-get",
     		body: JSON.stringify({
 				"$domain": "unstable.hookflash.me",
 				"$appid": "xyz123",
 				"$id": "abc123",
 				"$handler": "bootstrapper",
 				"$method": "services-get"
-			})
+			}),
+            headers: {
+                "Content-Type": "application/json"
+            }
     	}, function(err, response) {
     		if (err) return done(err);
             try {
@@ -48,20 +55,20 @@ describe("live-bootstrapper", function() {
     });
 
     // @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#BootstrappedFinderServiceRequests-FindersGetRequest
-    it("should call `https://unstable.hookflash.me/finders-get`", function(done) {
+    it("should call `https://" + HOSTNAME + "/finders-get`", function(done) {
 
         this.timeout(10 * 1000);
 
-        if (VERBOSE) console.log("https://unstable.hookflash.me/finders-get");
+        if (VERBOSE) console.log("https://" + HOSTNAME + "/finders-get");
 
         return REQUEST({
             method: "POST",
-            url: "https://unstable.hookflash.me/finders-get",
+            url: "https://" + HOSTNAME + "/finders-get",
             body: JSON.stringify({
                 "$domain": "unstable.hookflash.me",
                 "$appid": "xyz123",
                 "$id": "abc123",
-                "$handler": "bootstrapper-finder",
+                "$handler": "bootstrapped-finders",
                 "$method": "finders-get",
                 "servers": 1
             })
@@ -88,15 +95,15 @@ describe("live-bootstrapper", function() {
     });
 
     // @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#CertificatesServiceRequests-CertificatesGetRequest
-    it("should call `https://unstable.hookflash.me/certificates-get`", function(done) {
+    it("should call `https://" + HOSTNAME + "/certificates-get`", function(done) {
 
         this.timeout(10 * 1000);
 
-        if (VERBOSE) console.log("https://unstable.hookflash.me/certificates-get");
+        if (VERBOSE) console.log("https://" + HOSTNAME + "/certificates-get");
 
         return REQUEST({
             method: "POST",
-            url: "https://unstable.hookflash.me/certificates-get",
+            url: "https://" + HOSTNAME + "/certificates-get",
             body: JSON.stringify({
                 "$domain": "unstable.hookflash.me",
                 "$appid": "xyz123",
@@ -128,15 +135,15 @@ describe("live-bootstrapper", function() {
     });
 
     // @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#PeerSaltServiceProtocol-SignedSaltGetRequest
-    it("should call `https://unstable.hookflash.me/signed-salt-get`", function(done) {
+    it("should call `https://" + HOSTNAME + "/signed-salt-get`", function(done) {
 
         this.timeout(10 * 1000);
 
-        if (VERBOSE) console.log("https://unstable.hookflash.me/signed-salt-get");
+        if (VERBOSE) console.log("https://" + HOSTNAME + "/signed-salt-get");
 
         return REQUEST({
             method: "POST",
-            url: "https://unstable.hookflash.me/signed-salt-get",
+            url: "https://" + HOSTNAME + "/signed-salt-get",
             body: JSON.stringify({
                 "$domain": "unstable.hookflash.me",
                 "$appid": "xyz123",

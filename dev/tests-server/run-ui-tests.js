@@ -20,7 +20,9 @@ describe("run-ui-tests", function() {
                             urls: [
                                 //"http://localhost:" + info.port + "/test/flow/10-ConnectToFinder"
                                 "http://localhost:" + info.port + "/test"
-                            ]
+                            ],
+                            // PhantomJS options
+                            "--ignore-ssl-errors": "yes"
                         }
                     }
                 }

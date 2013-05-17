@@ -3,7 +3,7 @@
 
 var net = require('net');
 var readline = require('readline');
-var deFramer = require('./deframer');
+var deFramer = require('../deframer');
 var events = require("events");
 
 var VERBOSE = false;

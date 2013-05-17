@@ -1,0 +1,18 @@
+{
+  "name": "opjs2-dev-helpers-finder-proxy-server",
+  "version": "0.1.0",
+  "private": true,
+  "main": "server.js",
+  "dependencies": {
+    "ws": "~0.4.25",
+    "bignum": "~0.6.0",
+    "commander": "~1.1.1"
+  },
+  "devDependencies": {
+    "mocha": "~1.9.0",
+    "request": "~2.16.6"
+  },
+  "scripts": {
+  	"test": "make test"
+  }
+}
