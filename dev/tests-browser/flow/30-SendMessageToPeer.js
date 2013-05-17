@@ -27,7 +27,7 @@ define([
           identity: "identity://" + Util.getHostname() + "/test-SendMessageToPeer-1",
           _p2pRelayHost: "localhost:3000",
           _peerFilesForIdentity: HELPERS.peerFilesForIdentity,
-          _debug: false,
+          _debug: true,
           _verbose: true
         });
         client2 = new Stack({
@@ -35,7 +35,7 @@ define([
           identity: "identity://" + Util.getHostname() + "/test-SendMessageToPeer-2",
           _p2pRelayHost: "localhost:3000",
           _peerFilesForIdentity: HELPERS.peerFilesForIdentity,
-          _debug: false,
+          _debug: true,
           _verbose: true
         });
       });
