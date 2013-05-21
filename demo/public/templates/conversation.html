@@ -5,11 +5,11 @@
 <span class="status"><%
 if (peer && status) {
   if (status.rejected) {
-    print(peer.name + ' has ended the call.');
+    print(peer.fn + ' has ended the call.');
   } else if (status.calling) {
-    print('Now calling ' + peer.name + '...');
+    print('Now calling ' + peer.fn + '...');
   } else {
-    print('On call with ' + peer.name + '.');
+    print('On call with ' + peer.fn + '.');
   }
 } %></span>
 </div>
