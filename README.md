@@ -65,12 +65,6 @@ Initial [dotCloud](http://dotcloud.com) application setup:
 
     cd demo
     dotcloud create -f live <name>
-    # Setup github application: http://developer.github.com/v3/oauth/
-    dotcloud env set \
-      'APP_GITHUB_CLIENT_ID=<Client ID>' \
-      'APP_GITHUB_CLIENT_SECRET=<Client Secret>' \
-      'APP_TWITTER_CONSUMER_KEY=<Twitter Consumer Key>' \
-      'APP_TWITTER_CONSUMER_SECRET=<Twitter Consumer Secret>'
     dotcloud push
 
 Deployments:

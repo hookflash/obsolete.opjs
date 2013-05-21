@@ -1,5 +1,5 @@
 define([
-  'tests/peer',
-  'tests/oauth-prefilter',
-  'tests/util'
+//  'tests/peer',
+//  'tests/oauth-prefilter',
+//  'tests/util'
 ]);
