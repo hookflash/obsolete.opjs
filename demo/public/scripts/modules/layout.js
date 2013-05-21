@@ -168,7 +168,7 @@ define([
                 this.refetching = true;
                 this.$('.contact-holder').addClass('loading');
                 this.database.sync().then(function(){
-                    window.location = window.location;
+                    window.location.reload(true);
                 }, function(){
                     loginView.remove();
                     this.refetching = false;

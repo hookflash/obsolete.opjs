@@ -41,8 +41,6 @@ define(['text!templates/chat-layout.html', 'text!templates/chat-message-line.htm
                 var msg = this.$el.find('textarea[name="chat-text"]').val();
                 if(!msg) return;
 
-                msg = msg.replace(new RegExp("\n","gm"), '<br>');
-
                 var message = {
                     time: new Date().getTime(),
                     message: msg
@@ -79,6 +77,7 @@ define(['text!templates/chat-layout.html', 'text!templates/chat-message-line.htm
                 var d = new Date(message.time);
 
                 message.time = [d.getDate(), mounces[d.getMonth()], (d.getHours() + ":" + d.getMinutes())].join(" ");
+
                 if(!message.username){
                     message.username = user.getModel().get('fn');
                     message.isOwn = true;
@@ -86,13 +85,15 @@ define(['text!templates/chat-layout.html', 'text!templates/chat-message-line.htm
                     message.isOwn = false;
                 }
 
+                message.message = message.message.replace(/\n/gm, '<br>');
+
                 this.$el.find('.conversation-chat-dialog').append(_.template(chatMessageLine, message));
 
                 this.$el.find('.conversation-chat-dialog')[0].scrollTop = this.$el.find('.conversation-chat-dialog').get(0).scrollHeight;
                 this.$el.find('textarea[name="chat-text"]').val("")
 
             },
-            close: function(e){
+            close: function(){
                 this.remove();
             }
         });

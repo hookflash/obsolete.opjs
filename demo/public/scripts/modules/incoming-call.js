@@ -1,5 +1,5 @@
 define([
-    'text!templates/incoming-call.html', 'layoutmanager', '_', 'q'
+    'text!templates/incoming-call.html', 'layoutmanager', '_', 'rolodex/q'
 ], function(html, Backbone, _, Q) {
     'use strict';
 

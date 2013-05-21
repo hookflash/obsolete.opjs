@@ -6,7 +6,6 @@ require.config({
         backbone: 'lib/backbone',
         layoutmanager: 'lib/backbone.layoutmanager',
         text: 'lib/text',
-        q: 'lib/q',
         templates: '../templates',
         db: 'lib/ydn.db',
         rolodex: "http://webrtc.hookflash.me/.openpeer-rolodex/client",

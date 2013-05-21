@@ -142,7 +142,7 @@ define(["modules/login", 'jquery', "rolodex/client", "rolodex-presence/client",'
                 if (service.loggedin) {
                     currentService = serviceId;
                 }
-                if(isLoggedIn && service.logoutReason) window.location = window.location;
+                if(isLoggedIn && service.logoutReason) window.location.reload(true);
             }
 
             for (var serviceId in services) {
@@ -193,7 +193,7 @@ define(["modules/login", 'jquery', "rolodex/client", "rolodex-presence/client",'
         });
 
         rolodexPresnece.on("contact.message", function(to, uid, message) {
-            if(message.type == "text"){
+            if(message.type === "text"){
                 layout.trigger('on-chat-message', uid, message);
             }
         });

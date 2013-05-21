@@ -1,6 +1,6 @@
 define([
     'modules/gum-compat', 'text!templates/stream-view-remote.html',
-    'text!templates/stream-view-local.html', 'layoutmanager', '_', 'q'
+    'text!templates/stream-view-local.html', 'layoutmanager', '_', 'rolodex/q'
 ], function(gum, remoteHtml, localHtml, Backbone, _, Q) {
     'use strict';
 

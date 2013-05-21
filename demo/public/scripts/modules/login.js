@@ -22,29 +22,7 @@ define(['text!templates/login.html', 'layoutmanager', '_', 'jquery'], function(h
         requestAuth: function(event) {
             event.preventDefault();
             var provider = $(event.target).data('provider');
-
-            this.login(provider.toLowerCase());
-        },
-        login: function(provider, code){
-
-            this.service.getServices().then(function(services) {
-                console.log(services[provider].authURL);
-
-                $("body").append($("<form/>").attr({
-                    "action": services[provider].authURL,
-                    "method": "POST",
-                    "id": "rolodex-auth-form"
-                }).append($("<input/>").attr({
-                        "type": "hidden",
-                        "name": "successURL",
-                        "value": window.location.href.replace(/\?.*$/, "")
-                    })).append($("<input/>").attr({
-                        "type": "hidden",
-                        "name": "failURL",
-                        "value":  window.location.href.replace(/\?.*$/, "") + "?fail"
-                    }))).find("#rolodex-auth-form").submit();
-
-            });
+            this.service.loginService(provider.toLowerCase());
         },
         serialize: function() {
             return {
