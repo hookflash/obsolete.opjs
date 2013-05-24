@@ -20,8 +20,7 @@ define([
       test('connect', function(done) {
         client = new Stack({
           _logPrefix: "AccountFinder - Session",
-          identity: "identity://" + Util.getHostname() + "/test-AccountFinder-Session",
-          _peerFilesForIdentity: HELPERS.peerFilesForIdentity
+          identity: "identity://" + Util.getHostname() + "/test-AccountFinder-Session"
         });
         return client.ready().then(function() {
           return done(null);
@@ -100,8 +99,7 @@ define([
       test('connect', function(done) {
         client = new Stack({
           _logPrefix: "AccountFinder - Session Keepalive",
-          identity: "identity://" + Util.getHostname() + "/test-AccountFinder-SessionKeepalive",
-          _peerFilesForIdentity: HELPERS.peerFilesForIdentity
+          identity: "identity://" + Util.getHostname() + "/test-AccountFinder-SessionKeepalive"
         });
         return client.ready().then(function() {
           return done(null);
@@ -133,8 +131,7 @@ define([
 
         var client = new Stack({
           _logPrefix: "AccountFinder - failures",
-          identity: "identity://" + Util.getHostname() + "/test-AccountFinder-Failures",
-          _peerFilesForIdentity: HELPERS.peerFilesForIdentity
+          identity: "identity://" + Util.getHostname() + "/test-AccountFinder-Failures"
         });
         return client.ready().then(function() {
           client._account._bootstrapper.getFinders = function() {

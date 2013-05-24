@@ -19,8 +19,7 @@ define([
     test('one client', function(done) {
       var client = new Stack({
         _logPrefix: "ConnectToFinder - one client",
-        identity: "identity://" + Util.getHostname() + "/test-ConnectToFinder-one",
-        _peerFilesForIdentity: HELPERS.peerFilesForIdentity
+        identity: "identity://" + Util.getHostname() + "/test-ConnectToFinder-one"
       });
       return client.ready().then(function() {
         return client.destroy().then(function() {
@@ -33,13 +32,11 @@ define([
 
       var client1 = new Stack({
         _logPrefix: "ConnectToFinder - two clients (1)",
-        identity: "identity://" + Util.getHostname() + "/test-ConnectToFinder-two-1",
-        _peerFilesForIdentity: HELPERS.peerFilesForIdentity
+        identity: "identity://" + Util.getHostname() + "/test-ConnectToFinder-two-1"
       });
       var client2 = new Stack({
         _logPrefix: "ConnectToFinder - two clients (2)",
-        identity: "identity://" + Util.getHostname() + "/test-ConnectToFinder-two-2",
-        _peerFilesForIdentity: HELPERS.peerFilesForIdentity
+        identity: "identity://" + Util.getHostname() + "/test-ConnectToFinder-two-2"
       });
 
       return client1.ready().then(function() {

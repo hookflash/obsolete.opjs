@@ -26,7 +26,6 @@ define([
           _logPrefix: "FindPeer (1)",
           identity: "identity://" + Util.getHostname() + "/test-SendMessageToPeer-1",
           _p2pRelayHost: "localhost:3000",
-          _peerFilesForIdentity: HELPERS.peerFilesForIdentity,
           _debug: true,
           _verbose: true
         });
@@ -34,7 +33,6 @@ define([
           _logPrefix: "FindPeer (2)",
           identity: "identity://" + Util.getHostname() + "/test-SendMessageToPeer-2",
           _p2pRelayHost: "localhost:3000",
-          _peerFilesForIdentity: HELPERS.peerFilesForIdentity,
           _debug: true,
           _verbose: true
         });
@@ -54,7 +52,7 @@ define([
         client2._account.on("peer.new", function(peer) {
           peer2 = peer;
         });
-        return client1._account._finder.findPeer(client2._account._peerFiles.getContactID()).then(function(peer1) {
+        return client1._account._finder.findPeer("identity://" + Util.getHostname() + "/test-SendMessageToPeer-2").then(function(peer1) {
           peer2.on("message", function(location, message) {
             assert.deepEqual(message, {
               from: "client1",

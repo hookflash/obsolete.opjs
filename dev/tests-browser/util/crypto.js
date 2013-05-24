@@ -87,6 +87,14 @@ define([
       Assert.equal(privatePeerInfo.data, message);
       Assert.equal(privatePeerInfo.publicPeerFile, JSON.stringify(publicPeerFile));
 
+      var publicPeerInfo = Crypto.parsePublicPeerFile(publicPeerFile);
+
+      Assert.equal(publicPeerInfo.saltBundle, saltBundle);
+      Assert.equal(publicPeerInfo.contact, contact);
+      Assert.equal(publicPeerInfo.findSecret, findSecret);
+      Assert.equal(publicPeerInfo.identityBundle, identityBundle);
+      Assert.equal(Crypto.publicKeyToPem(publicPeerInfo.publicKey), Crypto.publicKeyToPem(pair.publicKey));
+
       return done(null);
     });
 

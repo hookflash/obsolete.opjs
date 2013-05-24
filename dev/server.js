@@ -22,6 +22,9 @@ exports.main = function(callback) {
         require("./helpers/identity").hook({
             host: "localhost:" + PORT
         }, app);
+        require("./helpers/lockbox").hook({
+            host: "localhost:" + PORT
+        }, app);
 
         var extraServers = [];
 
@@ -43,7 +46,7 @@ exports.main = function(callback) {
                     console.log('[p2p-relay-server] tcp server started on port ' + info.tcpServerPort);
                     extraServers.push(info.wsServer);
                     extraServers.push(info.tcpServer);
-
+/*
                     return require("./helpers/finder-proxy-server/tests/client").getFinderServer(function(err, finderInfo) {
                         if (err) return callback(err);
 
@@ -55,6 +58,7 @@ exports.main = function(callback) {
 
                             console.log('[finder-proxy-server] server started on port ' + info.port);
                             extraServers.push(info.server);
+*/
 
 
                             var hbs = HBS.create();
@@ -101,8 +105,8 @@ exports.main = function(callback) {
                                 server: server,
                                 port: PORT
                             });
-                        });
-                    });
+//                        });
+//                    });
                 });
             });
         });

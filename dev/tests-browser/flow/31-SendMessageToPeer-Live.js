@@ -31,7 +31,6 @@ return;
           identityHost: "provisioning-stable-dev.hookflash.me",
           _finderHost: "localhost:3092",
           _p2pRelayHost: "localhost:3000",
-          _peerFilesForIdentity: HELPERS.peerFilesForIdentity,
           _dev: false,
           _debug: true,
           _verbose: true
@@ -42,7 +41,6 @@ return;
           identityHost: "provisioning-stable-dev.hookflash.me",
           _finderHost: "localhost:3092",
           _p2pRelayHost: "localhost:3000",
-          _peerFilesForIdentity: HELPERS.peerFilesForIdentity,
           _dev: false,
           _debug: true,
           _verbose: true
@@ -63,7 +61,7 @@ return;
         client2._account.on("peer.new", function(peer) {
           peer2 = peer;
         });
-        return client1._account._finder.findPeer(client2._account._peerFiles.getContactID()).then(function(peer1) {
+        return client1._account._finder.findPeer("identity://unstable.hookflash.me/test-SendMessageToPeer-Live-2").then(function(peer1) {
           peer2.on("message", function(location, message) {
             assert.deepEqual(message, {
               from: "client1",

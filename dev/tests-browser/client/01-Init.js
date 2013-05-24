@@ -23,8 +23,7 @@ define([
 				test("should give us an object", function(done) {
 					var op = new OpenPeer({
 						_logPrefix: "Init - OpenPeer",
-						identity: "identity://" + Util.getHostname() + "/test-Init-OpenPeer",
-						_peerFilesForIdentity: HELPERS.peerFilesForIdentity
+						identity: "identity://" + Util.getHostname() + "/test-Init-OpenPeer"
 					});
 					assert.isObject(op);
 					return op.ready().then(function() {
@@ -48,8 +47,7 @@ define([
 				test("should give us an object", function(done) {
 					var stack = new Stack({
 						_logPrefix: "Init - Stack",
-						identity: "identity://" + Util.getHostname() + "/test-Init-Stack",
-						_peerFilesForIdentity: HELPERS.peerFilesForIdentity
+						identity: "identity://" + Util.getHostname() + "/test-Init-Stack"
 					});
 					assert.isObject(stack);
 					return stack.ready().then(function() {

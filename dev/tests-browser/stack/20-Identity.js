@@ -20,8 +20,7 @@ define([
     test('connect', function(done) {
       client = new Stack({
         identity: identity,
-        _logPrefix: "Identity",
-        _peerFilesForIdentity: HELPERS.peerFilesForIdentity
+        _logPrefix: "Identity"
       });
       return client.ready().then(function() {
         return done(null);

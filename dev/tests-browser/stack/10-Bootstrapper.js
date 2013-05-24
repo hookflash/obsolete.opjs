@@ -88,12 +88,12 @@ define([
         }).fail(done);
       });
 
-      test('`.getIdentityLookupService()` returns promise that resolves to object', function(done) {
+      test('`.getIdentityService("identity-lookup")` returns promise that resolves to object', function(done) {
         var bootstrapper = new Bootstrapper(new Context(), new AccountMock());
-        var url = bootstrapper.getIdentityLookupService();
+        var url = bootstrapper.getIdentityService("identity-lookup");
         assert.isTrue(Q.isPromise(url));
         return url.then(function(url) {
-          assert.equal(url, "http://" + Util.getHost() + "/.helpers/identity");
+          assert.equal(url, "http://" + Util.getHost() + "/.helpers/identity-lookup");
           return done(null);
         }).fail(done);
       });

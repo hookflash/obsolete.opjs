@@ -10,149 +10,108 @@ const Util = require("../../lib/util");
 
 exports.hook = function(options, app) {
 
+	FS.removeSync(PATH.join(__dirname, ".identities"));
+
 	var responder = SERVICE.responder(options, getPayload);
 
-	app.post(/^\/\.helpers\/identity\/ensure$/, function(req, res, next) {
-		return ensureIdentity(req.body.identity, function(err, data) {
-			if (err) return next(err);
-			res.writeHead(200, {
-				"Content-Type": "application/json"
-			});
-			res.end(JSON.stringify(data));
-		})
-	});
+	// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#IdentityServiceRequests-IdentityLookupUpdateRequest
+	app.post(/^\/.helpers\/identity-lookup-update$/, responder);
 
 	// @see http://docs.openpeer.org/OpenPeerProtocolSpecification#IdentityLookupServiceRequests
-	app.post(/^\/.helpers\/identity$/, responder);
+	app.post(/^\/.helpers\/identity-lookup$/, responder);
+
+	// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#IdentityServiceRequests-IdentityAccessStartNotification
+	// NOTE: This should go to the webpage inner frame instead of a server.
+	app.post(/^\/.helpers\/identity-access-start$/, responder);
 }
-
-function identityForContact(contact) {
-	var identity = null;
-	FS.readdirSync(PATH.join(__dirname, ".identities")).forEach(function(filename) {
-		if (identity) return;
-		var info = JSON.parse(FS.readFileSync(PATH.join(__dirname, ".identities", filename)));
-		if (info.contact === contact) {
-			identity = info.id;
-		}
-	});
-	return identity;
-}
-
-function ensureIdentity(identity, callback) {
-	try {
-
-		if (/^peer:\/\//.test(identity)) {
-			identity = identityForContact(identity);
-		}
-
-		var identityParts = Util.parseIdentityURI(identity);
-
-		var identityPath = PATH.join(__dirname, ".identities", "identity-" + identityParts.identity + ".json");
-
-		if (FS.existsSync(identityPath)) {
-			return callback(null, FS.readJsonSync(identityPath));
-		}
-
-		var info = {
-			id: identity,
-			name: identityParts.identity,
-			displayName: identityParts.identity.toUpperCase(),
-			mtime: Math.floor(Date.now()/1000),
-			secret: Util.randomHex(32),
-			domain: identityParts.domain,
-			saltBundle: {
-				real: 'salt',
-				data: 'goes',
-				here: true
-			},
-			findSecret: Util.randomHex(32),
-			salt: Util.randomHex(32)
-		};
-
-		var pair = Crypto.generateKeyPair(1028);
-
-		info.privateKey = pair.privatePem;
-		info.publicKey = pair.publicPem;
-
-		info.publicPeerFile = Crypto.generatePublicPeerFile({
-			lifetime: 60 * 60 * 24 * 365,	// 1 Year
-			saltBundle: info.saltBundle,
-			findSecret: info.findSecret,
-			identityBundle: null,
-			privateKey: pair.privateKey,
-			publicKey: pair.publicKey,
-			domain: info.domain
-		});
-
-		info.contact = info.publicPeerFile.contact;
-
-		info.privatePeerFile = Crypto.generatePrivatePeerFile({
-			contact: info.contact,
-			salt: info.salt,
-			secret: info.secret,
-			privateKey: pair.privateKey,
-			publicPeerFile: info.publicPeerFile
-		});
-
-		FS.outputFileSync(identityPath, JSON.stringify(info, null, 4));
-
-		return callback(null, info);
-
-	} catch(err) {
-		return callback(err);
-	}
-}
-
 
 function getPayload(request, options, callback) {
+	// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#IdentityServiceRequests-IdentityLookupUpdateRequest
+	if (request.$handler === "identity" && request.$method === "identity-lookup-update") {
+		ASSERT.equal(typeof request.clientNonce, "string");
+		ASSERT.equal(typeof request.identity, "object");
+		ASSERT.equal(typeof request.identity.uri, "string");
+		ASSERT.equal(typeof request.identity.peer, "object");
+
+		var identityParts = Util.parseIdentityURI(request.identity.uri);
+		var path = PATH.join(__dirname, ".identities", identityParts.domain, identityParts.identity);
+		FS.outputFileSync(path, JSON.stringify({
+			peer: request.identity.peer
+		}, null, 4));
+		return callback(null, {});
+	} else
+	// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#IdentityLookupServiceRequests-IdentityLookupRequest
 	if (request.$handler === "identity-lookup" && request.$method === "identity-lookup") {
 		ASSERT.equal(typeof request.providers, "object");
 		ASSERT.equal(typeof request.providers.provider, "object");
-		var provider = request.providers.provider;
-		if (!Array.isArray(provider)) {
-			provider = [ provider ];
-		}
+		var provider = Util.arrayForPayloadObject(request.providers.provider);
 		ASSERT.equal(provider.length > 0, true);
 		var identities = [];
-		var waitfor = WAITFOR.serial(function(err) {
-			if (err) return callback(err);
-			return callback(null, SERVICE.nestResponse(["identities", "identity"], identities));
-		});
 		provider.forEach(function(provider) {
 			ASSERT.equal(typeof provider, "object");
 			ASSERT.equal(typeof provider.base, "string");
 			ASSERT.equal(typeof provider.separator, "string");
 			ASSERT.equal(typeof provider.identities, "string");
 			provider.identities.split(provider.separator).forEach(function(id) {
-				waitfor(function(done) {
-					return ensureIdentity(provider.base + id, function(err, identity) {
-						if (err) return done(err);
-						// @see http://docs.openpeer.org/OpenPeerProtocolSpecification#IdentityLookupServiceRequests-IdentityLookupRequest
-						identities.push({
-			                "uri": identity.id,
-			                "provider": identity.domain,
-			                "stableID": identity.contact,
-			                "peer": identity.publicPeerFile.peer,
-			                "priority": 5,
-			                "weight": 1,
-			                "updated": identity.mtime,
-			                "expires": identity.mtime + (60 *60 * 24),	// 24 hours
-			                "name": identity.displayName,
-			                "profile": "http://" + identity.domain + "/user/" + identity.name + "/profile",
-			                "vprofile": "http://" + identity.domain + "/user/" + identity.name + "/vcard",
-			                "feed": "http://" + identity.domain + "/user/" + identity.name + "/feed",
-			                "avatars": {
-			                    "avatar": {
-			                        "url": "http://" + identity.domain + "/user/" + identity.name + "/avatar"
-			                    }
-			                }
-						});
-						return done(null);
+				var identity = provider.base + id;
+				var identityParts = Util.parseIdentityURI(identity);
+				var path = PATH.join(__dirname, ".identities", identityParts.domain, identityParts.identity);
+				if (FS.existsSync(path)) {
+					var publicPeerFile = JSON.parse(FS.readFileSync(path));
+					var publicPeerFileInfo = Crypto.parsePublicPeerFile(publicPeerFile);
+					identities.push({
+		                "uri": identity,
+		                "provider": identityParts.domain,
+		                "stableID": publicPeerFileInfo.contact,
+		                "peer": publicPeerFile.peer,
+		                "priority": 5,
+		                "weight": 1,
+		                "updated": 0,
+		                "expires": 0,	// 24 hours
+		                "name": identityParts.identity,
+		                "profile": "http://" + identityParts.domain + "/user/" + identityParts.identity + "/profile",
+		                "vprofile": "http://" + identityParts.domain + "/user/" + identityParts.identity + "/vcard",
+		                "feed": "http://" + identityParts.domain + "/user/" + identityParts.identity + "/feed",
+		                "avatars": {
+		                    "avatar": {
+		                        "url": "http://" + identityParts.domain + "/user/" + identityParts.identity + "/avatar"
+		                    }
+		                }
 					});
-				});
+				}
 			});
 		});
-		return waitfor();
+		return callback(null, SERVICE.nestResponse(["identities", "identity"], identities));
+	} else
+	// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#IdentityServiceRequests-IdentityAccessStartNotification
+	if (request.$handler === "identity" && request.$method === "identity-access-start") {
+		ASSERT.equal(typeof request.agent, "object");
+		ASSERT.equal(typeof request.identity, "object");
+		ASSERT.equal(typeof request.browser, "object");
+		var parsedIdentity = Util.parseIdentityURI(request.identity.base);
+		// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#IdentityServiceRequests-IdentityAccessCompleteNotification
+		var payload = {
+			"identity": {
+				// a verifiable token that is linked to the logged-in identity
+				"accessToken": Util.randomHex(32),
+				// a secret that can be used in combination to the "identity access token" to provide proof of previous successful login
+				"accessSecret": Util.randomHex(32),
+				"accessSecretExpires": Math.floor(Date.now()/1000) + 60,	// 60 seconds.
+				"uri": request.identity.base,
+				"provider": parsedIdentity.domain
+				// TODO: Support `reloginKey`.
+				//"reloginKey": "d2922f33a804c5f164a55210fe193327de7b2449-5007999b7734560b2c23fe81171af3e3-4c216c23"
+			}
+		};
+		if (parsedIdentity.identity !== "test-lockbox-fresh") {
+			payload.lockbox = {
+				"domain": parsedIdentity.domain,
+				// TODO: Use Lockbox key set by client.
+				"keyIdentityHalf": "V20x...IbGFWM0J5WTIxWlBRPT0=",
+				"reset": false
+			};
+		}
+		return callback(null, payload);
 	}
 	return callback(null, null);
 }

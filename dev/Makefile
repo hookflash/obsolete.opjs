@@ -8,7 +8,7 @@ install:
 	cd helpers/finder-server; npm install
 
 test:
-	./node_modules/.bin/mocha --reporter $(REPORTER) tests-server/*.js
+	node_modules/.bin/mocha --reporter $(REPORTER) tests-server/*.js
 	cd helpers/finder-proxy-server; make test
 	cd helpers/p2p-relay-server; make test
 

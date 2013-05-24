@@ -111,6 +111,7 @@ describe("generate-peer-files", function() {
         ASSERT.equal(publicPeerInfo.contact, contact);
         ASSERT.equal(publicPeerInfo.findSecret, findSecret);
         ASSERT.equal(publicPeerInfo.identityBundle, identityBundle);
+        ASSERT.equal(Crypto.publicKeyToPem(publicPeerInfo.publicKey), Crypto.publicKeyToPem(pair.publicKey));
 
         FS.writeFileSync(PATH.join(__dirname, "assets/public-from-JS.json"), JSON.stringify(publicPeerFile, null, 4));
         FS.writeFileSync(PATH.join(__dirname, "assets/private-from-JS.json"), JSON.stringify(privatePeerFile, null, 4));

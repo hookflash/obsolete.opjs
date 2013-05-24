@@ -7,6 +7,7 @@ define([
 
   suite('AccountFinder-Live', function () {
 
+return;
     this.timeout(10 * 1000);
 
     suite('Session', function() {
@@ -19,8 +20,7 @@ define([
           _logPrefix: "AccountFinder-Live - connect",
           identity: "identity://unstable.hookflash.me/test-AccountFinder-Live",
           identityHost: "provisioning-stable-dev.hookflash.me",
-          _finderHost: "localhost:3092",
-          _peerFilesForIdentity: HELPERS.peerFilesForIdentity
+          _finderHost: "localhost:3092"
         });
         return client.ready().then(function() {
           return client.destroy().then(function() {
@@ -42,8 +42,7 @@ define([
           identity: "identity://unstable.hookflash.me/test-AccountFinder-Live-SessionKeepalive",
           identityHost: "provisioning-stable-dev.hookflash.me",
           _finderHost: "localhost:3092",
-          _finderKeepalive: 1,  // 1 second.
-          _peerFilesForIdentity: HELPERS.peerFilesForIdentity
+          _finderKeepalive: 1  // 1 second.
         });
         return client.ready().then(function() {
           return done(null);

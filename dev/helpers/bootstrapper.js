@@ -303,49 +303,74 @@ function getPayload(request, options, callback) {
                 }
             },
             {
+                "$id": "f98b4d1ff0f1acf3054fefc560866e61",
+                "type": "identity",
+                "version": "1.0",
+                "methods": {
+                    "method": [
+                        // NOTE: Included here for testing only. This service is typically provided
+                        //       by the webpage inner frame.
+                        {
+                            "name": "identity-access-start",
+                            "uri": "https://" + options.host + "/.helpers/identity-access-start"
+                        },
+                        {
+                            "name": "identity-lookup-update",
+                            "uri": "https://" + options.host + "/.helpers/identity-lookup-update"
+                        }
+                    ]
+                }
+            },
+            {
                 "$id": "1c2fbe84248ea37d82d217ff975f7735c08fdad7",
                 "type": "identity-lookup",
                 "version": "1.0",
                 "methods": {
-                    "method": {
-                        "name": "identity-lookup",
-                        "uri": "http://" + options.host + "/.helpers/identity"
-                    }
+                    "method": [
+                        {
+                            "name": "identity-lookup-check",
+                            "uri": "https://" + options.host + "/.helpers/identity-check"
+                        },
+                        {
+                            "name": "identity-lookup",
+                            "uri": "http://" + options.host + "/.helpers/identity-lookup"
+                        }
+                    ]
                 }
             },
             {
-                "$id": "57eb7db7b44c4afde02182beb9f69ae14928b1ba",
-                "type": "peer-contact",
+                "$id": "d0b528b3f8e66455d154b1deac1e357e",
+                "type": "identity-lockbox",
                 "version": "1.0",
                 "methods": {
                     "method": [
                         {
-                            "name": "peer-contact-identity-associate",
-                            "uri": "https://unstable.hookflash.me/peercontact"
+                            "name": "lockbox-access",
+                            "uri": "http://" + options.host + "/.helpers/lockbox-access"
                         },
                         {
-                            "name": "peer-service-get",
-                            "uri": "https://unstable.hookflash.me/peercontact"
+                            "name": "lockbox-identities-update",
+                            "uri": "http://" + options.host + "/.helpers/lockbox-identities-update"
                         },
                         {
-                            "name": "private-peer-file-set",
-                            "uri": "https://unstable.hookflash.me/peercontact"
+                            "name": "lockbox-namespace-grant-inner-frame",
+                            "uri": "http://" + options.host + "/.helpers/lockbox-namespace-grant-inner-frame"
                         },
                         {
-                            "name": "peer-contact-identity-association-update",
-                            "uri": "https://unstable.hookflash.me/peercontact"
+                            "name": "lockbox-content-get",
+                            "uri": "http://" + options.host + "/.helpers/lockbox-content-get"
                         },
                         {
-                            "name": "private-peer-file-get",
-                            "uri": "https://unstable.hookflash.me/peercontact"
+                            "name": "lockbox-content-set",
+                            "uri": "http://" + options.host + "/.helpers/lockbox-content-set"
                         },
                         {
-                            "name": "public-peer-files-get",
-                            "uri": "https://unstable.hookflash.me/peercontact"
+                            "name": "lockbox-admin-inner-frame",
+                            "uri": "http://" + options.host + "/.helpers/lockbox-admin-inner-frame"
                         },
                         {
-                            "name": "peer-contact-login",
-                            "uri": "https://unstable.hookflash.me/peercontact"
+                            "name": "lockbox-namespace-preapproved-grant",
+                            "uri": "http://" + options.host + "/.helpers/lockbox-namespace-preapproved-grant"
                         }
                     ]
                 }
