@@ -50,6 +50,8 @@ exports.main = function(callback) {
                     return require("./helpers/finder-proxy-server/tests/client").getFinderServer(function(err, finderInfo) {
                         if (err) return callback(err);
 
+                        console.log('[finder-proxy-server] connecting to remote finder at: ' + finderInfo.hostname + ':' + finderInfo.port);
+
                         return require("./helpers/finder-proxy-server/server").main({
                             finderHostname: finderInfo.hostname,
                             finderPort: finderInfo.port,
@@ -59,7 +61,6 @@ exports.main = function(callback) {
                             console.log('[finder-proxy-server] server started on port ' + info.port);
                             extraServers.push(info.server);
 */
-
 
                             var hbs = HBS.create();
                             

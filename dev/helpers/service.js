@@ -6,8 +6,8 @@ exports.responder = function(options, getPayload) {
 	return function(req, res, next) {
 		try {
 			var request = req.body.request;
-			var hostname = options.host.split(":")[0];
-			ASSERT.equal(request.$domain, hostname);
+//			var hostname = options.host.split(":")[0];
+//			ASSERT.equal(request.$domain, hostname);
 			return getPayload(request, options, function(err, response) {
 				if (err) return next(err);
 				if (!response) {
@@ -17,7 +17,7 @@ exports.responder = function(options, getPayload) {
 				}
 				var payload = {
 					"result": {
-					    "$domain": hostname,
+					    "$domain": request.$domain,
 					    "$appid": request.$appid,
 					    "$id": request.$id,
 					    "$handler": request.$handler,

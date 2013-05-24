@@ -43,7 +43,7 @@ exports.main = function(options, callback) {
           finderConnection = null;
         }
         console.error("[finder-proxy-server] Finder connection failed:", err.stack);
-        if (socket) socket.end();
+        if (socket) socket.close();
       }
 
       socket.on("close", function() {
@@ -80,7 +80,7 @@ exports.main = function(options, callback) {
             if (index > -1) connections.splice(index, 1);
             finderConnection = null;
           }
-          if (socket) socket.end();
+          if (socket) socket.close();
         });
 
         finderConnection.on("data", function(data) {
