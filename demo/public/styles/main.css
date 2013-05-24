@@ -1,5 +1,6 @@
 @import url(http://fonts.googleapis.com/css?family=Satisfy);
 @import url(gradients.css);
+@import url(images.css);
 * {
   /*box-sizing: border-box;*/
   margin: 0;
@@ -37,7 +38,7 @@ div.login-header h2{
   font-family: 'Satisfy', cursive;
   font-weight: normal;
   /*line-height: 50px;*/
-  width: 230px;
+  width: 260px;
   font-size: 16px;
   text-align: right;
   margin-top: -10px;
@@ -45,6 +46,33 @@ div.login-header h2{
 }
 div.login-header h2 .diff{
   color: rgb(225, 128, 8);
+}
+div.login-header .user{
+  float: right;
+  line-height: 60px;
+  margin-right: 20px;
+  font-size: 14px;
+}
+div.login-header .user *{
+  vertical-align: middle;
+  display: inline-block;
+}
+div.login-header .user .avatar{
+  border-radius: 30px;
+  width: 50px;
+  height: 50px;
+  background-repeat: no-repeat;
+  background-size: 50px;
+  margin:0 5px;
+}
+div.login-header .user .inner-box{
+  line-height: normal;
+}
+div.login-header .user .inner-box .logout{
+  padding: 5px 10px;
+  line-height: normal;
+  text-decoration: none;
+  font-size: 14px;
 }
 a.logo {
   display: inline-block;
@@ -61,6 +89,15 @@ a.logo {
   /*padding-top: 20px;*/
   margin: 25px;
 }
+
+/*.status{*/
+  /*position: relative;*/
+  /*display: block;*/
+  /*width: 15px;*/
+  /*height: 15px;*/
+  /*border-radius: 20px;*/
+/*}*/
+/*.status:after*/
 
 .btn {
   background-color: #eee;
@@ -79,10 +116,6 @@ a.logo {
   width: 230px;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-}
-.contacts-cont .contacts{
-  -webkit-box-flex: 1;
-  overflow: auto;
 }
 
 .conversation-cont {
@@ -245,6 +278,7 @@ a.logo {
 .conversation .remote {
   display: -webkit-box;
   -webkit-box-orient: vertical;
+  -webkit-box-flex: 1;
 }
 .conversation .remote{
 
@@ -266,19 +300,188 @@ a.logo {
   margin-top: -6px;
 }
 
-.contacts-cont .title {
-  border-radius: 3px 3px 0px 0px;
+.contacts-cont .title{
+  /*border-top: 1px solid rgba(0, 0, 0, .1);*/
+  /*margin-top: 10px;*/
+}
+.contacts-cont .title li{
+  position: relative;
   padding: 10px 10px;
-  font-size: 16px;
-  font-weight: normal;
-  text-transform: uppercase;
+  list-style: none;
+  border-bottom: 1px solid rgba(0, 0, 0, .1);
+  border-top: 1px solid rgba(255, 255, 255, .3);
+}
+.contacts-cont .title li:first-child{
+  border-top: 0px;
+  padding: 15px 35px;
+  background-position: 15px 15px;
 }
 
-.contacts .contacts-list{}
-.contacts .contacts-list li{
+.nf{
+  display: none;
+  border-radius: 30px;
+  background-color: #FFF;
+  color: #F00;
+  padding: 0px 6px;
+  height: 20px;
+  line-height: 20px;
+  text-align: center;
+  font-size: 14px;
+  position: absolute;
+  right: 15px;
+  top: 8px;
+}
+
+.contacts-cont .title li.option-active{
+  /*box-shadow: inset 0px 2px 15px rgba(255, 255, 255, 0.4);*/
+  background-color: rgba(104, 90, 61, .1);
+}
+.contacts-cont .title li.option-active a{
+  color: #fff;
+  text-shadow: 1px 1px 1px rgba(0,0,0,.2);
+}
+
+.contacts-cont .contacts-wrapper{
+  -webkit-box-flex: 1;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  /*width: 230px;*/
+}
+.contacts-cont .contacts-wrapper .search-output,
+.contacts-cont .contacts-wrapper .contact-holder{
+  overflow: auto;
+  -webkit-box-flex: 1;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+}
+.contacts-cont .contacts-wrapper .search-output{
+  display: none;
+}
+.contacts-cont .contacts-wrapper .contact-holder h3{
+  display: none;
+  color: #fff;
+  text-shadow: 1px 1px 1px rgba(0,0,0,.2);
+  font-size: 12px;
+  font-weight: normal;
+  border-bottom: 1px solid rgba(0, 0, 0, .1);
+  border-top: 1px solid rgba(255, 255, 255, .3);
+  line-height: 30px;
+  text-align: center;
+  background-color: rgba(104, 90, 61, .1);
+  cursor: pointer;
+}
+.contacts-cont .contacts-wrapper .contact-holder h3>span{
+  vertical-align: middle;
+  display: inline-block;
+}
+.contacts-cont .contacts-wrapper .contact-holder h3>span.icon-collapse{
+  width: 10px;
+  height: 30px;
+  background-position: center center;
+}
+
+.contacts-cont .contacts-wrapper .contact-holder>*{
+
+}
+.contacts-cont .contacts-wrapper .contact-holder .active-action{
+  /*display: -webkit-box;*/
+}
+.contacts-cont .contacts-wrapper .contact-holder .active-contacts{
+
+}
+.contacts-cont .search{
+  -webkit-box-orient: vertical;
+  -webkit-box-flex: 1;
+}
+
+.contacts-cont .search>div{
+  padding: 5px 10px;
+}
+
+.contacts-cont .search>div>dl{
+  display: -webkit-box;
+  -webkit-box-orient: horizontal;
+  border-top: 1px solid #b7b4a3;
+  border-left: 1px solid #c9c1b4;
+  border-right: 1px solid #c9c1b4;
+  border-bottom: 1px solid #cfccbd;
+  border-radius: 3px;
+  box-shadow:
+    inset 0px 1px 2px rgba(135,121,96,.3),
+    1px 1px 1px rgba(255,255,255,.6);
+
+  height: 30px;
+  /*padding: 5px;*/
+}
+.contacts-cont .search>div>dl dt{
+  width: 30px;
+  border-right: 1px solid #d5d2c3;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+.contacts-cont .search>div>dl dd{
+  -webkit-box-flex: 1;
+  border-left: 1px solid #e5dfd3;
+  background-color: #e5dcd3;
+  position: relative;
+}
+
+.contacts-cont .search>div>dl dd input{
+  border: 0px;
+  background: transparent;
+  height: 30px;
+  width: 90%;
+  display: inline-block;
+  outline: 0;
+  font-size: 16px;
+  padding-left: 10px;
+  color: #786e55;
+}
+input::-webkit-input-placeholder{color: #aca27e;}
+input:-moz-placeholder{color: #aca27e;}
+input::-moz-placeholder{color: #aca27e;}
+input:-ms-input-placeholder{color: #aca27e;}
+
+.contacts-cont .search>div>dl dd a{
+  position: absolute;
+  display: none;
+  right: 5px;
+  top: 5px;
+  background-color: #bfb8a6;
+  border-radius: 20px;
+  width: 20px;
+  height: 20px;
+  line-height: 17px;
+  font-size: 15px;
+  text-align: center;
+  text-decoration: none;
+  text-shadow: 1px 1px 1px rgba(255,255,255, .4);
+  color: #786e55;
+}
+
+/*-webkit-box-orient: vertical;*/
+/*-webkit-box-flex: 1;*/
+
+.contacts-list,
+.contacts-cont .contacts{
+  overflow: auto;
+}
+
+.search-results{
+
+}
+
+.search-results li,
+.contacts-list li{
+  padding: 5px 20px;
+}
+
+.search-results li,
+.contacts-list li{
   position: relative;
   line-height: 20px;
-  padding: 10px 10px 10px 15px;
+  /*padding: 10px 10px 10px 15px;*/
   border-bottom: 1px solid rgba(0,0,0,.1);
   border-top: 1px solid rgba(255,255,255,.3);
   cursor: pointer;
@@ -287,14 +490,17 @@ a.logo {
   -webkit-box-orient: horizontal;
 }
 
-.contacts .contacts-list li *{
+.search-results li *,
+.contacts-list li *{
   vertical-align: middle;
   display: block;
 }
-.contacts .contacts-list li .inner-box{
+.search-results li .inner-box,
+.contacts-list li .inner-box{
   display: inline-block;
 }
-.contacts .contacts-list li .avatar {
+.search-results li .avatar,
+.contacts-list li .avatar {
   display: inline-block;
   border-radius: 30px;
   width: 30px;
@@ -302,22 +508,57 @@ a.logo {
   background-repeat: no-repeat;
   background-size: 30px;
 }
-.contacts .contacts-list li .name {
+.search-results li .name,
+.contacts-list li .name {
   padding-top: 5px;
   padding-left: 5px;
   width: 75%;
 }
-.contacts .contacts-list li .new-messages{
+.search-results li .new-messages,
+.contacts-list li .new-messages{
   display: block;
   position: absolute;
-  right: 5px;
+  right: 10px;
   color: #F00;
   background: #FFF;
-  padding: 3px;
+  padding: 0 6px;
   border-radius: 50px;
-  font-size: 10px;
+  font-size: 13px;
   text-shadow: none;
+  top: 12px;
+  line-height: 20px;
 }
+.search-results li a{
+  display: none;
+}
+.contacts-list li a{
+  position: absolute;
+  left: 5px;
+  top:13px;
+  visibility: hidden;
+  background-color: #BFB8A6;
+  border-radius: 20px;
+  width: 13px;
+  height: 13px;
+  line-height: 12px;
+  font-size: 9px;
+  text-align: center;
+  text-decoration: none;
+  text-shadow: 1px 1px 1px rgba(255, 255, 255, .4);
+  color: #786E55;
+}
+.search-results li:not(.active):hover,
+.contacts-list li:not(.active):hover{
+  background-color: rgba(104, 90, 61, .1);
+}
+.contacts-list li.active a{
+  background-color: #fff;
+}
+.contacts-list li:hover a{
+  visibility: visible;
+}
+
+
 
 .contact:hover .identifier {}
 .contact .domain {}
@@ -466,4 +707,38 @@ ul.login-form li a{
 .video-call{
   -webkit-box-flex: 1;
   background-color: #000;
+}
+.icon-contacts .inner-box{
+  position: absolute;
+  right: 10px;
+  top: 10px;
+}
+.sync span,
+.sync{
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+.sync span{
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+.notification{
+  position: absolute;
+  right: 10px;
+  top: 75px;
+  width: 250px;
+}
+.notification .bubble{
+  font-weight: normal;
+  text-align: center;
+  padding: 20px;
+  color: #e4ec9c;
+  text-shadow: 1px 1px 0px #000;
+  background-color: rgba(0,0,0,.8);
+  border-radius: 5px;
+  box-shadow: 0px 10px 20px rgba(0,0,0,0.5);
+}
+.notification .bubble span{
+  font-weight: bolder;
 }
