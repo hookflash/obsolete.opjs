@@ -1,6 +1,6 @@
 define(["modules/login", 'jquery', "rolodex/client", "rolodex-presence/client",'modules/util',
-    'modules/peer', 'modules/database', 'modules/user-view', 'modules/layout', 'modules/incoming-call', 'modules/peer', 'modules/_transport']
-    , function(Login, $, ROLODEX, ROLODEX_PRESENCE,util, Peer, DB, UserView, Layout, IncomingCall, Peer, Transport) {
+    'modules/peer', 'modules/database', 'modules/user-view', 'modules/layout', 'modules/incoming-call', 'modules/peer', 'modules/_transport', 'rolodex/q']
+    , function(Login, $, ROLODEX, ROLODEX_PRESENCE,util, Peer, DB, UserView, Layout, IncomingCall, Peer, Transport, Q) {
 
         var rolodex = new ROLODEX({baseURL: 'http://webrtc.hookflash.me'});
 
@@ -9,9 +9,19 @@ define(["modules/login", 'jquery', "rolodex/client", "rolodex-presence/client",'
             baseURL: 'http://webrtc.hookflash.me'
         });
 
-        var cookies = util.parseCookies(document.cookie);
+        var sortRecords = function(contacts){
+            var records = [];
+            for(var i in contacts) records.push(contacts[i]);
+            records.sort(function(a,b){
+                a.fn = a.fn || a.nickname;
+                b.fn = b.fn || b.nickname;
+                return a.fn > b.fn ? 1 : -1
+            });
 
-        var database = new DB(rolodex);
+            return records;
+        }
+
+        var cookies = util.parseCookies(document.cookie);
 
         var layout = new Layout({
             el: '#app'
@@ -74,7 +84,7 @@ define(["modules/login", 'jquery', "rolodex/client", "rolodex-presence/client",'
                     if (!peer) {
                         return;
                     }
-                    peer.destroy();
+                    peer.closeConnection();
                     delete peers[msg.from];
                 },
                 update: function(msg) {
@@ -116,7 +126,7 @@ define(["modules/login", 'jquery', "rolodex/client", "rolodex-presence/client",'
         layout.on('hangup', function(peer) {
             transport.request('bye', {
                 to: peer.get('uid'),
-                from: window.from,
+                from: peer.collection.providerUser.get('uid'),
                 blob: {
                     session: {
                         type: 'callend'
@@ -124,7 +134,7 @@ define(["modules/login", 'jquery', "rolodex/client", "rolodex-presence/client",'
                 }
             });
 
-            peer.destroy();
+            peer.closeConnection();
 
             this.hangOut();
         });
@@ -135,56 +145,101 @@ define(["modules/login", 'jquery', "rolodex/client", "rolodex-presence/client",'
 
         var isLoggedIn = false;
 
-        rolodex.on("fetched.services", function(services) {
-            var currentService = false;
+        var Collection = Peer.Collection;
 
-            function renderService(serviceId, service) {
-                if (service.loggedin) {
-                    currentService = serviceId;
+        rolodex.getServices().then(function(services){
+
+            var serviceCollection = new Collection(null, { transport: transport });
+
+            for(serviceID in services){
+                if(services[serviceID].loggedin){
+                    services[serviceID].hCard['provider'] = serviceID;
+
+                    if(!services[serviceID].hCard['fn']){
+                        services[serviceID].hCard['fn'] = services[serviceID].hCard['nickname'];
+                    }
+
+                    serviceCollection.add(services[serviceID].hCard);
                 }
-                if(isLoggedIn && service.logoutReason) window.location.reload(true);
             }
 
-            for (var serviceId in services) {
-                renderService(serviceId, services[serviceId]);
-            }
+            if(!serviceCollection.length) loginView.setStatus({ promt: true });
+            else return serviceCollection;
 
-            if(isLoggedIn) return false;
+        }).then(function(serviceCollection){
 
-            if(currentService){
+           var userView = new UserView({collection: serviceCollection, service: rolodex});
 
-                database.setProvider(currentService);
+           userView.$el.appendTo('.wrapper .user');
+           userView.render();
 
-                var Model = Peer.Model;
-                var Collection = Peer.Collection;
+           userView.on('logout', function(service){
+               layout.logoutService(service);
+           });
 
-                var user = new Model(null, { transport: transport });
-                var collection = new Collection(null, { transport: transport });
+           return serviceCollection;
 
-                loginView.setStatus({ fetching: true });
+        }).then(function(serviceCollection){
 
-                database.getUser().then(function(rec){
-                    window.from = rec.uid;
+            loginView.setStatus({ fetching: true });
 
-                    user.set(rec);
+            var deferred = Q.defer();
+            var index = 0;
+            var fullListOfcontacts = {};
 
-                    var userView = UserView.view({ model: user, service: rolodex, provider: currentService});
-                    userView.$el.appendTo('.wrapper .user');
-                    userView.render();
 
-                    database.getContacts().then(function(contacts){
+            (function getContacts(){
+                rolodex.getContacts(serviceCollection.at(index).get('provider')).then(function(contacts){
 
-                        layout.render();
-                        layout.setContacts(database, collection, contacts);
-                        loginView.remove();
+                    var records = sortRecords(contacts);
 
-                        isLoggedIn = true;
+                    fullListOfcontacts[serviceCollection.at(index).get('provider')] = new Collection(records, {
+                        providerUser: serviceCollection.at(index),
+                        transport: transport
                     });
 
+                    if(index < (serviceCollection.length - 1)){
+                        index++;
+                        getContacts();
+                    } else {
+                        deferred.resolve(fullListOfcontacts);
+                    }
                 });
-            } else {
-                loginView.setStatus({ promt: true });
+
+            })();
+
+            return deferred.promise;
+        })
+        .then(function(contacts){
+            layout.render();
+
+            layout.setContacts(contacts);
+            loginView.remove();
+            isLoggedIn = true;
+        });
+
+        var isReFetching = false;
+        rolodex.on("fetched.services", function(services) {
+            if(!isReFetching) return;
+
+            if(services[isReFetching].percentFetched === 100){
+                rolodex.getContacts(isReFetching, true).then(function(contacts){
+                    var records = sortRecords(contacts);
+                    layout.syncContacts(records, isReFetching);
+                    isReFetching = false;
+                });
             }
+        });
+
+        layout.on("contacts.refetching", function(service){
+            rolodex.refetchContacts(service).then(function(data){
+                if(data.error){
+                    alert(data.error.message);
+                    layout.syncContacts(null, service);
+                } else {
+                    isReFetching = service;
+                }
+            });
         });
 
         layout.on("chat-message", function(uid, model, message){
@@ -232,8 +287,11 @@ define(["modules/login", 'jquery', "rolodex/client", "rolodex-presence/client",'
 //    console.log("Back");
 //  });
 
-        $(document).ready(function() {
-            rolodex.init();
-        });
 
+
+
+    $(document).ready(function() {
+//        rolodex.init();
     });
+
+});

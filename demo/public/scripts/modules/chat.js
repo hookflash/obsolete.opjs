@@ -7,15 +7,22 @@ define(['text!templates/chat-layout.html', 'text!templates/chat-message-line.htm
             className: 'conversation-chat-window',
             template: _.template(chatLayout),
             events: {
-//        'click .option-call': 'call',
                 'click .option-video-call': 'videoCall',
                 'click .send': 'send'
+            },
+            initialize: function(){
+                this.model.set('provider', this.model.collection.providerUser.get('provider'));
+                this.listenTo(this.model.collection, 'collection.removed', this.removeChatWindow);
+                this.listenTo(this.model, 'destroy', this.removeChatWindow);
+            },
+            removeChatWindow: function(){
+                this.remove();
             },
             call: function() {
                 this.trigger('send-connect-request', this.model, false);
             },
             videoCall: function() {
-                this.trigger('send-connect-request', user.getModel().get('uid'), this.model, true);
+                this.trigger('send-connect-request', this.model.collection.providerUser.get('uid'), this.model, true);
             },
             afterRender: function(){
                 var self = this;
@@ -38,7 +45,7 @@ define(['text!templates/chat-layout.html', 'text!templates/chat-message-line.htm
                 });
             },
             send: function(){
-                var msg = this.$el.find('textarea[name="chat-text"]').val();
+                var msg = $.trim(this.$el.find('textarea[name="chat-text"]').val());
                 if(!msg) return;
 
                 var message = {
@@ -46,7 +53,7 @@ define(['text!templates/chat-layout.html', 'text!templates/chat-message-line.htm
                     message: msg
                 };
 
-                this.trigger('chat-message', user.getModel().get('uid'), this.model, message);
+                this.trigger('chat-message', this.model.collection.providerUser.get('uid'), this.model, message);
 
                 this.renderMessage(message);
             },
@@ -79,7 +86,7 @@ define(['text!templates/chat-layout.html', 'text!templates/chat-message-line.htm
                 message.time = [d.getDate(), mounces[d.getMonth()], (d.getHours() + ":" + d.getMinutes())].join(" ");
 
                 if(!message.username){
-                    message.username = user.getModel().get('fn');
+                    message.username = this.model.collection.providerUser.get('fn');
                     message.isOwn = true;
                 } else {
                     message.isOwn = false;

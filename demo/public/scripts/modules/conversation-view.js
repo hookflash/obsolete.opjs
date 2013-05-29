@@ -36,7 +36,7 @@ define([
                 this.stopRemoteStream();
             });
 
-            this.listenTo(this.peer, 'destroy', this.endCall);
+            this.listenTo(this.peer, 'close.connection', this.endCall);
 
             return this.localStreamView.requestMedia(isVideo).then(function(stream) {
                 peer.addStream(stream);

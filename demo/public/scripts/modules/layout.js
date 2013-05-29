@@ -1,56 +1,40 @@
 define([
     'modules/conversation-view', 'modules/contacts-view',
     'modules/login', 'text!templates/layout.html', 'backbone', '_', 'modules/chat', 'text!templates/contact-list-item.html',
-    'text!templates/notification-bubble.html',
-    'layoutmanager'
-], function(ConversationView, ContactsView, Login, html, Backbone, _, Chat, contactListItemHtml, notificationBubble) {
+    'modules/util', 'layoutmanager'
+], function(ConversationView, ContactsView, Login, html, Backbone, _, Chat, contactListItemHtml, Util) {
     'use strict';
 
     var Layout = Backbone.Layout.extend({
         template: _.template(html),
         events: {
             'keyup input[name="search"]': 'searchContact',
-            'click .clear': 'clearInput',
-            'click .sync': 'syncContacts'
+            'click .clear': 'clearInput'
         },
         initialize: function() {
             this.on('on-chat-message', this.onChatMessage, this);
             this.on('contact.online', this.contactOnLine, this);
         },
-        setContacts: function(database, collection, contacts) {
-            this.database = database;
-            this.collection = collection;
+        setContacts: function(contacts) {
+            this.contactsView = new ContactsView();
 
-            this.contactsView = new ContactsView({ collection: this.collection });
             this.insertView('.contacts-cont', this.contactsView);
+
             this.contactsView.render();
             this.contactsView.setContacts(contacts);
-            this.$el.find('.search-results').on('click', this.selectSearchResult.bind(this));
 
-            this.collection.on('start-chat-conversation', this.startChat, this);
+            this.on('start-chat-conversation', this.startChat, this);
+            this.$el.find('.search-results').on('click', this.selectSearchResult.bind(this));
         },
         onChatMessage: function(uid, message){
             var rec = this.getRecord(uid);
-
             rec.trigger('on-chat-message', uid, message);
 
-            this.collection.trigger('contact.selected', this.contactsView.getView({model: rec}));
+//            this.collection.trigger('contact.selected', this.contactsView.getView({model: rec}));
         },
         contactOnLine: function(uid, status){
             var rec = this.getRecord(uid);
-            if(rec['cid']) {
-                var el = this.contactsView.getView({model: rec}).$el.find('span.user-status');
-                el.attr('class', 'user-status');
-                if(status !== 'offline'){
-                    el.addClass(status);
-
-                    if(status === 'online'){
-                        var bubble = $(_.template(notificationBubble, rec.attributes).toString());
-                        $('.notification').append(bubble);
-                        bubble.delay(1000).fadeOut(300, function(){$(this).remove()});
-                    }
-                }
-            }
+            if(rec && rec['cid']) rec.trigger('contact.status', status)
         },
         startChat: function(peer){
             this.getViews('.conversation-cont').each(function(view){
@@ -110,10 +94,18 @@ define([
                 this.$el.find('.clear').css('display', 'block');
                 this.$el.find('.search-output').show();
                 this.$el.find('.contact-holder').hide();
-                this.database.search(val).done(function(result){
-                    self.$el.find('.search-results').html('');
-                    if(result.length) self.appendResults(result, true);
+
+                var result = [];
+                this.contactsView.getViews('.contacts').each(function(view){
+                    var search = view.collection.filter(function(data) {
+                        return !data.get('fn').toLowerCase().indexOf(val.toLowerCase());
+                    });
+
+                    if(search) result = result.concat(search);
                 });
+
+                self.$el.find('.search-results').html('');
+                if(result.length) self.appendResults(result);
 
             } else {
                 this.clearSearchResult();
@@ -121,8 +113,10 @@ define([
         },
         appendResults: function(results){
             results.forEach(function(item){
+                item = item.attributes;
                 var li = $('<li>'+ _.template(contactListItemHtml, item) +'</li>');
                 li.attr('data-record', item.uid);
+                li.find('.user-status').hide();
                 this.$el.find('.search-results').append(li);
             }.bind(this));
         },
@@ -135,45 +129,81 @@ define([
         },
         selectSearchResult: function(e){
             var el = ($(e.target).is('li') ? $(e.target)[0] : $(e.target).parents('li')[0]),
-                rec = this.getRecord($(el).data('record'));
+            rec = this.getRecord($(el).data('record'));
 
-            if(rec) this.contactsView.getView({model: rec}).$el.trigger('click');
+            if(rec){
+                var item;
+                this.contactsView.getViews('.contacts').each(function(view){
+                    if(view.getView({model: rec})){
+                        item = view.getView({model: rec})
+                        return;
+                    }
+                });
+                if(item) item.$el.trigger('click');
+            }
 
             this.clearSearchResult();
         },
         getRecord: function(uid){
-            var rec;
-            if(this.collection.length){
-                rec = this.collection.filter(function(data) {
-                    return data.get('uid') === uid;
-                });
-                if(rec.length) rec = rec[0];
-            }
+            var rec = null;
+            var provider = uid.split(':')[0]
+            this.contactsView.getViews('.contacts').each(function(view){
+                if(view.provider === provider){
+                    rec = view.collection.filter(function(data) {
+                        return data.get('uid') === uid;
+                    });
+                    if(rec.length) rec = rec[0];
+                }
+            });
             return rec;
         },
         clearInput: function(e){
             e.preventDefault();
             this.clearSearchResult();
         },
-        syncContacts: function(e){
-            e.preventDefault();
-            if(this.onCall) return;
-            if(!this.refetching) {
-                var loginView = new Login.View();
+        syncContacts: function(contacts, provider){
+            var collection;
 
-                loginView.$el.appendTo('body');
-                loginView.setStatus({ contacts: true });
+            this.contactsView.getViews('.contacts').each(function(view){
+                if(view.provider === provider) collection = view.collection;
+            });
 
+            if(!contacts) {
+                collection.trigger('contact.refetched');
+                return;
+            }
+            var fnCompare = function(a, b){
+                return a['uid'] === b['uid'] && a['fn'] === b['fn'] && a['nickname'] === b['nickname'] && a['photo'] === b['photo']
+            };
 
-                this.refetching = true;
-                this.$('.contact-holder').addClass('loading');
-                this.database.sync().then(function(){
-                    window.location.reload(true);
-                }, function(){
-                    loginView.remove();
-                    this.refetching = false;
+            var diff = Util.diff(collection.records, contacts, fnCompare, 'uid');
+
+            if(diff.inserted.length) collection.add(diff.inserted);
+
+            if(diff.removed.length){
+                diff.removed.forEach(function(item){
+                    var model = collection.where({uid: item.uid})[0];
+                    model.destroy();
+                    collection.remove(model);
                 });
             }
+
+            collection.trigger('contact.refetched');
+        },
+        logoutService: function(service){
+            this.contactsView.getViews('.contacts').each(function(view){
+                if(view.provider === service){
+                    view.collection.trigger('collection.removed');
+                    view.remove();
+                    if(!$('.active-contacts .contacts-list li').length){
+                        $('.active-contacts h3').hide();
+                        $('.active-contacts h3>.icon-collapse').removeClass('collapsed');
+                        $('.active-contacts h3+ul').show();
+                    } else {
+                        $('.active-contacts .contacts-list li').on(0).trigger('click');
+                    }
+                }
+            });
         }
     });
 
