@@ -54,26 +54,119 @@ div.login-header .user{
   font-size: 14px;
 }
 div.login-header .user *{
-  vertical-align: middle;
+
+}
+div.login-header .user ul.sn{
+  padding: 10px;
+}
+div.login-header .user ul.sn li{
+  margin-bottom: 10px;
+  font-size: 12px;
+}
+div.login-header .user ul.sn li > *{
+  vertical-align: top;
   display: inline-block;
 }
-div.login-header .user .avatar{
-  border-radius: 30px;
-  width: 50px;
-  height: 50px;
+div.login-header .user ul.sn li span.un{
+  display: block;
+  margin-bottom: 3px;
+}
+
+div.login-header .user .user-view>div:first-child a{
+  display: inline-block;
+  height: 60px;
+  color: #E4DED2;
+  text-decoration: none;
+}
+div.login-header .user .user-view>div:first-child a .arrow{
+  width: 20px;
+  height: 20px;
+  background-position: center 4px;
   background-repeat: no-repeat;
-  background-size: 50px;
+}
+div.login-header .user .user-view>div:first-child a.active{
+  background-color: #4d4d4d;
+}
+div.login-header .user .user-view>div:first-child a>*{
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.user-menu{
+  z-index: 9999;
+  position: absolute;
+  display: none;
+  right: 0px;
+  top: 61px;
+  width: 300px;
+}
+.user-menu *{
+  display: inline-block;
+  line-height: normal;
+}
+div.login-header .user .user-view>div:first-child a .avatar,
+.user-menu .avatar{
+  display: inline-block;
+  border-radius: 30px;
+  width: 30px;
+  height: 30px;
+  background-repeat: no-repeat;
+  background-size: 30px;
   margin:0 5px;
 }
-div.login-header .user .inner-box{
+.user-menu .inner-box{
   line-height: normal;
 }
-div.login-header .user .inner-box .logout{
-  padding: 5px 10px;
+.user-menu .inner-box .logout{
+  padding: 3px 5px;
   line-height: normal;
   text-decoration: none;
-  font-size: 14px;
+  font-size: 10px;
 }
+
+.user-menu .loginForm{
+  display: block;
+  margin-top: 10px;
+}
+.user-menu .loginForm>*{
+  vertical-align: top;
+}
+.user-menu .loginForm h3{
+  position: relative;
+  display: inline-block;
+  padding: 5px;
+  background-color: rgb(234, 231, 224);
+  color: #685A3D;
+  text-shadow: 1px 1px 0px #FFF;
+  font-weight: normal;
+}
+.user-menu .loginForm h3:before{
+  position: absolute;
+  z-index: -1;
+  top:4px;
+  right: -10px;
+  display: block;
+  content: "";
+  background-color: rgb(234, 231, 224);
+  width: 20px;
+  height: 20px;
+  -webkit-transform: rotate(45deg);
+}
+
+.user-menu ul.login-form {
+  display: inline-block;
+  width: 100px;
+  margin: 0;
+  padding: 0 0 0 20px;
+}
+.user-menu ul.login-form li{
+  display: block;
+}
+.user-menu ul.login-form a{
+  color: #fff;
+  padding: 3px 0;
+}
+
 a.logo {
   display: inline-block;
   width: 208px;
@@ -313,7 +406,7 @@ a.logo {
 }
 .contacts-cont .title li:first-child{
   border-top: 0px;
-  padding: 15px 35px;
+  /*padding: 15px 35px;*/
   background-position: 15px 15px;
 }
 
@@ -358,8 +451,8 @@ a.logo {
 .contacts-cont .contacts-wrapper .search-output{
   display: none;
 }
+.contacts-cont .contacts-wrapper .active-contacts h3{display: none;}
 .contacts-cont .contacts-wrapper .contact-holder h3{
-  display: none;
   color: #fff;
   text-shadow: 1px 1px 1px rgba(0,0,0,.2);
   font-size: 12px;
@@ -387,8 +480,10 @@ a.logo {
 .contacts-cont .contacts-wrapper .contact-holder .active-action{
   /*display: -webkit-box;*/
 }
-.contacts-cont .contacts-wrapper .contact-holder .active-contacts{
+.contacts-cont .contacts-wrapper .contact-holder .active-contacts{}
 
+.contacts-cont .contacts-wrapper .contact-holder .contacts>div{
+  position: relative;
 }
 .contacts-cont .search{
   -webkit-box-orient: vertical;
@@ -713,6 +808,11 @@ ul.login-form li a{
   right: 10px;
   top: 10px;
 }
+a.sync{
+  position: absolute;
+  right: 20px;
+  top: 6px;
+}
 .sync span,
 .sync{
   width: 18px;
@@ -738,7 +838,9 @@ ul.login-form li a{
   background-color: rgba(0,0,0,.8);
   border-radius: 5px;
   box-shadow: 0px 10px 20px rgba(0,0,0,0.5);
+  margin-bottom: 10px;
 }
 .notification .bubble span{
   font-weight: bolder;
 }
+

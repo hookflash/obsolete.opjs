@@ -1,5 +1,21 @@
-<span><strong><%= fn %></strong> by <%= provider %></span>
-<span class="avatar" style="background-image: url(<%= photo ? photo : 'MASDFDF.png' %>)"></span>
-<span class="inner-box">
-    <a href="" class="logout light-blue-gradient-box">Logout</a>
-</span>
+<div>
+    <a href="#" class="settings">
+        <span class="avatar" style="background-image: url(<%= photo ? photo : 'MASDFDF.png' %>)"></span>
+        <span><strong><%= fn %></strong> by <%= provider %></span>
+        <span class="arrow icon-big-arrow"></span>
+    </a>
+</div>
+<div class="user-menu dark-gradient-box">
+    <ul class="sn"></ul>
+    <div class="loginForm">
+        <h3>login with:</h3>
+        <ul class="login-form">
+            <li><a href="#" data-provider="github">GitHub</a></li>
+            <li><a href="#" data-provider="twitter">Twitter</a></li>
+            <li><a href="#" data-provider="facebook">FaceBook</a></li>
+            <li><a href="#" data-provider="linkedin">LinkedIn</a></li>
+        </ul>
+    </div>
+
+    <div class="settings"></div>
+</div>
