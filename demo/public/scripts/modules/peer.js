@@ -50,7 +50,7 @@ define([
     Peer.prototype.connect = function(options) {
         var peerConn;
         if (this.peerConn) {
-            this.destroy();
+            this.closeConnection();
         }
         options = options || this.connectOptions;
         try {
@@ -105,6 +105,7 @@ define([
 
         var candidate = evt && evt.candidate;
         var transport = this.getTransport();
+        var from = this.collection.providerUser.get('uid');
 //    var locationID = this.get('uid');
 //    var msg;
 
@@ -132,7 +133,7 @@ define([
                     session: msg
                 },
                 to: this.get('uid'),
-                from: window.from
+                from: from
             });
 
         } else {
@@ -190,23 +191,28 @@ define([
         return dfd.promise;
     };
 
-    Peer.prototype.destroy = function() {
-        this.trigger('destroy');
+    Peer.prototype.closeConnection = function() {
+        this.trigger('close.connection');
         this.unset('loaded');
         this.unset('isPestpone');
 
         this._iceBuffer.length = 0;
-        if(this.peerConn) this.peerConn.close();
+        if(this.peerConn){
+
+            console.log('Peer is closed!!!');
+
+            this.peerConn.close();
+        }
         delete this.peerConn;
     };
 
     var Peers = Peer.Peers = Backbone.Collection.extend({
         model: Peer,
         initialize: function(models, options) {
+            this.records = models;
             if (options) {
-                if (options.transport) {
-                    this.transport = options.transport;
-                }
+                if (options.transport) this.transport = options.transport;
+                if(options.providerUser) this.providerUser = options.providerUser;
             }
         }
     });
