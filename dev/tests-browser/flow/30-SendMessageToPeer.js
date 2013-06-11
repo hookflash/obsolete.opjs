@@ -49,7 +49,7 @@ define([
 
       test('find peer', function(done) {
         var peer2 = null;
-        client2._account.on("peer.new", function(peer) {
+        client2._account.on("peer.added", function(peer) {
           peer2 = peer;
         });
         return client1._account._finder.findPeer("identity://" + Util.getHostname() + "/test-SendMessageToPeer-2").then(function(peer1) {

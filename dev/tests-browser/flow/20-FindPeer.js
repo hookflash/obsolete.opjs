@@ -53,10 +53,10 @@ define([
             return done(null);
           }
         }
-        client1._account.on("peer.new", function(peer) {
+        client1._account.on("peer.added", function(peer) {
           return checkCount();
         });
-        client2._account.on("peer.new", function(peer) {
+        client2._account.on("peer.added", function(peer) {
           return checkCount();
         });
         return client1._account._finder.findPeer("identity://" + Util.getHostname() + "/test-FindPeer-2").then(function(peer) {

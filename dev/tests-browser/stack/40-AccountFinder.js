@@ -54,13 +54,21 @@ define([
             // Send one bad url to test connection to multiple finders until one works.
             {
               "$id": Util.randomHex(32),
-              "transport": "webSocket",
-              "srv": "localhost:-3002"
+              "protocols": {
+                "protocol": {
+                  "transport": "websocket",
+                  "srv": "localhost:-3002"
+                }
+              }
             },
             {
               "$id": Util.randomHex(32),
-              "transport": "webSocket",
-              "srv": "localhost:3002"
+              "protocols": {
+                "protocol": {
+                  "transport": "websocket",
+                  "srv": "localhost:3002"
+                }
+              }
             }
           ]);
         };
@@ -99,7 +107,8 @@ define([
       test('connect', function(done) {
         client = new Stack({
           _logPrefix: "AccountFinder - Session Keepalive",
-          identity: "identity://" + Util.getHostname() + "/test-AccountFinder-SessionKeepalive"
+          identity: "identity://" + Util.getHostname() + "/test-AccountFinder-SessionKeepalive",
+          _finderKeepalive: 1  // 1 second.
         });
         return client.ready().then(function() {
           return done(null);
@@ -139,13 +148,21 @@ define([
               // Send one bad url to test connection to multiple finders until one works.
               {
                 "$id": Util.randomHex(32),
-                "transport": "webSocket",
-                "srv": "localhost:-3002"
+                "protocols": {
+                  "protocol": {
+                    "transport": "websocket",
+                    "srv": "localhost:-3002"
+                  }
+                }
               },
               {
                 "$id": Util.randomHex(32),
-                "transport": "webSocket",
-                "srv": "localhost:-3002"
+                "protocols": {
+                  "protocol": {
+                    "transport": "websocket",
+                    "srv": "localhost:-3002"
+                  }
+                }
               }
             ]);
           };
