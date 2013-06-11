@@ -48,7 +48,7 @@ define(['rolodex/q'], function(Q) {
     Transport.prototype.open = function () {
         var transport = this;
 
-        this.mesanger.on("contact.message", function(to, from, message) {
+        this.mesanger.on("contact.message", function(from, message) {
 
             if(!message.type || message.type !== 'call') return;
 
@@ -78,7 +78,7 @@ define(['rolodex/q'], function(Q) {
         var deferred = Q.defer();
         request.type = 'call';
         request.$id = id;
-        this.mesanger.sendMessage(request.to, request.from, request);
+        this.mesanger.sendMessage(request.to, request);
 
         this.pending[id] = deferred;
         return deferred.promise;

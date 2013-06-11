@@ -33,7 +33,7 @@ define(['text!templates/contacts-list.html',
                 el.attr('class', 'user-status');
                 if(status !== 'offline'){
                     el.addClass(status);
-                    if(status === 'online'){
+                    if(status === 'online' && !this.$el.find('span.user-status').hasClass('online')){
                         var bubble = $(_.template(notificationBubble, this.model.attributes).toString());
                         $('.notification').append(bubble);
                         bubble.delay(1000).fadeOut(300, function(){$(this).remove()});
@@ -48,9 +48,10 @@ define(['text!templates/contacts-list.html',
                 this.trigger('start-chat-conversation', this.model);
 
                 this.model.collection.trigger('contact.selected', this);
+                this.model.active = true;
             },
-            onChatMessage: function(uid, message){
-                if(uid === this.model.get('uid')){
+            onChatMessage: function(peerContact, message){
+                if(peerContact === this.model.get('peerContact')){
                     message.username = this.model.get('fn');
                     message.isOwn = false;
 
@@ -79,6 +80,7 @@ define(['text!templates/contacts-list.html',
                 this.$el.find('>a').hide();
                 this.$el.removeClass('active');
                 this.model.collection.trigger('contact.unactive', this);
+                this.model.active = false;
             }
         });
         return ContactView;

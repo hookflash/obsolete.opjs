@@ -68,5 +68,18 @@ define(function() {
         return result;
     };
 
+    util.sortRecords = function(contacts){
+        var records = [];
+        for(var i in contacts){
+            contacts[i].fn = contacts[i].fn || contacts[i].nickname;
+            records.push(contacts[i]);
+        }
+        records.sort(function(a,b){
+            return a.fn > b.fn ? 1 : -1
+        });
+
+        return records;
+    }
+
     return util;
 });
