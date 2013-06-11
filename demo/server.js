@@ -4,13 +4,19 @@
 var https = require('https');
 var http = require('http');
 var url = require('url');
+var fs = require('fs');
 var querystring = require('querystring');
 var pathJoin = require('path').join;
 var send = require('send');
 
 var SendGrid = require('sendgrid').SendGrid;
 
-var sendgrid = new SendGrid("erik@hookflash.com", "<password>");
+
+var config = JSON.parse(fs.readFileSync(PATH.join(__dirname, 'config.local.json')));
+
+
+var sendgrid = new SendGrid(config.sendgrid.username, config.sendgrid.password);
+
 
 function handler(req, res) {
     var pathname = url.parse(req.url, true);
