@@ -18,36 +18,49 @@ var config = JSON.parse(fs.readFileSync(pathJoin(__dirname, 'config.local.json')
 var sendgrid = new SendGrid(config.sendgrid.username, config.sendgrid.password);
 
 
-function handler(req, res) {
-    var pathname = url.parse(req.url, true);
-
-    if(pathname.pathname === '/invite'){
-        var message;
-        if(pathname.query && pathname.query.contactemail){
-
-            sendgrid.send({
-                to: pathname.query.contactemail,
-                from: pathname.query.useremail || "info@webrtc.hookflash.com",
-                subject: 'Invitation to WebRTC Demo',
-                text: ('DEMO Link -> http://localhost:8080')
-            }, function(success, message) {
-                if (!success) {
-                    console.log(message);
-                }
-            });
-
-            message = {"done": "true"};
-
+// TODO: Only allow limited number of invites to be sent within X amout of time.
+exports.getInviteRoute = function() {
+    return function handler(req, res, next) {
+        var pathname = url.parse(req.url, true);
+        if (pathname.pathname === '/invite') {
+            var message;
+            if (pathname.query && pathname.query.contactemail) {
+                console.log("send invite email to", pathname.query.contactemail);
+                sendgrid.send({
+                    to: pathname.query.contactemail,
+                    from: pathname.query.useremail || "info@webrtc.hookflash.com",
+                    subject: 'Invitation to OpenPeer Demo',
+                    text: ('http://webrtc.hookflash.me/')
+                }, function(success, message) {
+                    if (!success) {
+                        console.error("[sendgrid]", message);
+                    }
+                });
+                message = {"done": "true"};
+            } else {
+                message = {"fail": "true"};
+            }
+            res.writeHeader(200, {"Content-Type": "application/json"});
+            res.write(JSON.stringify(message));
+            res.end();
         } else {
-            message = {"fail": "true"};
+            next();
+        }
+    }
+}
+
+var inviteRoute = exports.getInviteRoute();
+
+function handler(req, res) {
+    inviteRoute(req, res, function(err) {
+        if (err) {
+            console.error("ERROR", err.stack);
+            // TODO: Return error to client.
         }
 
-        res.writeHeader(200, {"Content-Type": "application/json"});
-        res.write(JSON.stringify(message));
-        res.end();
-    }
-
-    send(req, pathname.pathname).root(pathJoin(__dirname, 'public')).pipe(res);
+        var pathname = url.parse(req.url, true);
+        send(req, pathname.pathname).root(pathJoin(__dirname, 'public')).pipe(res);
+    });
 }
 
 // Start the server(s)
