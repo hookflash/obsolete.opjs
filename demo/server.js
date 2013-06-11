@@ -12,7 +12,7 @@ var send = require('send');
 var SendGrid = require('sendgrid').SendGrid;
 
 
-var config = JSON.parse(fs.readFileSync(PATH.join(__dirname, 'config.local.json')));
+var config = JSON.parse(fs.readFileSync(pathJoin(__dirname, 'config.local.json')));
 
 
 var sendgrid = new SendGrid(config.sendgrid.username, config.sendgrid.password);
