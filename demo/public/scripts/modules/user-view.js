@@ -47,6 +47,14 @@ define(['text!templates/user.html', 'text!templates/user-line.html', 'backbone',
             serialize: function() {
                 return this.collection.at(0).toJSON();
             },
+            setStatus: function(status){
+                var el = this.$el.find('span.user-status');
+
+                el.attr('class', 'user-status');
+                if(status !== 'offline'){
+                    el.addClass(status);
+                }
+            },
             afterRender: function(){
                 var self = this;
                 this.collection.each(function(model){
@@ -77,39 +85,5 @@ define(['text!templates/user.html', 'text!templates/user-line.html', 'backbone',
         });
 
         return UserView;
-
-
-
-//        var model = null;
-
-//        var UserView = Backbone.Layout.extend({
-//            className: 'user-view',
-//            template: _.template(userHtml),
-//            events: {
-//                'click a.logout': 'logout'
-//            },
-//            initialize: function(options){
-//                this.service = options.service;
-//                this.provider =  options.provider;
-//                model = options.model;
-//            },
-//            serialize: function() {
-//                return this.model.toJSON();
-//            },
-//            logout: function(e){
-//                e.preventDefault();
-//                this.service.logoutService(this.provider);
-//            }
-//        });
-//
-//        return {
-//            getModel: function(){
-//                return model;
-//            },
-//            view: function(options){
-//                model = options.model;
-//                return new UserView(options);
-//            }
-//        };
     });
 

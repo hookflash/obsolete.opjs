@@ -11,18 +11,17 @@ define(['text!templates/contacts-list.html',
                 'click h3': 'toggleHeader',
                 'click a.sync': 'sync'
             },
-            initialize: function() {
+            initialize: function(options) {
                 this.collection.on('add', this.onRecordAdded.bind(this));
-
                 this.collection.on('contact.selected', this.onContactSelected.bind(this));
                 this.collection.on('contact.unactive', this.onContactUnSelected.bind(this));
                 this.collection.on('contact.refetched', this.onContactRefetched.bind(this));
 
-                this.provider = this.collection.providerUser.get('provider');
+                this.group = options.group;
             },
             serialize: function() {
                 return {
-                    provider: this.provider
+                    group: this.group
                 };
             },
             afterRender: function(){
@@ -30,7 +29,11 @@ define(['text!templates/contacts-list.html',
                     this.collection.each(function(model){
                         this.onRecordAdded(model);
                     }.bind(this));
+                } else {
+                    this.$el.hide();
                 }
+
+                this.collection.view = this;
             },
             toggleHeader: function(e){
                 var el = ($(e.target).is('h3') ? $(e.target)[0] : $(e.target).parents('h3')[0]);
@@ -38,6 +41,8 @@ define(['text!templates/contacts-list.html',
                 $(el).find('.icon-collapse').toggleClass('collapsed');
             },
             onRecordAdded: function(model){
+                if(this.$el.is(':hidden')) this.$el.show();
+
                 var view = new ContactView({ model: model});
                 this.insertView('.contacts-list', view);
                 view.render();
@@ -74,9 +79,9 @@ define(['text!templates/contacts-list.html',
                 $('.active-contacts .contacts-list').prepend(view.$el);
             },
             sync: function(e){
-                e.preventDefault();
-                this.$el.find('a.sync span').addClass('preloader');
-                this.trigger('contacts.refetching', this.provider);
+//                e.preventDefault();
+//                this.$el.find('a.sync span').addClass('preloader');
+//                this.trigger('contacts.refetching', this.provider);
             },
             onContactRefetched: function(){
                 this.$el.find('a.sync span').removeClass('preloader');
@@ -92,10 +97,11 @@ define(['text!templates/contacts-list.html',
             initialize: function() {
 
             },
-            setContacts: function(collection){
+            setContacts: function(collection, status){
                 for(var i in collection){
                     var contactsGroupView = new ContactsGroup({
-                        collection: collection[i]
+                        collection: collection[i],
+                        group: i
                     });
 
                     this.insertView('.contacts', contactsGroupView);

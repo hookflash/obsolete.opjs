@@ -3,15 +3,45 @@
 
 var https = require('https');
 var http = require('http');
-var urlParse = require('url').parse;
+var url = require('url');
 var querystring = require('querystring');
 var pathJoin = require('path').join;
 var send = require('send');
 
-function handler(req, res) {
-    var pathname = urlParse(req.url).pathname;
+var SendGrid = require('sendgrid').SendGrid;
 
-    send(req, pathname).root(pathJoin(__dirname, 'public')).pipe(res);
+var sendgrid = new SendGrid("erik@hookflash.com", "<password>");
+
+function handler(req, res) {
+    var pathname = url.parse(req.url, true);
+
+    if(pathname.pathname === '/invite'){
+        var message;
+        if(pathname.query && pathname.query.contactemail){
+
+            sendgrid.send({
+                to: pathname.query.contactemail,
+                from: pathname.query.useremail || "info@webrtc.hookflash.com",
+                subject: 'Invitation to WebRTC Demo',
+                text: ('DEMO Link -> http://localhost:8080')
+            }, function(success, message) {
+                if (!success) {
+                    console.log(message);
+                }
+            });
+
+            message = {"done": "true"};
+
+        } else {
+            message = {"fail": "true"};
+        }
+
+        res.writeHeader(200, {"Content-Type": "application/json"});
+        res.write(JSON.stringify(message));
+        res.end();
+    }
+
+    send(req, pathname.pathname).root(pathJoin(__dirname, 'public')).pipe(res);
 }
 
 // Start the server(s)

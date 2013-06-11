@@ -56,6 +56,7 @@
   border-radius: 6px;
   border-top: 1px solid rgba(255,255,255,.4);
 }
+.invite-panel .contacts li.contact .link.inner-box,
 div.login-header .user .inner-box{
   padding: 3px 3px 5px 3px;
   background: -moz-linear-gradient(top,  rgba(34,34,34,.5) 0%, rgba(34,34,34,.1) 100%);
@@ -238,6 +239,7 @@ div.login-header .user .inner-box{
     0px 2px 0px 0px rgba(5,125,125,.4)
   }
 
+.invite-panel .contacts li.contact .light-blue-gradient-box,
 div.login-header .user .light-blue-gradient-box{
   box-shadow:
     inset 0px 0px 3px rgba(255,255,255, .2),
@@ -248,13 +250,39 @@ div.login-header .user .light-blue-gradient-box{
     0px 3px 1px rgba(5,125,125,.4),
     0px 3px 3px rgba(0,0,0,.1),
     0px 7px 7px rgba(0,0,0,.3);
-} div.login-header .user .light-blue-gradient-box:active{
+}
+
+.invite-panel .contacts li.contact .light-blue-gradient-box:active,
+div.login-header .user .light-blue-gradient-box:active{
     box-shadow: inset 0px 0px 3px rgba(255,255,255, .1),
     inset 0px 2px 2px rgba(0,0,0, .1),
     inset 0px -2px 7px rgba(5,125,125, .2),
     0px 0px 2px rgba(5,125,125, 1),
     0px 2px 0px 0px rgba(5,125,125,.4)
   }
+
+.invite-panel .contacts li.contact .orange-gradient-box,
+div.login-header .user .orange-gradient-box{
+    background: -webkit-linear-gradient(top, rgb(237, 114, 75) 0%,rgba(211, 40, 26,1) 100%);
+    box-shadow:
+        inset 0px 0px 3px rgba(255,255,255, .1),
+        inset 0px 2px 2px rgba(255, 145, 67, 0.69),
+        inset 0px -2px 7px rgba(87, 6, 13, 0.5),
+        0px 0px 2px rgb(201, 44, 47),
+        0px 2px 0px 0px rgba(125, 4, 10, 0.4),
+        0px 3px 1px rgba(125, 4, 10,.4),
+        0px 3px 3px rgba(0,0,0,.1),
+        0px 7px 7px rgba(0,0,0,.3);
+}
+
+.invite-panel .contacts li.contact .orange-gradient-box:active,
+div.login-header .user .orange-gradient-box:active{
+    box-shadow: inset 0px 0px 3px rgba(255,255,255, .1),
+    inset 0px 2px 2px rgba(0,0,0, .1),
+    inset 0px -2px 7px rgba(87, 6, 13, .2),
+    0px 0px 2px rgba(201, 44, 47, 1),
+    0px 2px 0px 0px rgba(125, 4, 10, 0.4)
+}
 
 
 .blue-gradient-box{
@@ -460,6 +488,9 @@ div.login-header .user .light-blue-gradient-box{
   box-shadow: inset 0px 2px 1px rgba(0,0,0,.3),
   inset 0px -2px 1px rgba(255,255,255,.3);
   margin: 10px 2px 0px 0px;
+}
+.settings .user-status{
+    margin: 0;
 }
 .user-status.online:after{
   content: " ";

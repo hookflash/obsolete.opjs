@@ -31,7 +31,7 @@ define([
         // getContactId
         // Compose the string contact ID for this peer
         getContactId: function() {
-            return this.get('uid');
+            return this.get('peerContact');
         },
         // getCollectionCtor
         // Return the constructor for Peers of this type
@@ -105,7 +105,7 @@ define([
 
         var candidate = evt && evt.candidate;
         var transport = this.getTransport();
-        var from = this.collection.providerUser.get('uid');
+        var from = this.collection.providerUser.get('peerContact');
 //    var locationID = this.get('uid');
 //    var msg;
 
@@ -132,7 +132,7 @@ define([
                 blob: {
                     session: msg
                 },
-                to: this.get('uid'),
+                to: this.get('peerContact'),
                 from: from
             });
 
@@ -148,7 +148,7 @@ define([
         var buffer, len;
 
         // Do not flush the buffer if the location ID is unset
-        if (!this.get('uid')) {
+        if (!this.get('peerContact')) {
             return;
         }
 
@@ -209,7 +209,7 @@ define([
     var Peers = Peer.Peers = Backbone.Collection.extend({
         model: Peer,
         initialize: function(models, options) {
-            this.records = models;
+//            this.records = models;
             if (options) {
                 if (options.transport) this.transport = options.transport;
                 if(options.providerUser) this.providerUser = options.providerUser;
