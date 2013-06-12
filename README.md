@@ -28,8 +28,6 @@ Development of this SDK is done via a development UI:
 
 Development Process:
 
-    make install-dev-test
-
   1. `make test` (this runs server-side, dev UI and demo tests)
   2. Launch dev UI
   3. Run all dev UI tests
@@ -52,7 +50,6 @@ Run:
 
 Test:
 
-    make install-demo-test
     make test-demo
 
 Deploy:

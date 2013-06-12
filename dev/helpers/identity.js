@@ -20,6 +20,9 @@ exports.hook = function(options, app) {
 	// @see http://docs.openpeer.org/OpenPeerProtocolSpecification#IdentityLookupServiceRequests
 	app.post(/^\/.helpers\/identity-lookup$/, responder);
 
+	// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#IdentityServiceRequests-IdentityAccessLockboxUpdateRequest
+	app.post(/^\/.helpers\/identity-access-lockbox-update$/, responder);
+
 	// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#IdentityServiceRequests-IdentityAccessStartNotification
 	// NOTE: This should go to the webpage inner frame instead of a server.
 	app.post(/^\/.helpers\/identity-access-start$/, responder);
@@ -38,6 +41,14 @@ function getPayload(request, options, callback) {
 		FS.outputFileSync(path, JSON.stringify({
 			peer: request.identity.peer
 		}, null, 4));
+		return callback(null, {});
+	} else
+	// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#IdentityServiceRequests-IdentityAccessLockboxUpdateRequest
+	if (request.$handler === "identity" && request.$method === "identity-access-lockbox-update") {
+		ASSERT.equal(typeof request.clientNonce, "string");
+		ASSERT.equal(typeof request.identity, "object");
+		ASSERT.equal(typeof request.lockbox, "object");
+
 		return callback(null, {});
 	} else
 	// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#IdentityLookupServiceRequests-IdentityLookupRequest

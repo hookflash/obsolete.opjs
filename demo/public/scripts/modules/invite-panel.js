@@ -115,7 +115,6 @@ define(['text!templates/invite-panel.html', 'text!templates/invite-panel-item.ht
                     this.$('div[rel="'+ contact['service'] +'"]').find('li[rel="'+ contact['uid'] +'"]').remove();
                 } else if(action === 'added'){
                     var el = $(this.$('div[rel="'+ contact['service'] +'"] li').get(0)).clone(true);
-
                     el.attr('rel', contact['uid']);
                     el.find('span.avatar').css('background-image', 'url('+ contact['photo'] +')');
                     el.find('span.name').text((contact['fn'] || contact['nickname']));

@@ -1,12 +1,25 @@
-define(["modules/login", 'jquery', "rolodex/client", "rolodex-presence/client",'modules/util',
-    'modules/peer', 'modules/database', 'modules/user-view', 'modules/layout', 'modules/incoming-call', 'modules/peer', 'modules/_transport', 'rolodex/q']
-    , function(Login, $, ROLODEX, ROLODEX_PRESENCE,util, Peer, DB, UserView, Layout, IncomingCall, Peer, Transport, Q) {
+define([
+    'config',
+    "modules/login",
+    'jquery',
+    "rolodex/client",
+    "rolodex-presence/client",
+    'modules/util',
+    'modules/peer',
+    'modules/user-view',
+    'modules/layout',
+    'modules/incoming-call',
+    'modules/_transport',
+    'rolodex/q'
+], function(CONFIG, Login, $, ROLODEX, ROLODEX_PRESENCE, util, Peer, UserView, Layout, IncomingCall, Transport, Q) {
 
-    var rolodex = new ROLODEX({baseURL: 'http://webrtc.hookflash.me'});
+    var rolodex = new ROLODEX({
+        baseURL: CONFIG.ROLODEX_BASE_URL
+    });
 
     var rolodexPresnece = new ROLODEX_PRESENCE({
         rolodex: rolodex,
-        baseURL: 'http://webrtc.hookflash.me'
+        baseURL: CONFIG.ROLODEX_BASE_URL
     });
 
     var cookies = util.parseCookies(document.cookie);
@@ -254,8 +267,6 @@ define(["modules/login", 'jquery', "rolodex/client", "rolodex-presence/client",'
 
             }).done();
     }
-
-
 
     layout.on("contacts.refetching", function(service){
         rolodex.refetchContacts(service).then(function(data){

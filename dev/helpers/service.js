@@ -5,7 +5,12 @@ const ASSERT = require("assert");
 exports.responder = function(options, getPayload) {
 	return function(req, res, next) {
 		try {
-			var request = req.body.request;
+			var request = Object.create({
+				req: req
+			});
+			for (var name in req.body.request) {
+				request[name] = req.body.request[name];
+			}
 //			var hostname = options.host.split(":")[0];
 //			ASSERT.equal(request.$domain, hostname);
 			return getPayload(request, options, function(err, response) {

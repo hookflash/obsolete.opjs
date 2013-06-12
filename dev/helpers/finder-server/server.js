@@ -9,16 +9,25 @@ exports.main = function(options, callback) {
 
     options = options || {};
 
-    options.port = options.port || 3002;
-
     var hostname = "localhost";
 
     var connections = [];
     var sessions = {};
 
-    var wsServer = new WebSocketServer({
-        port: options.port
-    });
+    var wsServer = null;
+
+    if (options.server) {
+      wsServer = new WebSocketServer({
+          server: options.server,
+          path: options.path || ""
+      });
+    } else {
+      options.port = options.port || 3002;
+      wsServer = new WebSocketServer({
+          port: options.port
+      });
+    }
+
     wsServer.on('error', function(err) {
         return callback(err);
     });
@@ -46,11 +55,11 @@ exports.main = function(options, callback) {
             request = data.reply;
             request._type = "reply";
           }
-          ASSERT.equal(request.$domain, hostname);
+//          ASSERT.equal(request.$domain, hostname);
 
           function getPayloadHeader() {
             return {
-              "$domain": hostname,
+              "$domain": request.$domain,
               "$appid": request.$appid,
               "$id": request.$id,
               "$handler": request.$handler,
@@ -134,13 +143,13 @@ exports.main = function(options, callback) {
       };
       return {
         "server": "hooflash/1.0 (centos)",
-        "expires": Math.floor(Date.now()/1000) + 1
+        "expires": Math.floor(Date.now()/1000) + 60 * 10  // 10 minutes
       };
     } else
     // @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#PeerFinderProtocol-SessionKeepAliveRequest
     if (request._type === "request" && request.$handler === "peer-finder" && request.$method === "session-keep-alive") {
       return {
-        "expires": Math.floor(Date.now()/1000) + 1
+        "expires": Math.floor(Date.now()/1000) + 60 * 10  // 10 minutes
       };
     } else
     // @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#PeerFinderProtocol-SessionDeleteRequest

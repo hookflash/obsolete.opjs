@@ -1,13 +1,12 @@
 
+install:
+	npm install
+
 test: test-dev test-demo
 
 
 install-dev:
-	npm install --production
-	cd dev; npm install --production
-
-install-dev-test:
-	npm install
+	$(MAKE) install
 	cd dev; npm install
 
 run-dev:
@@ -18,11 +17,7 @@ test-dev:
 
 
 install-demo:
-	npm install --production
-	cd demo; npm install --production
-
-install-demo-test:
-	npm install
+	$(MAKE) install
 	cd demo; npm install
 
 run-demo:
@@ -36,4 +31,4 @@ deploy-demo:
 	cd demo; dotcloud push
 
 
-.PHONY: test install-dev run-dev test-dev install-demo run-demo test-demo deploy-demo
+.PHONY: install test install-dev run-dev test-dev install-demo run-demo test-demo deploy-demo
