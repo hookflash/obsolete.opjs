@@ -1,6 +1,6 @@
 {
     "name": "opjs2-dev",
-    "version": "0.1.0",
+    "version": "0.0.0",
     "private": true,
     "main": "server.js",
     "dependencies": {
@@ -16,8 +16,5 @@
         "grunt-mocha": "~0.3.1",
         "request": "~2.16.6",
         "waitfor": "~0.1.2"
-    },
-    "scripts": {
-        "install": "make install"
     }
 }

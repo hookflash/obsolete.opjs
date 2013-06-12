@@ -2,6 +2,7 @@
 REPORTER ?= dot
 
 install:
+	npm install
 	cd helpers/finder-proxy-server; npm install
 	cd helpers/p2p-relay-server; npm install
 	cd helpers/websocket-test-server; npm install

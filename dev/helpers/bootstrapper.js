@@ -246,7 +246,7 @@ function getPayload(request, options, callback) {
         }, function (err, response, body) {
             if (err) return callback(err);
             if (response.statusCode !== 200) {
-                return callback(new Error("Got statuc code '" + response.statusCode + "' while calling 'https://" + options.host + "/.well-known/openpeer-services-get'"));
+                return callback(new Error("Got status code '" + response.statusCode + "' while calling 'https://" + IDENTITY_HOST + "/.well-known/openpeer-services-get'"));
             }
             try {
                 var data = JSON.parse(body);
