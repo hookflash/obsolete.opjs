@@ -22,7 +22,7 @@ define(['text!templates/chat-layout.html', 'text!templates/chat-message-line.htm
                 this.trigger('send-connect-request', this.model, false);
             },
             videoCall: function() {
-                this.trigger('send-connect-request', this.model.collection.providerUser.get('uid'), this.model, true);
+                this.trigger('send-connect-request', this.model.collection.providerUser.get('peerContact'), this.model, true);
             },
             afterRender: function(){
                 var self = this;
@@ -53,7 +53,7 @@ define(['text!templates/chat-layout.html', 'text!templates/chat-message-line.htm
                     message: msg
                 };
 
-                this.trigger('chat-message', this.model.collection.providerUser.get('uid'), this.model, message);
+                this.trigger('chat-message', this.model.collection.providerUser.get('peerContact'), this.model, message);
 
                 this.renderMessage(message);
             },

@@ -1,0 +1,55 @@
+<div class="search-output">
+    <ul class="search-results contacts-list"></ul>
+</div>
+<div class="contact-holder">
+    <div class="contacts">
+        <% _.each(contacts, function(service, index){ %>
+        <div rel="<%=index%>">
+            <h3>
+                <span class="shadow-line"></span>
+                <a class="sync" href="#">sync</a>
+                <span class="tab"><%=index%></span>
+            </h3>
+            <ul class="contacts-list">
+                <% _.each(service, function(contact){ %>
+                <% if(!contact.peerContact){%>
+                    <li class="contact cf" rel="<%=contact.uid%>">
+                        <span class="inner-box raunded light">
+                            <span class="avatar" style="background-image: url(<%=contact.photo%>)"></span>
+                        </span>
+                        <span class="name">
+                            <%=contact.fn%>
+                        </span>
+                        <span class="link inner-box">
+                            <a href="" class="invite light-blue-gradient-box">invite</a>
+                        </span>
+                    </li>
+                <%}%>
+                <% }); %>
+            </ul>
+        </div>
+        <% }); %>
+    </div>
+</div>
+<div class="email-form">
+    <div class="email-input">
+        <div>
+            <dl>
+                <dt class="icon-"></dt>
+                <dd>
+                    <input type="text" placeholder="contact email" name="email" autocomplete="off">
+                </dd>
+            </dl>
+        </div>
+    </div>
+    <div class="submit">
+        <span class="link inner-box">
+            <a href="" class="sand light-blue-gradient-box">Send Invitation</a>
+        </span>
+        <span class="link inner-box">
+            <a href="" class="cancel orange-gradient-box">cancel</a>
+        </span>
+    </div>
+</div>
+
+

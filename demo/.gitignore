@@ -3,3 +3,4 @@ node_modules/
 .DS*
 # Built JS file goes here
 public/scripts/dist/
+*.local.*

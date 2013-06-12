@@ -26,7 +26,10 @@ define(function() {
                 delete videoElem.mozSrcObject;
             },
             webkit: function(videoElem) {
-                videoElem.pause();
+                if(videoElem.stop){
+                    videoElem.stop();
+                }
+                else videoElem.pause();
                 videoElem.src = '';
             }
         }

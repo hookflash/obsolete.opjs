@@ -117,6 +117,7 @@ div.login-header .user .user-view>div:first-child a .avatar,
 .user-menu .inner-box{
   line-height: normal;
 }
+.invite-panel .contacts li.contact a.invite,
 .user-menu .inner-box .logout{
   padding: 3px 5px;
   line-height: normal;
@@ -202,22 +203,21 @@ a.logo {
 }
 
 .contacts-cont, .conversation-wrapper {
-  -webkit-box-flex: 1;
+  /*-webkit-box-flex: 1;*/
 }
 .contacts-cont {
   display: block;
-  width: 230px;
+  /*width: 230px;*/
   display: -webkit-box;
   -webkit-box-orient: vertical;
 }
 
 .conversation-cont {
-  width: 74%;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-box-flex: 1;
   position: relative;
-  padding-left: 25px;
+  padding: 0 25px;
+  -webkit-box-flex: 1;
 }
 .conversation-cont .conversation-chat-window{
   display: -webkit-box;
@@ -533,10 +533,10 @@ a.logo {
   padding-left: 10px;
   color: #786e55;
 }
-input::-webkit-input-placeholder{color: #aca27e;}
-input:-moz-placeholder{color: #aca27e;}
-input::-moz-placeholder{color: #aca27e;}
-input:-ms-input-placeholder{color: #aca27e;}
+.contacts-cont .search input::-webkit-input-placeholder{color: #aca27e;}
+.contacts-cont .search input:-moz-placeholder{color: #aca27e;}
+.contacts-cont .search input::-moz-placeholder{color: #aca27e;}
+.contacts-cont .search input:-ms-input-placeholder{color: #aca27e;}
 
 .contacts-cont .search>div>dl dd a{
   position: absolute;
@@ -563,16 +563,18 @@ input:-ms-input-placeholder{color: #aca27e;}
   overflow: auto;
 }
 
-.search-results{
 
+.active-contacts .contacts-list{
+    border-bottom: 3px solid #444;
 }
 
-.search-results li,
+
+.contacts-cont .search-results li,
 .contacts-list li{
   padding: 5px 20px;
 }
 
-.search-results li,
+.contacts-cont .search-results li,
 .contacts-list li{
   position: relative;
   line-height: 20px;
@@ -585,16 +587,16 @@ input:-ms-input-placeholder{color: #aca27e;}
   -webkit-box-orient: horizontal;
 }
 
-.search-results li *,
+.contacts-cont .search-results li *,
 .contacts-list li *{
   vertical-align: middle;
   display: block;
 }
-.search-results li .inner-box,
+.contacts-cont .search-results li .inner-box,
 .contacts-list li .inner-box{
   display: inline-block;
 }
-.search-results li .avatar,
+.contacts-cont .search-results li .avatar,
 .contacts-list li .avatar {
   display: inline-block;
   border-radius: 30px;
@@ -603,13 +605,13 @@ input:-ms-input-placeholder{color: #aca27e;}
   background-repeat: no-repeat;
   background-size: 30px;
 }
-.search-results li .name,
+.contacts-cont .search-results li .name,
 .contacts-list li .name {
   padding-top: 5px;
   padding-left: 5px;
   width: 75%;
 }
-.search-results li .new-messages,
+.contacts-cont .search-results li .new-messages,
 .contacts-list li .new-messages{
   display: block;
   position: absolute;
@@ -623,10 +625,10 @@ input:-ms-input-placeholder{color: #aca27e;}
   top: 12px;
   line-height: 20px;
 }
-.search-results li a{
+.contacts-cont .search-results li a{
   display: none;
 }
-.contacts-list li a{
+.contacts-cont .contacts-list li a{
   position: absolute;
   left: 5px;
   top:13px;
@@ -642,14 +644,14 @@ input:-ms-input-placeholder{color: #aca27e;}
   text-shadow: 1px 1px 1px rgba(255, 255, 255, .4);
   color: #786E55;
 }
-.search-results li:not(.active):hover,
-.contacts-list li:not(.active):hover{
+.contacts-cont .search-results li:not(.active):hover,
+.contacts-cont .contacts-list li:not(.active):hover{
   background-color: rgba(104, 90, 61, .1);
 }
-.contacts-list li.active a{
+.contacts-cont .contacts-list li.active a{
   background-color: #fff;
 }
-.contacts-list li:hover a{
+.contacts-cont .contacts-list li:hover a{
   visibility: visible;
 }
 
@@ -808,26 +810,19 @@ ul.login-form li a{
   right: 10px;
   top: 10px;
 }
-a.sync{
-  position: absolute;
-  right: 20px;
-  top: 6px;
-}
-.sync span,
-.sync{
-  width: 18px;
-  height: 18px;
-  display: block;
-}
-.sync span{
-  background-position: center center;
-  background-repeat: no-repeat;
-}
+/*a.sync{*/
+  /*position: absolute;*/
+  /*right: 20px;*/
+  /*top: 6px;*/
+/*}*/
+/*.sync span,*/
+
 .notification{
   position: absolute;
   right: 10px;
   top: 75px;
   width: 250px;
+  z-index: 9999;
 }
 .notification .bubble{
   font-weight: normal;
@@ -844,3 +839,261 @@ a.sync{
   font-weight: bolder;
 }
 
+.invite-panel{
+    width: 250px;
+    /*margin-right: -30px;*/
+    border-radius: 5px;
+    position: relative;
+    display: -webkit-box;
+}
+.invite-panel .search-output{
+    position: absolute;
+    top: 6px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+}
+.invite-panel .search-output .search-results{
+    position: absolute;
+    top:0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    overflow: auto;
+}
+.invite-panel>div{
+    position: absolute;
+    top: 56px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+}
+
+
+.sync{
+    height: 18px;
+    display:block;
+    color: #fff;
+    font-size: 10px;
+    line-height: 18px;
+    padding: 0px 10px;
+    float: right
+}
+.sync span{
+    width: 18px;
+    height: 18px;
+    margin-left: 5px;
+    display: inline-block;
+    vertical-align: middle;
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+.sync.preloader{
+    background-repeat: no-repeat;
+    padding-left: 23px;
+}
+
+.invite-panel .contact-holder{
+    position: absolute;
+    top:5px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    overflow: auto;
+    border-radius: 5px;
+}
+.invite-panel .search-output .search-results .link.inner-box{display: none !important;}
+.invite-panel .contacts{
+    margin-top: 30px;
+}
+.invite-panel .contacts>div{
+    margin-top: -28px;
+}
+.invite-panel .contacts-list{
+    border-top: 1px solid rgba(0,0,0,0.1);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin: 0px 0 30px;
+    background-color: rgba(70,70,70,1);
+
+}
+.invite-panel .contacts h3{
+    overflow: hidden;
+    font-size: 16px;
+    font-weight: normal;
+    height: 25px;
+    padding-top: 5px;
+    padding-left: 5px;
+    position: relative;
+}
+.invite-panel .contacts h3 .shadow-line{
+    display: block;
+    position: absolute;
+    bottom: 0px;
+    height: 1px;
+    line-height: 0;
+    box-shadow: 0px 0px 8px rgba(0,0,0, 1);
+    left:0px;
+    right: 0px;
+    z-index: 1;
+}
+.invite-panel .contacts h3 span.tab{
+    position: relative;
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 3px;
+    box-shadow: 0px 0px 8px rgba(0,0,0, 0.7);
+    z-index: 2;
+    background-color: rgba(70,70,70,1);
+}
+
+.invite-panel .contacts li.contact{
+    display: block;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+.invite-panel .contacts li:not(.active):hover{
+    background-color: rgba(255,255,255, 0.1);
+}
+.invite-panel .contacts span{
+    display: inline-block;
+}
+.invite-panel .contacts-list li .name{width: 123px}
+.email-form{
+    display: none;
+    margin-top: 10px;
+}
+.invite-panel .contacts li .email-for{
+    display: inline-block;
+}
+.email-form label{
+    display: inline-block;
+}
+
+.email-input>div{
+    padding: 2px 0px;
+}
+
+.email-input>div>dl{
+    display: -webkit-box;
+    -webkit-box-orient: horizontal;
+    border:1px solid rgba(0,0,0,0.1);
+
+    border-radius: 3px;
+    box-shadow:
+        inset 0px 1px 2px rgba(0,0,0,.1),
+        1px 1px 1px rgba(255,255,255,.1);
+    height: 25px;
+
+}
+.email-input>div>dl dt{
+    width: 30px;
+    border-right: 1px solid rgba(0,0,0,0.1);
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+.email-input>div>dl dd{
+    -webkit-box-flex: 1;
+    border-left: 1px solid rgba(255,255,255,0.1);
+    background-color: rgba(100,100,100,0.3);
+    position: relative;
+}
+
+.email-input>div>dl dd input{
+    border: 0px;
+    background: transparent;
+    height: 25px;
+    width: 90%;
+    display: inline-block;
+    outline: 0;
+    font-size: 12px;
+    padding-left: 10px;
+    color: #fff;
+}
+.email-form .submit{
+    margin-top: 5px;
+    text-align: right;
+}
+.email-form .submit a{
+    text-decoration: none;
+    font-size: 11px;
+    padding: 0px 5px;
+}
+.email-input input::-webkit-input-placeholder{color: #929292;}
+.email-input input:-moz-placeholder{color: #929292;}
+.email-input input::-moz-placeholder{color: #929292;}
+.email-input input:-ms-input-placeholder{color: #929292;}
+
+.invite-panel .title li{
+    position: relative;
+    padding: 10px 10px;
+    list-style: none;
+    border-bottom: 1px solid rgba(0, 0, 0, .1);
+}
+
+.invite-panel .title .search{
+    -webkit-box-orient: vertical;
+    -webkit-box-flex: 1;
+}
+
+.invite-panel .title .search>div{
+    padding: 5px 10px;
+}
+
+.invite-panel .title .search>div>dl{
+    display: -webkit-box;
+    -webkit-box-orient: horizontal;
+    border:1px solid rgba(0,0,0,0.1);
+
+    border-radius: 3px;
+    box-shadow:
+        inset 0px 1px 2px rgba(0,0,0,.1),
+        1px 1px 1px rgba(255,255,255,.1);
+
+    height: 30px;
+    /*padding: 5px;*/
+}
+.invite-panel .title .search>div>dl dt{
+    width: 30px;
+    border-right: 1px solid rgba(0,0,0,0.1);
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+.invite-panel .title .search>div>dl dd{
+    -webkit-box-flex: 1;
+    border-left: 1px solid rgba(255,255,255,0.1);
+    background-color: rgba(100,100,100,0.3);
+    position: relative;
+}
+
+.invite-panel .title .search>div>dl dd input{
+    border: 0px;
+    background: transparent;
+    height: 30px;
+    width: 90%;
+    display: inline-block;
+    outline: 0;
+    font-size: 16px;
+    padding-left: 10px;
+    color: #fff;
+}
+.invite-panel .title .search input::-webkit-input-placeholder{color: #929292;}
+.invite-panel .title .search input:-moz-placeholder{color: #929292;}
+.invite-panel .title .search input::-moz-placeholder{color: #929292;}
+.invite-panel .title .search input:-ms-input-placeholder{color: #929292;}
+
+.invite-panel .title .search>div>dl dd a{
+    position: absolute;
+    display: none;
+    right: 5px;
+    top: 5px;
+    background-color: rgba(0,0,0,0.1);
+    border-radius: 20px;
+    width: 20px;
+    height: 20px;
+    line-height: 17px;
+    font-size: 15px;
+    text-align: center;
+    text-decoration: none;
+    text-shadow: 1px 1px 1px rgba(255,255,255, .4);
+    color: #fff;
+}

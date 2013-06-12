@@ -40,6 +40,7 @@ define([
                 return;
             }
             gum.stopStream(media);
+            if(this._stream && this._stream.stop) this._stream.stop();
             delete this._stream;
             this.render();
         },

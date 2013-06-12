@@ -1,5 +1,17 @@
 # OpenPeer Web Client Prototype
 
+
+## Config
+
+`config.local.json`
+
+	{
+		"sendgrid": {
+			"username": "<username>",
+			"password": "<password>"
+		}
+	}
+
 ## Development Instructure
 
 1. Install [Node.js](http://nodejs.org).
