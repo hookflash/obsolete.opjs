@@ -1,10 +1,10 @@
 {
     "name": "openpeer",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "dependencies": {
-        "cifre": "~0.0.7"    	
+        "cifre": "~0.0.7"
     },
     "devDependencies": {
-    	"amdefine": "~0.0.4"
+        "amdefine": "~0.0.4"
     }
 }
