@@ -30,7 +30,7 @@ exports.getInviteRoute = function() {
                     to: pathname.query.contactemail,
                     from: pathname.query.useremail || "info@webrtc.hookflash.com",
                     subject: 'Invitation to OpenPeer Demo',
-                    text: ('http://webrtc.hookflash.me/')
+                    text: 'A contact of yours is using http://webrtc.hookflash.me and requested that you join a video chat with them. You will need to use Chrome 26 or later.'
                 }, function(success, message) {
                     if (!success) {
                         console.error("[sendgrid]", message);
