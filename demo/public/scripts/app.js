@@ -303,6 +303,7 @@ define([
         if(isRendered){
             layout.trigger('contact.online', peerContact, 'offline');
         }
+
     });
 
     rolodexPresnece.on("contact.away", function(peerContact) {
@@ -347,4 +348,10 @@ define([
         layout.trigger('user-status', 'online');
     });
 
+    rolodexPresnece.on("logout", function() {
+        layout.remove();
+        var ErrorView = new Login.View({ cookies: cookies, service: rolodex });
+        ErrorView.$el.appendTo('body');
+        ErrorView.setStatus({error: "More recent login at another location. Reload page to login again."});
+    });
 });
