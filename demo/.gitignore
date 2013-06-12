@@ -1,6 +1,0 @@
-node_modules/
-.idea
-.DS*
-# Built JS file goes here
-public/scripts/dist/
-*.local.*
