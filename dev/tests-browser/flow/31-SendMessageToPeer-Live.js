@@ -13,9 +13,6 @@ define([
 
   suite("SendMessageToPeer-Live", function() {
 
-// @see https://github.com/openpeer/opjs/issues/41
-return;
-
     suite("two clients with one location each", function() {
 
       this.timeout(10 * 1000);
@@ -28,8 +25,7 @@ return;
         client1 = new Stack({
           _logPrefix: "FindPeer (1)",
           identity: "identity://unstable.hookflash.me/test-SendMessageToPeer-Live-1",
-          identityHost: "provisioning-stable-dev.hookflash.me",
-          _finderHost: "localhost:3092",
+          identityHost: Util.getHost(),
           _p2pRelayHost: "localhost:3000",
           _dev: false,
           _debug: true,
@@ -38,8 +34,7 @@ return;
         client2 = new Stack({
           _logPrefix: "FindPeer (2)",
           identity: "identity://unstable.hookflash.me/test-SendMessageToPeer-Live-2",
-          identityHost: "provisioning-stable-dev.hookflash.me",
-          _finderHost: "localhost:3092",
+          identityHost: Util.getHost(),
           _p2pRelayHost: "localhost:3000",
           _dev: false,
           _debug: true,
@@ -58,7 +53,7 @@ return;
 
       test('find peer', function(done) {
         var peer2 = null;
-        client2._account.on("peer.new", function(peer) {
+        client2._account.on("peer.added", function(peer) {
           peer2 = peer;
         });
         return client1._account._finder.findPeer("identity://unstable.hookflash.me/test-SendMessageToPeer-Live-2").then(function(peer1) {

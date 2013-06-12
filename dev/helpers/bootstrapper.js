@@ -1,7 +1,11 @@
 
 const ASSERT = require("assert");
+const REQUEST = require("request");
 const SERVICE = require("./service");
 const Util = require("../../lib/util");
+
+
+var IDENTITY_HOST = "provisioning-stable-dev.hookflash.me";
 
 
 exports.hook = function(options, app) {
@@ -10,16 +14,16 @@ exports.hook = function(options, app) {
 
 	// `https://domain.com/.well-known/openpeer-services-get`
 	// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#BootstrapperServiceRequests-ServicesGetRequest
-	app.post(/^\/\.well-known\/openpeer-services-get$/, responder);
+    app.post(/^\/\.well-known\/openpeer-services-get$/, responder);
 
 	// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#BootstrappedFinderServiceRequests-FindersGetRequest
-	app.post(/^\/.helpers\/bootstrapper\/finders-get$/, responder);
+	app.post(/^\/.helpers\/finders-get$/, responder);
 
 	// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#CertificatesServiceRequests-CertificatesGetRequest
-	app.post(/^\/.helpers\/bootstrapper\/certificates-get$/, responder);
+	app.post(/^\/.helpers\/certificates-get$/, responder);
 
 	// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#PeerSaltServiceProtocol-SignedSaltGetRequest
-	app.post(/^\/.helpers\/bootstrapper\/signed-salt-get$/, responder);
+	app.post(/^\/.helpers\/signed-salt-get$/, responder);
 }
 
 function getPayload(request, options, callback) {
@@ -203,8 +207,12 @@ function getPayload(request, options, callback) {
 		return callback(null, SERVICE.nestResponse(["finders", "finderBundle"], {
             "finder": {
                 "$id": "c14de2cad95b5b9ce000933d74b20cc6a2c0e275",
-                "transport": "webSocket",
-                "srv": "localhost:3002",
+                "protocols": {
+                    "protocol": {
+                        "transport": "websocket",
+                        "srv": "localhost:3002"
+                    }
+                },
                 "key": {
                     "x509Data": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwIw4uEJG3QAeL/sq7hFfqVhCMyOPOM8TwsN0qZ/AxyJ6DbCl8fY27hSqcnzbDvotMBnGzZRLcQ9n/6/9CREIutTqgC11MWTLBr1AZPz4TliWy3RIhJGYw7ddKkmuIiYfkShBV1k2paXoX4wWdEtUgzT73Ts4RrSmN0rG1fw7ttzHtYdmP6Un3SdGixHUsXdeh4/GE18zTkq7uzV3OrmaFYat8XL9mBz2SAGOl8Bn8lpRZ2rXDju4NNy18mHmaUQ34lnetk3DoVEBvaIVEJzqhzAJ4xj9s2HZ14lgtK38W/2mKjZ0RRtTtFoPFW8c3qp+o74tGnkObSZPD2KiMvoDsQIDAQAB"
                 },
@@ -228,6 +236,108 @@ function getPayload(request, options, callback) {
 		}));
 	} else
 	if (request.$handler === "bootstrapper" && request.$method === "services-get") {
+        return REQUEST({
+            method: "POST",
+            url: "https://" + IDENTITY_HOST + "/.well-known/openpeer-services-get",
+            body: JSON.stringify(request),
+            headers: {
+                "Content-Type": "application/json"
+            }
+        }, function (err, response, body) {
+            if (err) return callback(err);
+            if (response.statusCode !== 200) {
+                return callback(new Error("Got statuc code '" + response.statusCode + "' while calling 'https://" + options.host + "/.well-known/openpeer-services-get'"));
+            }
+            try {
+                var data = JSON.parse(body);
+                ASSERT(typeof data.result === "object");
+                ASSERT(typeof data.result.services === "object");
+                ASSERT(typeof data.result.services.service === "object");
+                for (var i=0 ; i<data.result.services.service.length ; i++) {
+
+                    var service = data.result.services.service[i];
+
+                    if (service.type === "identity-lockbox") {
+                        data.result.services.service = data.result.services.service.splice(i, 1);
+                        i--;
+                        continue;
+                    }
+
+                    if (!Array.isArray(service.methods.method)) {
+                        service.methods.method = [ service.methods.method ];
+                    }
+                    service.methods.method = service.methods.method.map(function(method) {
+                        if (
+                            method.name === "finders-get" ||
+                            method.name === "signed-salt-get" ||                            
+                            method.name === "certificates-get"
+                        ) {
+                            return method;
+                        }
+                        method.uri = "http://" + options.host + "/.helpers/" + method.name;
+                        return method;
+                    });
+
+                    if (service.type === "identity") {
+                        service.methods.method.push({
+                            name: "identity-access-start",
+                            uri: "http://" + options.host + "/.helpers/identity-access-start"
+                        });
+                        service.methods.method = service.methods.method.filter(function(method) {
+                            if (method.name === "identity-lookup-update") return false;
+                            if (method.name === "identity-access-lockbox-update") return false;
+                            return true;
+                        });
+                        service.methods.method.push({
+                            name: "identity-lookup-update",
+                            uri: "http://" + options.host + "/.helpers/identity-lookup-update"
+                        });
+                        service.methods.method.push({
+                            name: "identity-access-lockbox-update",
+                            uri: "http://" + options.host + "/.helpers/identity-access-lockbox-update"
+                        });
+                    } else
+                    if (service.type === "identity-lookup") {
+                        service.methods.method = service.methods.method.filter(function(method) {
+                            if (method.name === "identity-lookup") return false;
+                            return true;
+                        });
+                        service.methods.method.push({
+                            name: "identity-lookup",
+                            uri: "http://" + options.host + "/.helpers/identity-lookup"
+                        });
+                    }
+                }
+                data.result.services.service.push({
+                    type: "identity-lockbox",
+                    methods: {
+                        method: [
+                            {
+                                name: "lockbox-access",
+                                uri: "http://" + options.host + "/.helpers/lockbox-access"
+                            },
+                            {
+                                name: "lockbox-identities-update",
+                                uri: "http://" + options.host + "/.helpers/lockbox-identities-update"
+                            },
+                            {
+                                name: "lockbox-content-set",
+                                uri: "http://" + options.host + "/.helpers/lockbox-content-set"
+                            },
+                            {
+                                name: "lockbox-content-get",
+                                uri: "http://" + options.host + "/.helpers/lockbox-content-get"
+                            }                            
+                        ]
+                    }
+                });
+                return callback(null, data.result);
+            } catch(err) {
+                return callback(err);
+            }
+        });
+    } else
+    if (request.$handler === "bootstrapper" && request.$method === "services-get-dev") {
 		return callback(null, SERVICE.nestResponse(["services", "service"], [
             {
                 "$id": "b1ad4a059d4726f563b2fb04ed061ed5b909c66b",
@@ -247,7 +357,7 @@ function getPayload(request, options, callback) {
                 "methods": {
                     "method": {
                         "name": "certificates-get",
-                        "uri": "http://" + options.host + "/.helpers/bootstrapper/certificates-get"
+                        "uri": "http://" + options.host + "/.helpers/certificates-get"
                     }
                 }
             },
@@ -258,7 +368,7 @@ function getPayload(request, options, callback) {
                 "methods": {
                     "method": {
                         "name": "finders-get",
-                        "uri": "http://" + options.host + "/.helpers/bootstrapper/finders-get"
+                        "uri": "http://" + options.host + "/.helpers/finders-get"
                     }
                 }
             },
@@ -269,7 +379,7 @@ function getPayload(request, options, callback) {
                 "methods": {
                     "method": {
                         "name": "signed-salt-get",
-                        "uri": "http://" + options.host + "/.helpers/bootstrapper/signed-salt-get"
+                        "uri": "http://" + options.host + "/.helpers/signed-salt-get"
                     }
                 }
             },
@@ -281,42 +391,37 @@ function getPayload(request, options, callback) {
                     "method": [
                         {
                             "name": "identity-associate",
-                            "uri": "http://" + options.host + "/.helpers/bootstrapper/identity"
+                            "uri": "http://" + options.host + "/.helpers/identity-associate"
                         },
                         {
                             "name": "identity-login-start",
-                            "uri": "http://" + options.host + "/.helpers/bootstrapper/identity"
+                            "uri": "http://" + options.host + "/.helpers/identity-login-start"
                         },
                         {
                             "name": "identity-login-complete",
-                            "uri": "http://" + options.host + "/.helpers/bootstrapper/identity"
+                            "uri": "http://" + options.host + "/.helpers/identity-login-complete"
                         },
                         {
                             "name": "identity-sign",
-                            "uri": "http://" + options.host + "/.helpers/bootstrapper/identity"
+                            "uri": "http://" + options.host + "/.helpers/identity-sign"
                         },
                         {
                             "name": "identity-login-validate",
-                            "uri": "http://" + options.host + "/.helpers/bootstrapper/identity"
-                        }
-                    ]
-                }
-            },
-            {
-                "$id": "f98b4d1ff0f1acf3054fefc560866e61",
-                "type": "identity",
-                "version": "1.0",
-                "methods": {
-                    "method": [
+                            "uri": "http://" + options.host + "/.helpers/identity-login-validate"
+                        },
+                        {
+                            "name": "identity-lookup-update",
+                            "uri": "https://" + options.host + "/.helpers/identity-lookup-update"
+                        },
+                        {
+                            "name": "identity-access-lockbox-update",
+                            "uri": "https://" + options.host + "/.helpers/identity-access-lockbox-update"
+                        },                        
                         // NOTE: Included here for testing only. This service is typically provided
                         //       by the webpage inner frame.
                         {
                             "name": "identity-access-start",
                             "uri": "https://" + options.host + "/.helpers/identity-access-start"
-                        },
-                        {
-                            "name": "identity-lookup-update",
-                            "uri": "https://" + options.host + "/.helpers/identity-lookup-update"
                         }
                     ]
                 }

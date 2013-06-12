@@ -1,13 +1,13 @@
 /* global define, suite, test, assert */
 define([
-  'opjs/Stack'
-], function (Stack) {
+  'opjs/Stack',
+  'opjs/util'
+], function (Stack, Util) {
 
   'use strict';
 
   suite('AccountFinder-Live', function () {
 
-return;
     this.timeout(10 * 1000);
 
     suite('Session', function() {
@@ -19,8 +19,7 @@ return;
           _debug: true,
           _logPrefix: "AccountFinder-Live - connect",
           identity: "identity://unstable.hookflash.me/test-AccountFinder-Live",
-          identityHost: "provisioning-stable-dev.hookflash.me",
-          _finderHost: "localhost:3092"
+          identityHost: Util.getHost()
         });
         return client.ready().then(function() {
           return client.destroy().then(function() {
@@ -40,8 +39,7 @@ return;
           _debug: true,
           _logPrefix: "AccountFinder-Live - Session Keepalive",
           identity: "identity://unstable.hookflash.me/test-AccountFinder-Live-SessionKeepalive",
-          identityHost: "provisioning-stable-dev.hookflash.me",
-          _finderHost: "localhost:3092",
+          identityHost: Util.getHost(),
           _finderKeepalive: 1  // 1 second.
         });
         return client.ready().then(function() {
@@ -69,5 +67,4 @@ return;
     });
 
   });
-
 });

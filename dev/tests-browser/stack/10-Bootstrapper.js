@@ -15,7 +15,7 @@ define([
     suite('Helper', function() {
 
       test('`/.well-known/openpeer-services-get` response', function(done) {
-        return Request.makeRequestTo(new Context(), "http://" + Util.getHost() + "/.well-known/openpeer-services-get", "bootstrapper", "services-get").then(function(result) {
+        return Request.makeRequestTo(new Context(), "http://" + Util.getHost() + "/.well-known/openpeer-services-get", "bootstrapper", "services-get-dev").then(function(result) {
           assert.isObject(result);
           assert.isObject(result.services);
           return done(null);
