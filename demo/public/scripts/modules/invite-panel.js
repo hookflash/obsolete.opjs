@@ -44,10 +44,7 @@ define(['text!templates/invite-panel.html', 'text!templates/invite-panel-item.ht
                     method: 'GET',
                     success: function(data){
                         if(data.done) {
-                            $(e.target).parents('li').hide();
-                            if(!$(e.target).parents('ul').find('li:not(:hidden)').length){
-                                $(e.target).parents('div.contacts>div').hide();
-                            }
+                            $(e.target).parents('li').find('.link:hidden').show();
                             $('.invite-panel').append($('.email-form'));
                             $('.email-form input').val("");
                         } else {
@@ -118,8 +115,6 @@ define(['text!templates/invite-panel.html', 'text!templates/invite-panel-item.ht
                     this.$('div[rel="'+ contact['service'] +'"]').find('li[rel="'+ contact['uid'] +'"]').remove();
                 } else if(action === 'added'){
                     var el = $(this.$('div[rel="'+ contact['service'] +'"] li').get(0)).clone(true);
-
-                    console.log(el);
 
                     el.attr('rel', contact['uid']);
                     el.find('span.avatar').css('background-image', 'url('+ contact['photo'] +')');
