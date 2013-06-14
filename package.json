@@ -1,13 +1,11 @@
 {
     "name": "openpeer",
     "version": "0.1.4",
+    "pm": "npm",
     "dependencies": {
         "cifre": "~0.0.7"
     },
     "devDependencies": {
         "amdefine": "~0.0.4"
-    },
-    "scripts": {
-        "publish": "make publish"
     }
 }
