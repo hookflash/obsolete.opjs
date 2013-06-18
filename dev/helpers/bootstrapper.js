@@ -257,7 +257,7 @@ function getPayload(request, options, callback) {
 
                     var service = data.result.services.service[i];
 
-                    if (service.type === "identity-lockbox") {
+                    if (service.type === "identity-lockbox" || service.type === "namespace-grant") {
                         data.result.services.service = data.result.services.service.splice(i, 1);
                         i--;
                         continue;
@@ -327,7 +327,22 @@ function getPayload(request, options, callback) {
                             {
                                 name: "lockbox-content-get",
                                 uri: "http://" + options.host + "/.helpers/lockbox-content-get"
-                            }                            
+                            },
+                            {
+                                name: "lockbox-namespace-grant-challenge-validate",
+                                uri: "http://" + options.host + "/.helpers/lockbox-namespace-grant-challenge-validate"
+                            }
+                        ]
+                    }
+                });
+                data.result.services.service.push({
+                    type: "namespace-grant",
+                    methods: {
+                        method: [
+                            {
+                                name: "namespace-grant-start",
+                                uri: "http://" + options.host + "/.helpers/namespace-grant-start"
+                            }
                         ]
                     }
                 });
@@ -445,6 +460,19 @@ function getPayload(request, options, callback) {
             },
             {
                 "$id": "d0b528b3f8e66455d154b1deac1e357e",
+                "type": "namespace-grant",
+                "version": "1.0",
+                "methods": {
+                    "method": [
+                        {
+                            "name": "namespace-grant-start",
+                            "uri": "http://" + options.host + "/.helpers/namespace-grant-start"
+                        }
+                    ]
+                }
+            },
+            {
+                "$id": "d0b528b3f8e66455d154b1deac1e357e",
                 "type": "identity-lockbox",
                 "version": "1.0",
                 "methods": {
@@ -458,10 +486,6 @@ function getPayload(request, options, callback) {
                             "uri": "http://" + options.host + "/.helpers/lockbox-identities-update"
                         },
                         {
-                            "name": "lockbox-namespace-grant-inner-frame",
-                            "uri": "http://" + options.host + "/.helpers/lockbox-namespace-grant-inner-frame"
-                        },
-                        {
                             "name": "lockbox-content-get",
                             "uri": "http://" + options.host + "/.helpers/lockbox-content-get"
                         },
@@ -470,12 +494,8 @@ function getPayload(request, options, callback) {
                             "uri": "http://" + options.host + "/.helpers/lockbox-content-set"
                         },
                         {
-                            "name": "lockbox-admin-inner-frame",
-                            "uri": "http://" + options.host + "/.helpers/lockbox-admin-inner-frame"
-                        },
-                        {
-                            "name": "lockbox-namespace-preapproved-grant",
-                            "uri": "http://" + options.host + "/.helpers/lockbox-namespace-preapproved-grant"
+                            "name": "lockbox-namespace-grant-challenge-validate",
+                            "uri": "http://" + options.host + "/.helpers/lockbox-namespace-grant-challenge-validate"
                         }
                     ]
                 }

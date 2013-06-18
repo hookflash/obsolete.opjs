@@ -22,6 +22,9 @@ exports.main = function(callback) {
         require("./helpers/identity").hook({
             host: "localhost:" + PORT
         }, app);
+        require("./helpers/namespace").hook({
+            host: "localhost:" + PORT
+        }, app);
         require("./helpers/lockbox").hook({
             host: "localhost:" + PORT
         }, app);

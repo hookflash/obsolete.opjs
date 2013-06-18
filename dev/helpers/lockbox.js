@@ -22,6 +22,8 @@ exports.hook = function(options, app) {
 	app.post(/^\/.helpers\/lockbox-content-get$/, responder);
 	// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#IdentityLockboxServiceRequests-LockboxContentSetRequest
 	app.post(/^\/.helpers\/lockbox-content-set$/, responder);
+	// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#IdentityLockboxServiceRequests-LockboxNamespaceGrantChallengeValidateRequest
+	app.post(/^\/.helpers\/lockbox-namespace-grant-challenge-validate$/, responder);
 }
 
 function getPayload(request, options, callback) {
@@ -43,16 +45,13 @@ function getPayload(request, options, callback) {
 	            "domain": request.lockbox.domain,
 	            "keyLockboxHalf": Crypto.sha1(request.identity.uri)
 	        },
-	        "grant": {
-	            "$id": request.grant.$id,
-	            "namespaces": {
-	                "namespace": [
-	                    {
-	                        "$id": "https://meta.openpeer.org/ns/private-peer-file"
-	                    }
-	                ]
-	            }
-	        },
+			"namespaceGrantChallenge": {
+				"$id": "20651257fecbe8436cea6bfd3277fec1223ebd63",
+				"name": "Provider Lockbox Service",
+				"image": "https://provider.com/lockbox/lockbox.png",
+				"url": "https://provider.com/lockbox/",
+				"domains": "trust.com,trust2.com"
+			},
 	        "identities": {
 	            "identity": [
 	                {
@@ -129,6 +128,17 @@ function getPayload(request, options, callback) {
 				FS.outputFileSync(path, namespace.value);
 			}
 		});
+
+		return callback(null, {});
+	} else
+	// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#IdentityLockboxServiceRequests-LockboxNamespaceGrantChallengeValidateRequest
+	if (request.$handler === "lockbox" && request.$method === "lockbox-namespace-grant-challenge-validate") {
+
+		ASSERT.equal(typeof request.clientNonce, "string");
+		ASSERT.equal(typeof request.lockbox, "object");
+		ASSERT.equal(typeof request.lockbox.accessToken, "string");
+		ASSERT.equal(typeof request.namespaceGrantChallengeBundle.namespaceGrantChallenge, "object");
+		ASSERT.equal(typeof request.namespaceGrantChallengeBundle.signature, "object");
 
 		return callback(null, {});
 	}
