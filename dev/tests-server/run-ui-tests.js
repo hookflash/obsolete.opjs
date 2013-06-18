@@ -7,7 +7,7 @@ describe("run-ui-tests", function() {
 
     it("grunt-phantomjs", function(done) {
 
-        this.timeout(60 * 1000);
+        this.timeout(120 * 1000);
 
         return SERVER.main(function(err, info) {
             if (err) return done(err);
