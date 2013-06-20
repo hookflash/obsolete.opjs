@@ -28,6 +28,9 @@ exports.main = function(callback) {
         require("./helpers/lockbox").hook({
             host: "localhost:" + PORT
         }, app);
+        require("./helpers/rolodex").hook({
+            host: "localhost:" + PORT
+        }, app);
 
         var extraServers = [];
 

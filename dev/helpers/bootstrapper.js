@@ -257,7 +257,7 @@ function getPayload(request, options, callback) {
 
                     var service = data.result.services.service[i];
 
-                    if (service.type === "identity-lockbox" || service.type === "namespace-grant") {
+                    if (service.type === "identity-lockbox" || service.type === "namespace-grant" || service.type === "rolodex") {
                         data.result.services.service = data.result.services.service.splice(i, 1);
                         i--;
                         continue;
@@ -342,6 +342,21 @@ function getPayload(request, options, callback) {
                             {
                                 name: "namespace-grant-start",
                                 uri: "http://" + options.host + "/.helpers/namespace-grant-start"
+                            }
+                        ]
+                    }
+                });
+                data.result.services.service.push({
+                    type: "rolodex",
+                    methods: {
+                        method: [
+                            {
+                                name: "rolodex-access",
+                                uri: "http://" + options.host + "/.helpers/rolodex-access"
+                            },
+                            {
+                                name: "rolodex-namespace-grant-challenge-validate",
+                                uri: "http://" + options.host + "/.helpers/rolodex-namespace-grant-challenge-validate"
                             }
                         ]
                     }
@@ -496,6 +511,23 @@ function getPayload(request, options, callback) {
                         {
                             "name": "lockbox-namespace-grant-challenge-validate",
                             "uri": "http://" + options.host + "/.helpers/lockbox-namespace-grant-challenge-validate"
+                        }
+                    ]
+                }
+            },
+            {
+                "$id": "d0b528b3f8e66455d154b1deac1e357e",
+                "type": "rolodex",
+                "version": "1.0",
+                "methods": {
+                    "method": [
+                        {
+                            "name": "rolodex-access",
+                            "uri": "http://" + options.host + "/.helpers/rolodex-access"
+                        },
+                        {
+                            "name": "rolodex-namespace-grant-challenge-validate",
+                            "uri": "http://" + options.host + "/.helpers/rolodex-namespace-grant-challenge-validate"
                         }
                     ]
                 }
