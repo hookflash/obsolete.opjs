@@ -34,8 +34,6 @@ function getPayload(request, options, callback) {
 
 		ASSERT.equal(typeof request.rolodex, "object");
 		ASSERT.equal(typeof request.rolodex.serverToken, "string");
-//		ASSERT.equal(typeof request.rolodex.version, "string");
-		ASSERT.equal(typeof request.rolodex.refresh, "boolean");
 
 		ASSERT.equal(typeof request.agent, "object");
 		ASSERT.equal(typeof request.agent.userAgent, "string");
@@ -88,7 +86,7 @@ function getPayload(request, options, callback) {
 		ASSERT.equal(typeof request.rolodex.accessToken, "string");
 		ASSERT.equal(typeof request.rolodex.accessSecretProof, "string");
 		ASSERT.equal(typeof request.rolodex.accessSecretProofExpires, "number");
-		ASSERT.equal(typeof request.rolodex.version, "string");
+//		ASSERT.equal(typeof request.rolodex.version, "string");
 		ASSERT.equal(typeof request.rolodex.refresh, "boolean");
 
 		return callback(null, {

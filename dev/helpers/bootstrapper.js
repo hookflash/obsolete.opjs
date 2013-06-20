@@ -286,6 +286,7 @@ function getPayload(request, options, callback) {
                         service.methods.method = service.methods.method.filter(function(method) {
                             if (method.name === "identity-lookup-update") return false;
                             if (method.name === "identity-access-lockbox-update") return false;
+                            if (method.name === "identity-access-rolodex-credentials-get") return false;
                             return true;
                         });
                         service.methods.method.push({
@@ -295,6 +296,10 @@ function getPayload(request, options, callback) {
                         service.methods.method.push({
                             name: "identity-access-lockbox-update",
                             uri: "http://" + options.host + "/.helpers/identity-access-lockbox-update"
+                        });
+                        service.methods.method.push({
+                            name: "identity-access-rolodex-credentials-get",
+                            uri: "http://" + options.host + "/.helpers/identity-access-rolodex-credentials-get"
                         });
                     } else
                     if (service.type === "identity-lookup") {
@@ -357,6 +362,10 @@ function getPayload(request, options, callback) {
                             {
                                 name: "rolodex-namespace-grant-challenge-validate",
                                 uri: "http://" + options.host + "/.helpers/rolodex-namespace-grant-challenge-validate"
+                            },
+                            {
+                                name: "rolodex-contacts-get",
+                                uri: "http://" + options.host + "/.helpers/rolodex-contacts-get"
                             }
                         ]
                     }
@@ -446,7 +455,11 @@ function getPayload(request, options, callback) {
                         {
                             "name": "identity-access-lockbox-update",
                             "uri": "https://" + options.host + "/.helpers/identity-access-lockbox-update"
-                        },                        
+                        },
+                        {
+                            "name": "identity-access-rolodex-credentials-get",
+                            "uri": "https://" + options.host + "/.helpers/identity-access-rolodex-credentials-get"
+                        },
                         // NOTE: Included here for testing only. This service is typically provided
                         //       by the webpage inner frame.
                         {
@@ -528,7 +541,11 @@ function getPayload(request, options, callback) {
                         {
                             "name": "rolodex-namespace-grant-challenge-validate",
                             "uri": "http://" + options.host + "/.helpers/rolodex-namespace-grant-challenge-validate"
-                        }
+                        },
+                        {
+                            "name": "rolodex-contacts-get",
+                            "uri": "http://" + options.host + "/.helpers/rolodex-contacts-get"
+                        }                        
                     ]
                 }
             }

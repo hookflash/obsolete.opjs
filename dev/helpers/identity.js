@@ -23,6 +23,9 @@ exports.hook = function(options, app) {
 	// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#IdentityServiceRequests-IdentityAccessLockboxUpdateRequest
 	app.post(/^\/.helpers\/identity-access-lockbox-update$/, responder);
 
+	// @see http://docs.openpeer.org/OpenPeerProtocolSpecificationAnnexRolodex/#IdentityServiceRequestsAnnex-IdentityAccessRolodexCredentialsGetRequest
+	app.post(/^\/.helpers\/identity-access-rolodex-credentials-get$/, responder);
+
 	// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#IdentityServiceRequests-IdentityAccessStartNotification
 	// NOTE: This should go to the webpage inner frame instead of a server.
 	app.post(/^\/.helpers\/identity-access-start$/, responder);
@@ -123,6 +126,21 @@ function getPayload(request, options, callback) {
 			};
 		}
 		return callback(null, payload);
+	} else
+	// @see http://docs.openpeer.org/OpenPeerProtocolSpecificationAnnexRolodex/#IdentityServiceRequestsAnnex-IdentityAccessRolodexCredentialsGetRequest
+	if (request.$handler === "identity" && request.$method === "identity-access-rolodex-credentials-get") {
+
+		ASSERT.equal(typeof request.clientNonce, "string");
+		ASSERT.equal(typeof request.identity, "object");
+		ASSERT.equal(typeof request.identity.accessToken, "string");
+		ASSERT.equal(typeof request.identity.accessSecretProof, "string");
+		ASSERT.equal(typeof request.identity.accessSecretProofExpires, "number");
+
+		return callback(null, {
+			"rolodex": {
+				"serverToken": "b3ff46bae8cacd1e572ee5e158bcb04ed9297f20-9619e3bc-4cd41c9c64ab2ed2a03b45ace82c546d"
+			}
+		});
 	}
 	return callback(null, null);
 }
