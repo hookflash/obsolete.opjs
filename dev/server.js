@@ -91,6 +91,7 @@ exports.main = function(callback) {
                             mountStaticDir(app, /^\/tests\/(.*)$/, PATH.join(__dirname, "tests-browser"));
                             mountStaticDir(app, /^\/mocks\/(.*)$/, PATH.join(__dirname, "mocks"));
                             mountStaticDir(app, /^\/lib\/opjs\/(.*)$/, PATH.join(__dirname, "../lib"));
+                            mountStaticDir(app, /^\/lib\/ortc\/(.*)$/, PATH.join(__dirname, "../node_modules/ortc-over-rtc/lib"));
                             mountStaticDir(app, /^\/lib\/cifre\/(.*)$/, PATH.join(__dirname, "../node_modules/cifre"));
                             mountStaticDir(app, /^\/lib\/q\/(.*)$/, PATH.join(__dirname, "node_modules/q"));
 

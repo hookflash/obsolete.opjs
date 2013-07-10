@@ -4,6 +4,7 @@
 	requirejs.config({
 		paths: {
 			opjs: "/lib/opjs",
+			ortc: "/lib/ortc",
 			cifre: "/lib/cifre",
 			q: "/lib/q",
 			tests: "/tests",
