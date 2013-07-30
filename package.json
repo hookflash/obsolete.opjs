@@ -3,7 +3,7 @@
     "version": "0.1.4",
     "pm": "npm",
     "dependencies": {
-        "cifre": "~0.0.7",
+        "cifre": "~0.0.8",
         "ortc-over-rtc": "~0.1.0"
     },
     "devDependencies": {
