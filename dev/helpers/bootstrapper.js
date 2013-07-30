@@ -1,11 +1,13 @@
 
 const ASSERT = require("assert");
 const REQUEST = require("request");
+const URL = require("url");
 const SERVICE = require("./service");
 const Util = require("../../lib/util");
 
 
-var IDENTITY_HOST = "provisioning-stable-dev.hookflash.me";
+var IDENTITY_HOST = "idprovider-javascript.hookflash.me";
+var BOOTSTRAPPER_HOST = "provisioning-stable-dev.hookflash.me";
 
 
 exports.hook = function(options, app) {
@@ -236,21 +238,43 @@ function getPayload(request, options, callback) {
 		}));
 	} else
 	if (request.$handler === "bootstrapper" && request.$method === "services-get") {
-        return REQUEST({
-            method: "POST",
-            url: "https://" + IDENTITY_HOST + "/.well-known/openpeer-services-get",
-            body: JSON.stringify(request),
-            headers: {
-                "Content-Type": "application/json"
-            }
-        }, function (err, response, body) {
+
+        function handleResult(err, response, body) {
             if (err) return callback(err);
+
             if (response.statusCode !== 200) {
                 return callback(new Error("Got status code '" + response.statusCode + "' while calling 'https://" + IDENTITY_HOST + "/.well-known/openpeer-services-get'"));
             }
             try {
                 var data = JSON.parse(body);
+
                 ASSERT(typeof data.result === "object");
+
+                if (data.result.error) {
+
+                    if (data.result.error['$id'] === 302) {
+
+                        //var url = data.result.error['location'];
+                        var url = "https://" + BOOTSTRAPPER_HOST + "/.well-known/openpeer-services-get";
+
+                        //request.$domain = URL.parse(url).hostname;
+
+                        return REQUEST({
+                            method: "POST",
+                            url: url,
+                            body: JSON.stringify({
+                                request: request
+                            }),
+                            headers: {
+                                "Content-Type": "application/json"
+                            }
+                        }, handleResult);
+
+                    } else {
+                        return callback(new Error("Got error over openpeer wire: " + JSON.stringify()));
+                    }
+                }
+
                 ASSERT(typeof data.result.services === "object");
                 ASSERT(typeof data.result.services.service === "object");
                 for (var i=0 ; i<data.result.services.service.length ; i++) {
@@ -374,7 +398,18 @@ function getPayload(request, options, callback) {
             } catch(err) {
                 return callback(err);
             }
-        });
+        }
+
+        return REQUEST({
+            method: "POST",
+            url: "https://" + IDENTITY_HOST + "/.well-known/openpeer-services-get",
+            body: JSON.stringify({
+                request: request
+            }),
+            headers: {
+                "Content-Type": "application/json"
+            }
+        }, handleResult);
     } else
     if (request.$handler === "bootstrapper" && request.$method === "services-get-dev") {
 		return callback(null, SERVICE.nestResponse(["services", "service"], [
