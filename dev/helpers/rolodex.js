@@ -92,7 +92,7 @@ function getPayload(request, options, callback) {
 		return callback(null, {
 			"rolodex": {
 				"updateNext": 54433434,
-				"version": "4341443-54343a"
+				"version": false
 			},
 			"identities": {
 				"identity": [
