@@ -30,6 +30,14 @@ define([
 			}).fail(done);
 		});
 
+		test('should fetch contacts', function(done) {
+			return op.getContacts().then(function(contacts) {
+				Assert.isObject(contacts);
+				Assert.isObject(contacts["identity://foo.com/alice"]);
+				done();
+			}).fail(done);
+		});
+
 		test('destroy', function(done) {
 	        return op.destroy().then(function() {
 	          	return HELPERS.ensureNoConnections(done);
