@@ -6,6 +6,7 @@ define([
 
   'use strict';
 
+return;
   suite('AccountFinder-Live', function () {
 
     this.timeout(10 * 1000);
@@ -18,8 +19,9 @@ define([
           _dev: false,
           _debug: true,
           _logPrefix: "AccountFinder-Live - connect",
-          identity: "identity://unstable.hookflash.me/test-AccountFinder-Live",
-          identityHost: Util.getHost()
+          identity: "identity://facebook.com/",
+          identityHost: Util.getHost(),
+          identityDomain: "idprovider-javascript.hookflash.me"
         });
         return client.ready().then(function() {
           return client.destroy().then(function() {
@@ -28,7 +30,7 @@ define([
         }).fail(done);
       });
     });
-
+return;
     suite('Session Keepalive', function() {
 
       var client = null;

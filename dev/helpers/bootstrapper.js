@@ -239,6 +239,8 @@ function getPayload(request, options, callback) {
 	} else
 	if (request.$handler === "bootstrapper" && request.$method === "services-get") {
 
+        request.$domain = IDENTITY_HOST;
+
         function handleResult(err, response, body) {
             if (err) return callback(err);
 
@@ -254,10 +256,7 @@ function getPayload(request, options, callback) {
 
                     if (data.result.error['$id'] === 302) {
 
-                        //var url = data.result.error['location'];
-                        var url = "https://" + BOOTSTRAPPER_HOST + "/.well-known/openpeer-services-get";
-
-                        //request.$domain = URL.parse(url).hostname;
+                        var url = data.result.error['location'];
 
                         return REQUEST({
                             method: "POST",
@@ -282,7 +281,7 @@ function getPayload(request, options, callback) {
                     var service = data.result.services.service[i];
 
                     if (service.type === "identity-lockbox" || service.type === "namespace-grant" || service.type === "rolodex") {
-                        data.result.services.service = data.result.services.service.splice(i, 1);
+                        data.result.services.service.splice(i, 1);
                         i--;
                         continue;
                     }
@@ -293,8 +292,9 @@ function getPayload(request, options, callback) {
                     service.methods.method = service.methods.method.map(function(method) {
                         if (
                             method.name === "finders-get" ||
-                            method.name === "signed-salt-get" ||                            
-                            method.name === "certificates-get"
+                            method.name === "signed-salt-get" ||
+                            method.name === "certificates-get" ||
+                            method.name === "identity-access-inner-frame"
                         ) {
                             return method;
                         }
@@ -303,10 +303,6 @@ function getPayload(request, options, callback) {
                     });
 
                     if (service.type === "identity") {
-                        service.methods.method.push({
-                            name: "identity-access-start",
-                            uri: "http://" + options.host + "/.helpers/identity-access-start"
-                        });
                         service.methods.method = service.methods.method.filter(function(method) {
                             if (method.name === "identity-lookup-update") return false;
                             if (method.name === "identity-access-lockbox-update") return false;
@@ -484,6 +480,10 @@ function getPayload(request, options, callback) {
                             "uri": "http://" + options.host + "/.helpers/identity-login-validate"
                         },
                         {
+                            "name": "identity-access-inner-frame",
+                            "uri": "http://" + options.host + "/.helpers/identity-access-inner-frame"
+                        },
+                        {
                             "name": "identity-lookup-update",
                             "uri": "https://" + options.host + "/.helpers/identity-lookup-update"
                         },
@@ -494,12 +494,6 @@ function getPayload(request, options, callback) {
                         {
                             "name": "identity-access-rolodex-credentials-get",
                             "uri": "https://" + options.host + "/.helpers/identity-access-rolodex-credentials-get"
-                        },
-                        // NOTE: Included here for testing only. This service is typically provided
-                        //       by the webpage inner frame.
-                        {
-                            "name": "identity-access-start",
-                            "uri": "https://" + options.host + "/.helpers/identity-access-start"
                         }
                     ]
                 }

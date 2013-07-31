@@ -26,9 +26,94 @@ exports.hook = function(options, app) {
 	// @see http://docs.openpeer.org/OpenPeerProtocolSpecificationAnnexRolodex/#IdentityServiceRequestsAnnex-IdentityAccessRolodexCredentialsGetRequest
 	app.post(/^\/.helpers\/identity-access-rolodex-credentials-get$/, responder);
 
-	// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#IdentityServiceRequests-IdentityAccessStartNotification
-	// NOTE: This should go to the webpage inner frame instead of a server.
-	app.post(/^\/.helpers\/identity-access-start$/, responder);
+	// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#IdentityServiceRequests-IdentityAccessInnerFrameWebpage
+	app.get(/^\/.helpers\/identity-access-inner-frame$/, function(req, res, next) {
+		// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#IdentityServiceRequests-IdentityAccessWindowRequest
+		var message = {
+			"request": {
+				"$domain": "provider.com",
+				"$appid": "xyz123",
+				"$id": "abd23",
+				"$handler": "identity",
+				"$method": "identity-access-window",
+				"browser": {
+				    "ready": true,
+				    "visibility": true
+				}
+			}
+		};
+		var html = [
+			'<!DOCTYPE html><html lang="en"><head>',
+			'<script src="/ui/require.js"></script>',
+			'<script>',
+				'requirejs.config({',
+					'paths: {',
+						'opjs: "/lib/opjs"',
+					'}',
+				'});',
+				'require([',
+					'"opjs/util",',
+					'"opjs/assert"',
+				'], function(Util, ASSERT) {',
+
+					'window.addEventListener("message", function(event) {',
+			            'var request = null;',
+			            'if (typeof event.data === "string" && event.data.substring(0, 1) === "{") {',
+			           		'try {',
+			              		'request = JSON.parse(event.data).notify;',
+			            	'} catch(err) {}',
+			          	'}',
+			          	'if (request) {',
+							'if (request.$handler === "identity") {',
+								// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#IdentityServiceRequests-IdentityAccessStartNotification
+								'if (request.$method === "identity-access-start") {',
+									'ASSERT.equal(typeof request.agent, "object");',
+									'ASSERT.equal(typeof request.identity, "object");',
+									'ASSERT.equal(typeof request.browser, "object");',
+									'var parsedIdentity = Util.parseIdentityURI(request.identity.base);',
+									// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#IdentityServiceRequests-IdentityAccessCompleteNotification
+									'var payload = {',
+					                    '"$domain": request.$domain,',
+					                    '"$appid": request.$appid,',
+					                    '"$id": request.$id,',
+					                    '"$handler": request.$handler,',
+					                    '"$method": request.$method,',
+										'"identity": {',
+											// a verifiable token that is linked to the logged-in identity'
+											'"accessToken": Util.randomHex(32),',
+											// a secret that can be used in combination to the "identity access token" to provide proof of previous successful login
+											'"accessSecret": Util.randomHex(32),',
+											'"accessSecretExpires": Math.floor(Date.now()/1000) + 60,',  // 60 seconds.
+											'"uri": request.identity.base,',
+											'"provider": parsedIdentity.domain',
+											// TODO: Support `reloginKey`.
+											//"reloginKey": "d2922f33a804c5f164a55210fe193327de7b2449-5007999b7734560b2c23fe81171af3e3-4c216c23"
+										'}',
+									'};',
+									'if (parsedIdentity.identity !== "test-lockbox-fresh") {',
+										'payload.lockbox = {',
+											'"domain": parsedIdentity.domain,',
+											// TODO: Use Lockbox key set by client.
+											'"keyIdentityHalf": "V20x...IbGFWM0J5WTIxWlBRPT0=",',
+											'"reset": false',
+										'};',
+									'}',
+									'event.source.postMessage(JSON.stringify({ result: payload }), event.origin);',
+								'}',
+							'}',
+						'}',
+					'}, false);',
+					'window.parent.postMessage(JSON.stringify(' + JSON.stringify(message) + '), "*");',
+				'});',
+			'</script>',
+			'</head><body></body></html>'
+		].join('\n');
+		res.writeHead(200, {
+			"Content-Type": "text/html",
+			"Content-Length": html.length
+		});
+		return res.end(html);
+	});
 }
 
 function getPayload(request, options, callback) {
@@ -96,36 +181,6 @@ function getPayload(request, options, callback) {
 			});
 		});
 		return callback(null, SERVICE.nestResponse(["identities", "identity"], identities));
-	} else
-	// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#IdentityServiceRequests-IdentityAccessStartNotification
-	if (request.$handler === "identity" && request.$method === "identity-access-start") {
-		ASSERT.equal(typeof request.agent, "object");
-		ASSERT.equal(typeof request.identity, "object");
-		ASSERT.equal(typeof request.browser, "object");
-		var parsedIdentity = Util.parseIdentityURI(request.identity.base);
-		// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#IdentityServiceRequests-IdentityAccessCompleteNotification
-		var payload = {
-			"identity": {
-				// a verifiable token that is linked to the logged-in identity
-				"accessToken": Util.randomHex(32),
-				// a secret that can be used in combination to the "identity access token" to provide proof of previous successful login
-				"accessSecret": Util.randomHex(32),
-				"accessSecretExpires": Math.floor(Date.now()/1000) + 60,	// 60 seconds.
-				"uri": request.identity.base,
-				"provider": parsedIdentity.domain
-				// TODO: Support `reloginKey`.
-				//"reloginKey": "d2922f33a804c5f164a55210fe193327de7b2449-5007999b7734560b2c23fe81171af3e3-4c216c23"
-			}
-		};
-		if (parsedIdentity.identity !== "test-lockbox-fresh") {
-			payload.lockbox = {
-				"domain": parsedIdentity.domain,
-				// TODO: Use Lockbox key set by client.
-				"keyIdentityHalf": "V20x...IbGFWM0J5WTIxWlBRPT0=",
-				"reset": false
-			};
-		}
-		return callback(null, payload);
 	} else
 	// @see http://docs.openpeer.org/OpenPeerProtocolSpecificationAnnexRolodex/#IdentityServiceRequestsAnnex-IdentityAccessRolodexCredentialsGetRequest
 	if (request.$handler === "identity" && request.$method === "identity-access-rolodex-credentials-get") {

@@ -11,6 +11,8 @@ define([
   'opjs/Stack'
 ], function(Util, Stack) {
 
+return;
+
   suite("SendMessageToPeer-Live", function() {
 
     suite("two clients with one location each", function() {

@@ -13,7 +13,7 @@ define([
   suite('Identity', function () {
 
     this.timeout(10 * 1000);
-
+/*
     suite('Identity - None', function () {
 
       test('connect & destroy', function(done) {
@@ -32,6 +32,7 @@ define([
       });
 
     });
+*/
 
     suite('Identity - Single', function () {
 
@@ -66,6 +67,7 @@ define([
 
     });
 
+/*
     suite('Identity - Add One', function () {
 
       test('connect & destroy', function(done) {
@@ -105,7 +107,7 @@ define([
       });
 
     });
-
+*/
   });
 
 
