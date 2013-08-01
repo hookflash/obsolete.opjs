@@ -34,11 +34,16 @@ define([
 			});
 
 			suite('have events', function() {
+
+				test("contacts.loaded(identity)", function() {
+				});
+
 			});
 
 			suite('have methods', function() {
 				[
-					"getContacts"
+					"getContacts",
+					"addIdentity"
 				].forEach(function(name) {
 					test(name, function() {
 						assert.isFunction(op[name]);
