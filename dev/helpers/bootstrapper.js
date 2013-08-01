@@ -270,7 +270,7 @@ function getPayload(request, options, callback) {
                         }, handleResult);
 
                     } else {
-                        return callback(new Error("Got error over openpeer wire: " + JSON.stringify()));
+                        return callback(new Error("Got error over openpeer wire: " + JSON.stringify(data.result.error)));
                     }
                 }
 
