@@ -266,7 +266,8 @@ function getPayload(request, options, callback) {
                             }),
                             headers: {
                                 "Content-Type": "application/json"
-                            }
+                            },
+                            rejectUnauthorized: false
                         }, handleResult);
 
                     } else {
@@ -404,7 +405,8 @@ function getPayload(request, options, callback) {
             }),
             headers: {
                 "Content-Type": "application/json"
-            }
+            },
+            rejectUnauthorized: false
         }, handleResult);
     } else
     if (request.$handler === "bootstrapper" && request.$method === "services-get-dev") {
