@@ -17,7 +17,7 @@ define([
       run("PublicationRepository-1", "PublicationRepository-2", function(API) {
 
         test('get missing doc', function(done) {
-          return API.peer1.getDoc({
+          return API.peer2.getDoc({
             "name": "/github.com/openpeer/opjs/dev/test-doc"
           }).then(function(publication) {
             assert.isNull(publication);
@@ -41,6 +41,23 @@ define([
           }).then(function(publication) {
             assert.isObject(publication);
             assert.equal(publication.getName(), "/github.com/openpeer/opjs/dev/test-doc");
+            return done();
+          }).fail(done);
+        });
+
+        test('delete existing doc', function(done) {
+          return API.peer1.deleteDoc({
+            "name": "/github.com/openpeer/opjs/dev/test-doc"
+          }).then(function() {
+            return done();
+          }).fail(done);
+        });
+
+        test('get deleted doc', function(done) {
+          return API.peer2.getDoc({
+            "name": "/github.com/openpeer/opjs/dev/test-doc"
+          }).then(function(publication) {
+            assert.isNull(publication);
             return done();
           }).fail(done);
         });
