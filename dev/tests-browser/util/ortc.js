@@ -5,6 +5,11 @@ define([
 
   suite('ORTC', function () {
 
+    if (navigator.userAgent.indexOf("PhantomJS") >= 0) {
+        test("tests disabled when running via PhantomJS");
+        return;
+    }
+
     var connectionOptions = {
         stunServers: [
             {
