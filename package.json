@@ -8,5 +8,10 @@
     },
     "devDependencies": {
         "amdefine": "~0.0.4"
+    },
+    "config": {
+        "run": {
+            "packagePath": "dev"
+        }
     }
 }

@@ -7,12 +7,24 @@ const FS = require("fs-extra");
 const MARKED = require("marked");
 const WAITFOR = require("waitfor");
 
-const PORT = 8081;
+const PORT = process.env.PORT || 8081;
 
+
+var serviceUid = false;
+if (FS.existsSync(PATH.join(__dirname, "../service.json"))) {
+    serviceUid = JSON.parse(FS.readFileSync(PATH.join(__dirname, "../service.json"))).uid;
+}
 
 exports.main = function(callback) {
     try {
         var app = EXPRESS();
+
+        app.use(function(req, res, next) {
+            if (serviceUid) {
+                res.setHeader("x-service-uid", serviceUid);
+            }
+            return next();
+        });
 
         app.use(EXPRESS.bodyParser());
 
