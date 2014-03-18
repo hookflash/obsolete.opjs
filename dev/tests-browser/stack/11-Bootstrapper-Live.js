@@ -12,38 +12,38 @@ define([
 
   suite('Bootstrapper-Live', function() {
 
-    test('`https://' + HOSTNAME + '/.well-known/openpeer-services-get` response', function(done) {
+    test('`http://' + HOSTNAME + '/.well-known/openpeer-services-get` response', function(done) {
       return Request.makeRequestTo(new Context({
         domain: "unstable.hookflash.me",
         appid: Util.randomHex(32),
         _dev: false,
         _debug: true
-      }), "https://" + HOSTNAME + "/.well-known/openpeer-services-get", "bootstrapper", "services-get").then(function(result) {
+      }), "http://" + HOSTNAME + "/.well-known/openpeer-services-get", "bootstrapper", "services-get").then(function(result) {
         assert.isObject(result);
         assert.isObject(result.services);
         return done(null);
       }).fail(done);
     });
 
-    test('`https://' + HOSTNAME + '/certificates-get` response', function(done) {
+    test('`http://' + HOSTNAME + '/certificates-get` response', function(done) {
       return Request.makeRequestTo(new Context({
         domain: "unstable.hookflash.me",
         appid: Util.randomHex(32),
         _dev: false
-      }), "https://" + HOSTNAME + "/certificates-get", "certificates", "certificates-get").then(function(result) {
+      }), "http://" + HOSTNAME + "/certificates-get", "certificates", "certificates-get").then(function(result) {
         assert.isObject(result);
         assert.isObject(result.certificates);
         return done(null);
       }).fail(done);
     });
 
-    test('`https://' + HOSTNAME + '/finders-get` response', function(done) {
+    test('`http://' + HOSTNAME + '/finders-get` response', function(done) {
       return Request.makeRequestTo(new Context({
         domain: "unstable.hookflash.me",
         appid: Util.randomHex(32),
         _dev: false,
         _debug: true
-      }), "https://" + HOSTNAME + "/finders-get", "bootstrapped-finders", "finders-get", {
+      }), "http://" + HOSTNAME + "/finders-get", "bootstrapped-finders", "finders-get", {
         "servers": 2
       }).then(function(result) {
         assert.isObject(result);
@@ -52,12 +52,12 @@ define([
       }).fail(done);
     });
 
-    test('`https://' + HOSTNAME + '/signed-salt-get` response', function(done) {
+    test('`http://' + HOSTNAME + '/signed-salt-get` response', function(done) {
       return Request.makeRequestTo(new Context({
         domain: "unstable.hookflash.me",
         appid: Util.randomHex(32),
         _dev: false
-      }), "https://" + HOSTNAME + "/signed-salt-get", "peer-salt", "signed-salt-get", {
+      }), "http://" + HOSTNAME + "/signed-salt-get", "peer-salt", "signed-salt-get", {
         "salts": 2
       }).then(function(result) {
         assert.isObject(result);
@@ -66,12 +66,12 @@ define([
       }).fail(done);
     });
 
-    test('`https://' + HOSTNAME + '/identity` response', function(done) {
+    test('`http://' + HOSTNAME + '/identity` response', function(done) {
       return Request.makeRequestTo(new Context({
         domain: "unstable.hookflash.me",
         appid: Util.randomHex(32),
         _dev: false
-      }), "https://" + HOSTNAME + "/identity", "identity-lookup", "identity-lookup", {
+      }), "http://" + HOSTNAME + "/identity", "identity-lookup", "identity-lookup", {
         "providers": {
           "provider": {
             "base": "identity://unstable.hookflash.me/",

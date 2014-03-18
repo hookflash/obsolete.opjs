@@ -54,7 +54,7 @@ exports.getFinderServer = function(callback) {
 
   return REQUEST({
       method: "POST",
-      url: "https://" + HOSTNAME + "/finders-get",
+      url: "http://" + HOSTNAME + "/finders-get",
       body: JSON.stringify({
           "$domain": "unstable.hookflash.me",
           "$appid": "xyz123",

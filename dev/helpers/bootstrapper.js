@@ -14,7 +14,7 @@ exports.hook = function(options, app) {
 
 	var responder = SERVICE.responder(options, getPayload);
 
-	// `https://domain.com/.well-known/openpeer-services-get`
+	// `http://domain.com/.well-known/openpeer-services-get`
 	// @see http://docs.openpeer.org/OpenPeerProtocolSpecification/#BootstrapperServiceRequests-ServicesGetRequest
     app.post(/^\/\.well-known\/openpeer-services-get$/, responder);
 
@@ -245,7 +245,7 @@ function getPayload(request, options, callback) {
             if (err) return callback(err);
 
             if (response.statusCode !== 200) {
-                return callback(new Error("Got status code '" + response.statusCode + "' while calling 'https://" + IDENTITY_HOST + "/.well-known/openpeer-services-get'"));
+                return callback(new Error("Got status code '" + response.statusCode + "' while calling 'http://" + IDENTITY_HOST + "/.well-known/openpeer-services-get'"));
             }
             try {
                 var data = JSON.parse(body);
@@ -399,7 +399,7 @@ function getPayload(request, options, callback) {
 
         return REQUEST({
             method: "POST",
-            url: "https://" + IDENTITY_HOST + "/.well-known/openpeer-services-get",
+            url: "http://" + IDENTITY_HOST + "/.well-known/openpeer-services-get",
             body: JSON.stringify({
                 request: request
             }),
@@ -487,15 +487,15 @@ function getPayload(request, options, callback) {
                         },
                         {
                             "name": "identity-lookup-update",
-                            "uri": "https://" + options.host + "/.helpers/identity-lookup-update"
+                            "uri": "http://" + options.host + "/.helpers/identity-lookup-update"
                         },
                         {
                             "name": "identity-access-lockbox-update",
-                            "uri": "https://" + options.host + "/.helpers/identity-access-lockbox-update"
+                            "uri": "http://" + options.host + "/.helpers/identity-access-lockbox-update"
                         },
                         {
                             "name": "identity-access-rolodex-credentials-get",
-                            "uri": "https://" + options.host + "/.helpers/identity-access-rolodex-credentials-get"
+                            "uri": "http://" + options.host + "/.helpers/identity-access-rolodex-credentials-get"
                         }
                     ]
                 }
@@ -508,7 +508,7 @@ function getPayload(request, options, callback) {
                     "method": [
                         {
                             "name": "identity-lookup-check",
-                            "uri": "https://" + options.host + "/.helpers/identity-check"
+                            "uri": "http://" + options.host + "/.helpers/identity-check"
                         },
                         {
                             "name": "identity-lookup",

@@ -28,7 +28,7 @@ define([
 
       test('`.getUrl()`', function() {
         var bootstrapper = new Bootstrapper(new Context(), new AccountMock());
-        assert.equal(bootstrapper.getUrl(), "https://" + Util.getHost() + "/.well-known/openpeer-services-get");
+        assert.equal(bootstrapper.getUrl(), "http://" + Util.getHost() + "/.well-known/openpeer-services-get");
       });
 
       test('`.ready()` returns promise that resolves', function(done) {
