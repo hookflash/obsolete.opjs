@@ -3,7 +3,7 @@ define([
 ], function (Events) {
   'use strict';
 
-  function AccountMock() {  	
+  function AccountMock() {
   }
 
   AccountMock.prototype = Object.create(Events.prototype);

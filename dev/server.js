@@ -86,7 +86,7 @@ exports.main = function(callback) {
 */
 
                             var hbs = HBS.create();
-                            
+
                             app.set("view engine", "hbs");
 
                             app.engine("hbs", hbs.__express);
@@ -161,7 +161,7 @@ function mountStaticDir(app, route, path) {
 var tests = null;
 function getTemplateData(page, callback) {
     if (page === "index") {
-        if (tests) return callback(null, tests);        
+        if (tests) return callback(null, tests);
         return getTests(function(err, files) {
             if (err) return callback(err);
             tests = {
