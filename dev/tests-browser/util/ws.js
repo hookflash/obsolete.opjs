@@ -1,7 +1,7 @@
 /* global define, suite, test, assert */
 define([
-  'opjs/ws',
-  'opjs/context'
+  'opjs-primitives/ws',
+  'opjs-primitives/context'
 ], function (WS, Context) {
 
   'use strict';

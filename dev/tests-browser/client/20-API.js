@@ -2,7 +2,7 @@
 define([
   'opjs/OpenPeer',
   'opjs/Stack',
-  'opjs/util'
+  'opjs-primitives/util'
 ], function(OpenPeer, Stack, Util) {
 
 	'use strict';
@@ -18,6 +18,7 @@ define([
 			test("when instanciated", function() {
 				op = new OpenPeer({
 					_logPrefix: "API - OpenPeer",
+			        appid: 'com.hookflash.testapp',
 					identity: "identity://" + Util.getHostname() + "/test-API-OpenPeer"
 				});
 			});

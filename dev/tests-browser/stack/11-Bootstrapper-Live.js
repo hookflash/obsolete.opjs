@@ -1,24 +1,26 @@
 /* global define, suite, test, assert */
 define([
-  'opjs/request',
-  'opjs/util',
-  'opjs/context'
+  'opjs-primitives/request',
+  'opjs-primitives/util',
+  'opjs-primitives/context'
 ], function (Request, Util, Context) {
 
   'use strict';
 
-//  var HOSTNAME = "unstable.hookflash.me";
-  var HOSTNAME = "provisioning-stable-dev.hookflash.me";
+//  var HOSTNAME = DOMAIN;
+//  var HOSTNAME = "provisioning-stable-dev.hookflash.me";
+  var HOSTNAME = window.HFSERVICE_HOSTNAME;
+  var DOMAIN = window.IDENTITY_HOSTNAME;
 
   suite('Bootstrapper-Live', function() {
 
-    test('`http://' + HOSTNAME + '/.well-known/openpeer-services-get` response', function(done) {
+    test('`http://' + HOSTNAME + '/services-get` response', function(done) {
       return Request.makeRequestTo(new Context({
-        domain: "unstable.hookflash.me",
-        appid: Util.randomHex(32),
+        domain: DOMAIN,
+        appid: 'com.hookflash.testapp',
         _dev: false,
         _debug: true
-      }), "http://" + HOSTNAME + "/.well-known/openpeer-services-get", "bootstrapper", "services-get").then(function(result) {
+      }), "http://" + HOSTNAME + "/services-get", "bootstrapper", "services-get").then(function(result) {
         assert.isObject(result);
         assert.isObject(result.services);
         return done(null);
@@ -27,8 +29,8 @@ define([
 
     test('`http://' + HOSTNAME + '/certificates-get` response', function(done) {
       return Request.makeRequestTo(new Context({
-        domain: "unstable.hookflash.me",
-        appid: Util.randomHex(32),
+        domain: DOMAIN,
+        appid: 'com.hookflash.testapp',
         _dev: false
       }), "http://" + HOSTNAME + "/certificates-get", "certificates", "certificates-get").then(function(result) {
         assert.isObject(result);
@@ -39,8 +41,8 @@ define([
 
     test('`http://' + HOSTNAME + '/finders-get` response', function(done) {
       return Request.makeRequestTo(new Context({
-        domain: "unstable.hookflash.me",
-        appid: Util.randomHex(32),
+        domain: DOMAIN,
+        appid: 'com.hookflash.testapp',
         _dev: false,
         _debug: true
       }), "http://" + HOSTNAME + "/finders-get", "bootstrapped-finders", "finders-get", {
@@ -54,8 +56,8 @@ define([
 
     test('`http://' + HOSTNAME + '/signed-salt-get` response', function(done) {
       return Request.makeRequestTo(new Context({
-        domain: "unstable.hookflash.me",
-        appid: Util.randomHex(32),
+        domain: DOMAIN,
+        appid: 'com.hookflash.testapp',
         _dev: false
       }), "http://" + HOSTNAME + "/signed-salt-get", "peer-salt", "signed-salt-get", {
         "salts": 2
@@ -68,8 +70,8 @@ define([
 
     test('`http://' + HOSTNAME + '/identity` response', function(done) {
       return Request.makeRequestTo(new Context({
-        domain: "unstable.hookflash.me",
-        appid: Util.randomHex(32),
+        domain: DOMAIN,
+        appid: 'com.hookflash.testapp',
         _dev: false
       }), "http://" + HOSTNAME + "/identity", "identity-lookup", "identity-lookup", {
         "providers": {

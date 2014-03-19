@@ -4,7 +4,8 @@
     "pm": "npm",
     "dependencies": {
         "cifre": "~0.0.8",
-        "ortc-over-rtc": "~0.1.0"
+        "ortc-over-rtc": "~0.1.0",
+        "opjs-primitives": "~0.1.0"
     },
     "devDependencies": {
         "amdefine": "~0.0.4"

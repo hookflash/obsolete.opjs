@@ -1,6 +1,6 @@
 /* global define, suite, test, assert */
 define([
-  'opjs/util'
+  'opjs-primitives/util'
 ], function (util) {
 
   'use strict';

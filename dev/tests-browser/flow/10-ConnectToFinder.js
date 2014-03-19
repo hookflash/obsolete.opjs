@@ -7,9 +7,9 @@ Test is successful if clients are deemed to be connected to finder service.
 */
 /* global define, suite, test, assert, HELPERS */
 define([
-  'opjs/util',
+  'opjs-primitives/util',
   'opjs/Stack',
-  'opjs/assert'
+  'opjs-primitives/assert'
 ], function(Util, Stack, Assert) {
 
   suite("ConnectToFinder", function() {
@@ -19,6 +19,7 @@ define([
     test('one client', function(done) {
       var client = new Stack({
         _logPrefix: "ConnectToFinder - one client",
+        appid: 'com.hookflash.testapp',
         identity: "identity://" + Util.getHostname() + "/test-ConnectToFinder-one"
       });
       return client.ready().then(function() {
@@ -32,10 +33,12 @@ define([
 
       var client1 = new Stack({
         _logPrefix: "ConnectToFinder - two clients (1)",
+        appid: 'com.hookflash.testapp',
         identity: "identity://" + Util.getHostname() + "/test-ConnectToFinder-two-1"
       });
       var client2 = new Stack({
         _logPrefix: "ConnectToFinder - two clients (2)",
+        appid: 'com.hookflash.testapp',
         identity: "identity://" + Util.getHostname() + "/test-ConnectToFinder-two-2"
       });
 

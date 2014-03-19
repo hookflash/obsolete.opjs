@@ -2,9 +2,9 @@
 define([
   'opjs/Stack',
   'q/q',
-  'opjs/util',
-  'opjs/ws',
-  'opjs/context'
+  'opjs-primitives/util',
+  'opjs-primitives/ws',
+  'opjs-primitives/context'
 ], function (Stack, Q, Util, WS, Context) {
 
   'use strict';
@@ -20,6 +20,7 @@ define([
       test('connect', function(done) {
         client = new Stack({
           _logPrefix: "AccountFinder - Session",
+          appid: 'com.hookflash.testapp',
           identity: "identity://" + Util.getHostname() + "/test-AccountFinder-Session"
         });
         return client.ready().then(function() {
@@ -107,6 +108,7 @@ define([
       test('connect', function(done) {
         client = new Stack({
           _logPrefix: "AccountFinder - Session Keepalive",
+          appid: 'com.hookflash.testapp',
           identity: "identity://" + Util.getHostname() + "/test-AccountFinder-SessionKeepalive",
           _finderKeepalive: 1  // 1 second.
         });
@@ -140,6 +142,7 @@ define([
 
         var client = new Stack({
           _logPrefix: "AccountFinder - failures",
+          appid: 'com.hookflash.testapp',
           identity: "identity://" + Util.getHostname() + "/test-AccountFinder-Failures"
         });
         return client.ready().then(function() {

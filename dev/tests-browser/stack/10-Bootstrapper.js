@@ -2,10 +2,10 @@
 define([
   'mocks/Account',
   'opjs/stack/Bootstrapper',
-  'opjs/request',
-  'opjs/util',
+  'opjs-primitives/request',
+  'opjs-primitives/util',
   'q/q',
-  'opjs/context'
+  'opjs-primitives/context'
 ], function (AccountMock, Bootstrapper, Request, Util, Q, Context) {
 
   'use strict';

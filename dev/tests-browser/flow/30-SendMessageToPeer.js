@@ -7,7 +7,7 @@ Test is successful if messages are received and replied to.
 */
 /* global define, suite, test, assert, HELPERS */
 define([
-  'opjs/util',
+  'opjs-primitives/util',
   'opjs/Stack'
 ], function(Util, Stack) {
 
@@ -24,6 +24,7 @@ define([
 
         client1 = new Stack({
           _logPrefix: "FindPeer (1)",
+          appid: 'com.hookflash.testapp',
           identity: "identity://" + Util.getHostname() + "/test-SendMessageToPeer-1",
           _p2pRelayHost: "localhost:3000",
           _debug: true,
@@ -31,6 +32,7 @@ define([
         });
         client2 = new Stack({
           _logPrefix: "FindPeer (2)",
+          appid: 'com.hookflash.testapp',
           identity: "identity://" + Util.getHostname() + "/test-SendMessageToPeer-2",
           _p2pRelayHost: "localhost:3000",
           _debug: true,

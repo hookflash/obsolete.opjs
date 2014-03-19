@@ -16,6 +16,11 @@ window.__TestHarnessReady.then(function() {
 	window.assert = chai.assert;
 	window.ASSERT = chai.assert;
 
+	window.INSTANCE_HOSTNAME = "{{config.server.instanceHostname}}";
+	window.HFSERVICE_HOSTNAME = "{{config.hfServicesHost}}";
+	window.IDENTITY_HOSTNAME = "{{config.identityProviderHost}}";
+	window.IDENTITY_DOMAIN = "{{config.identityDomain}}";
+
 	requirejs([
 		{{#each tests}}
 			"{{id}}"{{#if more}},{{/if}}

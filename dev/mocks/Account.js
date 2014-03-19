@@ -1,5 +1,5 @@
 define([
-  'opjs/events'
+  'opjs-primitives/events'
 ], function (Events) {
   'use strict';
 

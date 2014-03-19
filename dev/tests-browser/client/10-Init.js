@@ -2,8 +2,8 @@
 define([
   'opjs/OpenPeer',
   'opjs/Stack',
-  'opjs/assert',
-  'opjs/util'
+  'opjs-primitives/assert',
+  'opjs-primitives/util'
 ], function(OpenPeer, Stack, Assert, Util) {
 
 	'use strict';
@@ -23,6 +23,7 @@ define([
 				test("should give us an object", function(done) {
 					var op = new OpenPeer({
 						_logPrefix: "Init - OpenPeer",
+				        appid: 'com.hookflash.testapp',
 						identity: "identity://" + Util.getHostname() + "/test-Init-OpenPeer"
 					});
 					assert.isObject(op);
@@ -47,6 +48,7 @@ define([
 				test("should give us an object", function(done) {
 					var stack = new Stack({
 						_logPrefix: "Init - Stack",
+				        appid: 'com.hookflash.testapp',
 						identity: "identity://" + Util.getHostname() + "/test-Init-Stack"
 					});
 					assert.isObject(stack);

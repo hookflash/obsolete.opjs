@@ -2,10 +2,10 @@
 define([
   'opjs/Stack',
   'q/q',
-  'opjs/assert',
-  'opjs/util',
-  'opjs/ws',
-  'opjs/context'
+  'opjs-primitives/assert',
+  'opjs-primitives/util',
+  'opjs-primitives/ws',
+  'opjs-primitives/context'
 ], function (Stack, Q, Assert, Util, WS, Context) {
 
   suite('Lockbox', function () {
@@ -19,6 +19,7 @@ define([
       test('connect', function(done) {
         client = new Stack({
           identity: "identity://" + Util.getHostname() + "/test-lockbox-fresh",
+          appid: 'com.hookflash.testapp',
           _logPrefix: "Lockbox - Fresh"
         });
         return client.ready().then(function() {
@@ -40,6 +41,7 @@ define([
       test('connect', function(done) {
         client = new Stack({
           identity: "identity://" + Util.getHostname() + "/test-lockbox-existing",
+          appid: 'com.hookflash.testapp',
           _logPrefix: "Lockbox - Existing"
         });
         return client.ready().then(function() {

@@ -1,8 +1,8 @@
 /* global define, suite, test, assert */
 define([
-  'opjs/util',
-  'opjs/assert',
-  'opjs/crypto',
+  'opjs-primitives/util',
+  'opjs-primitives/assert',
+  'opjs-primitives/crypto',
   'cifre/forge/pki',
   'cifre/forge/sha256',
   'cifre/aes',

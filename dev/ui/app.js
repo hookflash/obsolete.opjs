@@ -4,6 +4,7 @@
 	requirejs.config({
 		paths: {
 			opjs: "/lib/opjs",
+			"opjs-primitives": "/lib/opjs-primitives",
 			ortc: "/lib/ortc",
 			cifre: "/lib/cifre",
 			q: "/lib/q",
@@ -18,7 +19,7 @@
 
 	require([
 		"q/q",
-		"opjs/assert"
+		"opjs-primitives/assert"
 	], function(Q, Assert) {
 
 		window.HELPERS = {

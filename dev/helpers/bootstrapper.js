@@ -3,7 +3,7 @@ const ASSERT = require("assert");
 const REQUEST = require("request");
 const URL = require("url");
 const SERVICE = require("./service");
-const Util = require("../../lib/util");
+const Util = require("opjs-primitives/lib/util");
 
 
 var IDENTITY_HOST = "idprovider-javascript.hookflash.me";

@@ -15,6 +15,11 @@ if (FS.existsSync(PATH.join(__dirname, "../service.json"))) {
     serviceUid = JSON.parse(FS.readFileSync(PATH.join(__dirname, "../service.json"))).uid;
 }
 
+var config = {};
+if (FS.existsSync(PATH.join(__dirname, "../../../config.js"))) {
+    config = require("../../../config").getConfig();
+}
+
 exports.main = function(callback) {
     try {
         var app = EXPRESS();
@@ -91,6 +96,9 @@ exports.main = function(callback) {
                                 return getTemplateData(page, function(err, data) {
                                     if (err) return next(err);
                                     try {
+
+                                        data.config = config;
+
                                         res.render(page.split("/")[0], data);
                                     } catch(err) {
                                         return next(err);
@@ -103,6 +111,7 @@ exports.main = function(callback) {
                             mountStaticDir(app, /^\/tests\/(.*)$/, PATH.join(__dirname, "tests-browser"));
                             mountStaticDir(app, /^\/mocks\/(.*)$/, PATH.join(__dirname, "mocks"));
                             mountStaticDir(app, /^\/lib\/opjs\/(.*)$/, PATH.join(__dirname, "../lib"));
+                            mountStaticDir(app, /^\/lib\/opjs-primitives\/(.*)$/, PATH.join(__dirname, "../node_modules/opjs-primitives/lib"));
                             mountStaticDir(app, /^\/lib\/ortc\/(.*)$/, PATH.join(__dirname, "../node_modules/ortc-over-rtc/lib"));
                             mountStaticDir(app, /^\/lib\/cifre\/(.*)$/, PATH.join(__dirname, "../node_modules/cifre"));
                             mountStaticDir(app, /^\/lib\/q\/(.*)$/, PATH.join(__dirname, "node_modules/q"));

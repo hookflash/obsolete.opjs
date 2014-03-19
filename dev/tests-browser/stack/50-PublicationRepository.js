@@ -2,7 +2,7 @@
 define([
   'opjs/Stack',
   'q/q',
-  'opjs/util',
+  'opjs-primitives/util',
 ], function (Stack, Q, Util) {
 
   'use strict';
@@ -75,6 +75,7 @@ define([
 
         client1 = new Stack({
           _logPrefix: "PublicationRepository - " + id1,
+          appid: 'com.hookflash.testapp',
           identity: "identity://" + Util.getHostname() + "/test-" + id1,
           _p2pRelayHost: "localhost:3000",
           _debug: true,
@@ -82,6 +83,7 @@ define([
         });
         client2 = new Stack({
           _logPrefix: "PublicationRepository - " + id2,
+          appid: 'com.hookflash.testapp',
           identity: "identity://" + Util.getHostname() + "/test-" + id2,
           _p2pRelayHost: "localhost:3000",
           _debug: true,

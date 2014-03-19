@@ -5,7 +5,7 @@ Instanciate 2 clients and have them find each other.
 */
 /* global define, suite, test, assert, HELPERS */
 define([
-  'opjs/util',
+  'opjs-primitives/util',
   'opjs/Stack'
 ], function(Util, Stack) {
 
@@ -22,6 +22,7 @@ define([
 
         client1 = new Stack({
           _logPrefix: "FindPeer (1)",
+          appid: 'com.hookflash.testapp',
           identity: "identity://" + Util.getHostname() + "/test-FindPeer-1",
           _p2pRelayHost: "localhost:3000",
           _debug: false,
@@ -29,6 +30,7 @@ define([
         });
         client2 = new Stack({
           _logPrefix: "FindPeer (2)",
+          appid: 'com.hookflash.testapp',
           identity: "identity://" + Util.getHostname() + "/test-FindPeer-2",
           _p2pRelayHost: "localhost:3000",
           _debug: false,

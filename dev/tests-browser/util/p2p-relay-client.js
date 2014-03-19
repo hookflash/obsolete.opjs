@@ -1,7 +1,7 @@
 /* global define, suite, test, assert */
 define([
   'opjs/p2p-relay-client',
-  'opjs/context'
+  'opjs-primitives/context'
 ], function (RelayClient, Context) {
 
   'use strict';

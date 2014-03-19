@@ -1,8 +1,8 @@
 /* global define, suite, test, assert, HELPERS */
 define([
   'opjs/OpenPeer',
-  'opjs/assert',
-  'opjs/util'
+  'opjs-primitives/assert',
+  'opjs-primitives/util'
 ], function(OpenPeer, Assert, Util) {
 
 	suite('Contact', function() {
@@ -19,6 +19,7 @@ define([
 		test('init', function(done) {
 			op = new OpenPeer({
 				_logPrefix: "Contact",
+		        appid: 'com.hookflash.testapp',
 				identity: "identity://" + Util.getHostname() + "/test-Contact"
 			});
 			return op.ready().then(function() {

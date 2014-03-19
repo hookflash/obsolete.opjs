@@ -4,8 +4,8 @@ const PATH = require("path");
 const FS = require("fs-extra");
 const WAITFOR = require("waitfor");
 const SERVICE = require("./service");
-const Crypto = require("../../lib/crypto");
-const Util = require("../../lib/util");
+const Crypto = require("opjs-primitives/lib/crypto");
+const Util = require("opjs-primitives/lib/util");
 
 
 exports.hook = function(options, app) {

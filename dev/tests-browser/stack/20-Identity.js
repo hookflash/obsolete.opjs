@@ -2,10 +2,10 @@
 define([
   'opjs/Stack',
   'q/q',
-  'opjs/assert',
-  'opjs/util',
-  'opjs/ws',
-  'opjs/context'
+  'opjs-primitives/assert',
+  'opjs-primitives/util',
+  'opjs-primitives/ws',
+  'opjs-primitives/context'
 ], function (Stack, Q, Assert, Util, WS, Context) {
 
   'use strict';
@@ -42,7 +42,8 @@ define([
       test('connect', function(done) {
         client = new Stack({
           identity: identity,
-          _logPrefix: "Identity - Single"
+          _logPrefix: "Identity - Single",
+          appid: 'com.hookflash.testapp'
         });
         return client.ready().then(function() {
           return done(null);

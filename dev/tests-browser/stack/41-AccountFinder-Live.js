@@ -1,7 +1,7 @@
 /* global define, suite, test, assert */
 define([
   'opjs/Stack',
-  'opjs/util'
+  'opjs-primitives/util'
 ], function (Stack, Util) {
 
   'use strict';
@@ -19,6 +19,7 @@ return;
           _dev: false,
           _debug: true,
           _logPrefix: "AccountFinder-Live - connect",
+          appid: 'com.hookflash.testapp',
           identity: "identity://facebook.com/",
           identityHost: Util.getHost(),
           identityDomain: "idprovider-javascript.hookflash.me"
@@ -39,6 +40,7 @@ return;
         client = new Stack({
           _dev: false,
           _debug: true,
+          appid: 'com.hookflash.testapp',
           _logPrefix: "AccountFinder-Live - Session Keepalive",
           identity: "identity://unstable.hookflash.me/test-AccountFinder-Live-SessionKeepalive",
           identityHost: Util.getHost(),
