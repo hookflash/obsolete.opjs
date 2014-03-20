@@ -1,16 +1,16 @@
 /* global define, suite, test, assert, HELPERS */
 define([
-  'opjs/OpenPeer',
-  'opjs-primitives/assert',
-  'opjs-primitives/util'
+	'opjs/OpenPeer',
+	'opjs-primitives/assert',
+	'opjs-primitives/util'
 ], function(OpenPeer, Assert, Util) {
 
 	suite('Contact', function() {
 
-	    if (navigator.userAgent.indexOf("PhantomJS") >= 0) {
-	        test("tests disabled when running via PhantomJS for now. TODO: Fix. Seems to have to do with identity login.");
-	        return;
-	    }
+		if (navigator.userAgent.indexOf("PhantomJS") >= 0) {
+			test("tests disabled when running via PhantomJS for now. TODO: Fix. Seems to have to do with identity login.");
+			return;
+		}
 
 		this.timeout(10 * 1000);
 
@@ -19,17 +19,19 @@ define([
 		test('init', function(done) {
 			op = new OpenPeer({
 				_logPrefix: "Contact",
-		        appid: 'com.hookflash.testapp',
+				appid: 'com.hookflash.testapp',
 				identity: "identity://" + Util.getHostname() + "/test-Contact"
 			});
 			return op.ready().then(function() {
 				return done();
-	        }).fail(done);
+			}).fail(done);
 		});
 
 		test('should be ready', function(done) {
 			return op._core.ready().then(function() {
-				Assert.equal(Q.isFulfilled(op._core._contact.ready()), true);
+				var readyPromise = op._core._contact.ready();
+				var readyState = readyPromise.inspect();
+				Assert.equal(readyState.state, "fulfilled");
 				done();
 			}).fail(done);
 		});
@@ -43,9 +45,9 @@ define([
 		});
 
 		test('destroy', function(done) {
-	        return op.destroy().then(function() {
-	          	return HELPERS.ensureNoConnections(done);
-	        }).fail(done);
+			return op.destroy().then(function() {
+				return HELPERS.ensureNoConnections(done);
+			}).fail(done);
 		});
 	});
 
