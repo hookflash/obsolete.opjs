@@ -29,11 +29,6 @@ define([
 
 		test('should fetch contacts', function(done) {
 			return op.getContacts().then(function(contacts) {
-
-				var readyPromise = op._core._contact.ready();
-				var readyState = readyPromise.inspect();
-				Assert.equal(readyState.state, "fulfilled");
-
 				Assert.isObject(contacts);
 				Assert.isObject(contacts["identity://foo.com/alice"]);
 				done();
