@@ -27,17 +27,13 @@ define([
 			}).fail(done);
 		});
 
-		test('should be ready', function(done) {
-			return op._core.ready().then(function() {
+		test('should fetch contacts', function(done) {
+			return op.getContacts().then(function(contacts) {
+
 				var readyPromise = op._core._contact.ready();
 				var readyState = readyPromise.inspect();
 				Assert.equal(readyState.state, "fulfilled");
-				done();
-			}).fail(done);
-		});
 
-		test('should fetch contacts', function(done) {
-			return op.getContacts().then(function(contacts) {
 				Assert.isObject(contacts);
 				Assert.isObject(contacts["identity://foo.com/alice"]);
 				done();
