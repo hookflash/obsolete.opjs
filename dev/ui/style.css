@@ -80,3 +80,7 @@ BODY > TABLE > TBODY > TR > TD:nth-child(2) > IFRAME {
 	right: 0px;
 	padding-left: 20px !important;
 }
+
+li.test {
+  clear: right;
+}
