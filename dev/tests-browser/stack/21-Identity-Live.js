@@ -5,11 +5,14 @@ define([
   'opjs-primitives/assert',
   'opjs-primitives/util',
   'opjs-primitives/ws',
-  'opjs-primitives/context'
-], function (Stack, Q, Assert, Util, WS, Context) {
+  'opjs-primitives/context',
+  'opjs-primitives/events'
+], function (Stack, Q, Assert, Util, WS, Context, EventEmitter) {
   'use strict';
 
   var DOMAIN = window.IDENTITY_HOSTNAME;
+  var outerFrameURL = 'http://jsouter-'+ INSTANCE_HOSTNAME +'/identity.html?test=true';
+  var innerFrameURL = 'http://identity-'+ INSTANCE_HOSTNAME +'/login.php';
 
   suite('Identity', function () {
 
@@ -40,10 +43,9 @@ define([
       var identity = "identity://" + Util.getHostname() + "/test-identity-single";
       var client = null;
 
-      test('connect', function(done) {
+      test('connect', function (done) {
         client = new Stack({
           domain: DOMAIN,
-          identity: identity,
           _dev: false,
           _logPrefix: "Identity - Single",
           appid: 'com.hookflash.testapp'
@@ -53,7 +55,17 @@ define([
         }).fail(done);
       });
 
-      test('lookup own', function(done) {
+      test('add identity', function (done) {
+        console.log({
+          outerFrameURL: outerFrameURL,
+          innerFrameURL: innerFrameURL
+        });
+        var frames = new IdentityClient(outerFrameURL, innerFrameURL);
+        // client.addIdentity(identity).then(function () {
+        // }).fail(done);
+      });
+
+      test('lookup own', function (done) {
         return client._account._identity.lookup().then(function(identities) {
           Assert.isArray(identities);
           Assert(identities.length > 0);
@@ -115,4 +127,78 @@ define([
   });
 
 
+  // Copied from hcs-system-tests/identity_client/client.js
+
+  function IdentityClient(outerFrame, innerFrame) {
+    EventEmitter.call(this);
+    var self = this;
+
+    this._outerFrame = outerFrame;
+    this._innerFrame = innerFrame;
+    this._onMessage = this._onMessage.bind(this);
+    window.addEventListener("message", this._onMessage, false);
+
+    this._frame = this._loadFrame(this._outerFrame);
+  }
+
+  IdentityClient.prototype = new EventEmitter();
+
+  IdentityClient.prototype._loadFrame = function(url) {
+    var iframe = document.createElement('IFRAME');
+    iframe.setAttribute("src", url);
+    iframe.style.width = "300px";
+    iframe.style.height = "500px";
+    // iframe.style.display = "none";
+    document.body.appendChild(iframe);
+    return iframe;
+  };
+
+  IdentityClient.prototype._onMessage = function(event) {
+    try {
+      var payload = JSON.parse(event.data);
+
+      if(payload.message == 'start-communication') {
+        this._exec('initInnerFrame', [this._innerFrame]);
+      } else if(payload.message == 'notify-client') {
+        this.emit('message', JSON.parse(payload.json));
+      }
+    } catch(ex) {
+      //we don't need to care
+    }
+  };
+
+  IdentityClient.prototype._exec = function(method, args) {
+    var payload = {
+      message: "exec",
+      method: method,
+      args: args || []
+    };
+    this._frame.contentWindow.postMessage(JSON.stringify(payload), '*');
+  };
+
+  IdentityClient.prototype.send = function(bundle) {
+    this._exec('sendBundleToJS', [JSON.stringify(bundle)]);
+  };
+
+  IdentityClient.prototype.register = function(name, username, password) {
+    this._exec('testRegister', [name, username, password]);
+  };
+
+  IdentityClient.prototype.login = function(username, password) {
+    this._exec('testLogin', [username, password]);
+  };
+
+  IdentityClient.prototype.close = function(callback) {
+    var self = this;
+    //force delay
+    setTimeout(function() {
+      document.body.removeChild(self._frame);
+      window.removeEventListener("message", self._onMessage);
+      if(callback) {
+        callback();
+      }
+    }, 500);
+  };
+
+  return IdentityClient;
 });
