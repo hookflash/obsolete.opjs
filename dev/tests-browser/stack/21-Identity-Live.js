@@ -56,13 +56,8 @@ define([
       });
 
       test('add identity', function (done) {
-        console.log({
-          outerFrameURL: outerFrameURL,
-          innerFrameURL: innerFrameURL
-        });
-        var frames = new IdentityClient(outerFrameURL, innerFrameURL);
-        // client.addIdentity(identity).then(function () {
-        // }).fail(done);
+        client.addIdentity(identity).then(function () {
+        }).fail(done);
       });
 
       test('lookup own', function (done) {
