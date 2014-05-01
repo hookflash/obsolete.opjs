@@ -1,3 +1,4 @@
 .DS*
 node_modules/
 /.dist/
+.pio.*

@@ -13,6 +13,9 @@
     "config": {
         "run": {
             "packagePath": "dev"
+        },
+        "pio.deploy.converter": {
+            "name": "hcs.server/plugins/pio.deploy.converter"
         }
     }
 }
