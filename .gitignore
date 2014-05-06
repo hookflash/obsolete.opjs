@@ -1,3 +1,5 @@
 .DS*
 node_modules/
 /.dist/
+.pio.*
+.smi.json
